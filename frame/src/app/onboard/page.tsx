@@ -1,0 +1,165 @@
+'use client';
+
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import ConnectWallet from '@/components/ConnectWallet';
+import SubscriptionForm from '@/components/SubscriptionForm';
+import { useAccount } from 'wagmi';
+
+export default function OnboardPage() {
+    const { address, isConnected } = useAccount();
+    const [step, setStep] = useState<'connect' | 'amount' | 'confirm'>('connect');
+
+    return (
+        <main className="min-h-screen bg-gradient-to-br from-primary-900 via-primary-800 to-accent-900 flex items-center justify-center p-4">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full max-w-2xl"
+            >
+                {/* Progress Bar */}
+                <div className="mb-8">
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-white/60 text-sm">Step {step === 'connect' ? 1 : step === 'amount' ? 2 : 3} of 3</span>
+                        <span className="text-white font-medium">
+                            {step === 'connect' && 'Connect Wallet'}
+                            {step === 'amount' && 'Choose Amount'}
+                            {step === 'confirm' && 'Confirm'}
+                        </span>
+                    </div>
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                        <motion.div
+                            className="h-full bg-gradient-to-r from-primary-400 to-accent-400"
+                            initial={{ width: '0%' }}
+                            animate={{
+                                width: step === 'connect' ? '33%' : step === 'amount' ? '66%' : '100%',
+                            }}
+                            transition={{ duration: 0.3 }}
+                        />
+                    </div>
+                </div>
+
+                {/* Main Card */}
+                <div className="glass-dark rounded-3xl p-8 backdrop-blur-xl">
+                    <div className="text-center mb-8">
+                        <h1 className="text-4xl font-bold text-white mb-3">
+                            {step === 'connect' && '🚀 Welcome to AutoYield'}
+                            {step === 'amount' && '💵 Set Your Daily Savings'}
+                            {step === 'confirm' && '✅ Almost There!'}
+                        </h1>
+                        <p className="text-white/70 text-lg">
+                            {step === 'connect' && 'Connect your wallet to start earning'}
+                            {step === 'amount' && 'Choose how much to save daily'}
+                            {step === 'confirm' && 'Review and confirm your subscription'}
+                        </p>
+                    </div>
+
+                    {/* Step Content */}
+                    {step === 'connect' && (
+                        <div className="space-y-6">
+                            <ConnectWallet onConnect={() => setStep('amount')} />
+
+                            <div className="glass rounded-2xl p-6 space-y-4">
+                                <h3 className="text-xl font-semibold text-white mb-4">Why AutoYield?</h3>
+                                <div className="space-y-3">
+                                    {[
+                                        { icon: '⚡', title: 'Gasless', desc: 'No gas fees for subscriptions' },
+                                        { icon: '🔄', title: 'Automated', desc: 'Daily deductions, zero effort' },
+                                        { icon: '📈', title: 'Earn Yield', desc: 'Immediate AvantisFi deposits' },
+                                        { icon: '🔐', title: 'Secure', desc: 'Non-custodial, you own your funds' },
+                                    ].map((feature, i) => (
+                                        <div key={i} className="flex items-start gap-3">
+                                            <span className="text-2xl">{feature.icon}</span>
+                                            <div>
+                                                <p className="text-white font-medium">{feature.title}</p>
+                                                <p className="text-white/60 text-sm">{feature.desc}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 'amount' && (
+                        <SubscriptionForm
+                            onBack={() => setStep('connect')}
+                            onNext={() => setStep('confirm')}
+                        />
+                    )}
+
+                    {step === 'confirm' && (
+                        <div className="space-y-6">
+                            <ConfirmStep onBack={() => setStep('amount')} />
+                        </div>
+                    )}
+                </div>
+
+                {/* Info Footer */}
+                <div className="mt-6 text-center text-white/50 text-sm">
+                    <p>Powered by Base Network • Secured by Smart Contracts</p>
+                </div>
+            </motion.div>
+        </main>
+    );
+}
+
+function ConfirmStep({ onBack }: { onBack: () => void }) {
+    const [loading, setLoading] = useState(false);
+
+    const handleConfirm = async () => {
+        setLoading(true);
+        // TODO: Call contract subscription function
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        setLoading(false);
+        window.location.href = '/dashboard';
+    };
+
+    return (
+        <>
+            <div className="glass rounded-2xl p-6 space-y-4">
+                <h3 className="text-xl font-semibold text-white">Subscription Summary</h3>
+                <div className="space-y-3 text-white/80">
+                    <div className="flex justify-between">
+                        <span>Daily Amount</span>
+                        <span className="font-semibold">$10 USDC</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span>First Deduction</span>
+                        <span className="font-semibold">Tomorrow 12:00 AM UTC</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span>Expected APY</span>
+                        <span className="font-semibold text-green-400">~12.5%</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span>Gas Fees</span>
+                        <span className="font-semibold text-green-400">$0 (Gasless!)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="glass rounded-2xl p-6 bg-accent-500/10 border-accent-500/30">
+                <p className="text-white/80 text-sm">
+                    💡 <strong>Important:</strong> You can cancel anytime. Your funds remain in AvantisFi until you withdraw.
+                </p>
+            </div>
+
+            <div className="flex gap-4">
+                <button
+                    onClick={onBack}
+                    className="flex-1 py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold transition-all disabled:opacity-50"
+                >
+                    Back
+                </button>
+                <button
+                    onClick={handleConfirm}
+                    disabled={loading}
+                    className="flex-1 py-4 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-semibold transition-all disabled:opacity-50 animate-pulse-glow"
+                >
+                    {loading ? 'Confirming...' : 'Confirm Subscription'}
+                </button>
+            </div>
+        </>
+    );
+}

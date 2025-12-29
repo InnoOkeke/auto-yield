@@ -1,0 +1,102 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(uuid())
+  farcasterFid    Int      @unique
+  walletAddress   String   @unique
+  username        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  subscription    Subscription?
+  transactions    Transaction[]
+  
+  @@index([walletAddress])
+  @@index([farcasterFid])
+}
+
+model Subscription {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  walletAddress   String   @unique
+  dailyAmount     Decimal  @db.Decimal(18, 6)
+  isActive        Boolean  @default(true)
+  startDate       DateTime @default(now())
+  lastDeduction   DateTime?
+  nextDeduction   DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([walletAddress])
+  @@index([isActive])
+  @@index([nextDeduction])
+}
+
+model Transaction {
+  id              String   @id @default(uuid())
+  userId          String
+  type            TransactionType
+  amount          Decimal  @db.Decimal(18, 6)
+  txHash          String   @unique
+  blockNumber     Int
+  status          TransactionStatus @default(PENDING)
+  avantisShares   Decimal? @db.Decimal(18, 6)
+  timestamp       DateTime @default(now())
+  errorMessage    String?
+  
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([txHash])
+  @@index([type])
+  @@index([timestamp])
+}
+
+model YieldSnapshot {
+  id              String   @id @default(uuid())
+  totalPooled     Decimal  @db.Decimal(18, 6)
+  avantisShares   Decimal  @db.Decimal(18, 6)
+  totalValue      Decimal  @db.Decimal(18, 6)
+  apy             Decimal  @db.Decimal(8, 4)
+  timestamp       DateTime @default(now())
+  
+  @@index([timestamp])
+}
+
+model RelayerStatus {
+  id              String   @id @default(uuid())
+  address         String   @unique
+  ethBalance      Decimal  @db.Decimal(18, 18)
+  lastCheck       DateTime @default(now())
+  isHealthy       Boolean  @default(true)
+  alertSent       Boolean  @default(false)
+  
+  @@index([address])
+}
+
+enum TransactionType {
+  DEDUCTION
+  DEPOSIT_AVANTIS
+  WITHDRAWAL
+  REWARDS_CLAIM
+  EMERGENCY_WITHDRAWAL
+}
+
+enum TransactionStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  REVERTED
+}
