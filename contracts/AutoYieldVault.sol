@@ -33,6 +33,9 @@ contract AutoYieldVault is AccessControl, ReentrancyGuard, Pausable {
     IERC20Permit public immutable usdcPermit;
     IAvantisLPVault public immutable avantisLPVault;
     
+    uint256 public platformFeeBps; // Basis points (e.g. 50 = 0.5%)
+    address public treasury;
+
     // ============ Structs ============
     struct Subscription {
         uint256 dailyAmount;      // Daily deduction amount in USDC (6 decimals)
@@ -64,6 +67,9 @@ contract AutoYieldVault is AccessControl, ReentrancyGuard, Pausable {
     );
     event RewardsClaimed(address indexed user, uint256 amount, uint256 timestamp);
     event EmergencyWithdrawal(address indexed user, uint256 shares, uint256 usdcAmount);
+    event PlatformFeeUpdated(uint256 oldFee, uint256 newFee);
+    event TreasuryUpdated(address oldTreasury, address newTreasury);
+    event FeeCollected(address indexed user, uint256 amount, uint256 timestamp);
     
     // ============ Errors ============
     error AlreadySubscribed();
@@ -172,6 +178,26 @@ contract AutoYieldVault is AccessControl, ReentrancyGuard, Pausable {
         subscriptions[msg.sender].dailyAmount = newDailyAmount;
     }
     
+    // ============ Admin Functions ============
+
+    /**
+     * @notice Set platform fee in basis points
+     * @param _bps Fee in basis points (e.g. 50 = 0.5%)
+     */
+    function setPlatformFee(uint256 _bps) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        emit PlatformFeeUpdated(platformFeeBps, _bps);
+        platformFeeBps = _bps;
+    }
+
+    /**
+     * @notice Set treasury address for fee collection
+     * @param _treasury New treasury address
+     */
+    function setTreasury(address _treasury) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        emit TreasuryUpdated(treasury, _treasury);
+        treasury = _treasury;
+    }
+
     // ============ Daily Deduction Execution ============
     
     /**
@@ -194,23 +220,35 @@ contract AutoYieldVault is AccessControl, ReentrancyGuard, Pausable {
             revert DeductionTooSoon();
         }
         
-        uint256 amount = sub.dailyAmount;
+        uint256 totalAmount = sub.dailyAmount;
         
         // Check user has sufficient USDC balance
-        if (usdc.balanceOf(user) < amount) revert InsufficientBalance();
+        if (usdc.balanceOf(user) < totalAmount) revert InsufficientBalance();
+        
+        uint256 depositAmount = totalAmount;
+
+        // Deduct Fee
+        if (platformFeeBps > 0 && treasury != address(0)) {
+            uint256 fee = (totalAmount * platformFeeBps) / 10000;
+            if (fee > 0) {
+                usdc.transferFrom(user, treasury, fee);
+                depositAmount -= fee;
+                emit FeeCollected(user, fee, block.timestamp);
+            }
+        }
         
         // Transfer USDC from user to vault
-        usdc.transferFrom(user, address(this), amount);
+        usdc.transferFrom(user, address(this), depositAmount);
         
         // Immediately deposit to AvantisFi and receive LP shares
-        uint256 sharesReceived = avantisLPVault.deposit(amount);
+        uint256 sharesReceived = avantisLPVault.deposit(depositAmount);
         
         // Update user's state
         avantisLPShares[user] += sharesReceived;
-        totalDeposited[user] += amount;
+        totalDeposited[user] += totalAmount; // We track total pulled from wallet, or deposited? Let's track total amount users put in.
         sub.lastDeduction = block.timestamp;
         
-        emit DailyDeductionExecuted(user, amount, sharesReceived, block.timestamp);
+        emit DailyDeductionExecuted(user, depositAmount, sharesReceived, block.timestamp);
     }
     
     /**
@@ -233,20 +271,32 @@ contract AutoYieldVault is AccessControl, ReentrancyGuard, Pausable {
             if (sub.isActive && 
                 (sub.lastDeduction == 0 || block.timestamp >= sub.lastDeduction + 1 days)) {
                 
-                uint256 amount = sub.dailyAmount;
+                uint256 totalAmount = sub.dailyAmount;
                 
                 // Skip if insufficient balance
-                if (usdc.balanceOf(user) >= amount) {
+                if (usdc.balanceOf(user) >= totalAmount) {
+                    uint256 depositAmount = totalAmount;
+
+                    // Deduct Fee
+                    if (platformFeeBps > 0 && treasury != address(0)) {
+                        uint256 fee = (totalAmount * platformFeeBps) / 10000;
+                        if (fee > 0) {
+                            usdc.transferFrom(user, treasury, fee);
+                            depositAmount -= fee;
+                            emit FeeCollected(user, fee, block.timestamp);
+                        }
+                    }
+
                     // Transfer and deposit
-                    usdc.transferFrom(user, address(this), amount);
-                    uint256 sharesReceived = avantisLPVault.deposit(amount);
+                    usdc.transferFrom(user, address(this), depositAmount);
+                    uint256 sharesReceived = avantisLPVault.deposit(depositAmount);
                     
                     // Update state
                     avantisLPShares[user] += sharesReceived;
-                    totalDeposited[user] += amount;
+                    totalDeposited[user] += totalAmount;
                     sub.lastDeduction = block.timestamp;
                     
-                    emit DailyDeductionExecuted(user, amount, sharesReceived, block.timestamp);
+                    emit DailyDeductionExecuted(user, depositAmount, sharesReceived, block.timestamp);
                 }
             }
             

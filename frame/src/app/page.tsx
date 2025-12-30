@@ -19,10 +19,29 @@ export const metadata: Metadata = {
     },
 };
 
-export default function Home() {
+async function getStats() {
+    try {
+        // Prevent build failure if API is offline
+        if (!process.env.NEXT_PUBLIC_API_URL) return null;
+
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/stats`, {
+            next: { revalidate: 3600 } // Revalidate every hour
+        });
+        if (!res.ok) return null;
+        return res.json();
+    } catch (e) {
+        console.error('Failed to fetch stats:', e);
+        return null;
+    }
+}
+
+export default async function Home() {
+    const stats = await getStats();
+    const apy = stats?.vault?.apy ? Number(stats.vault.apy).toFixed(2) : 12.5;
+
     return (
         <div className="container mx-auto px-4 py-8">
-            <Hero />
+            <Hero apy={Number(apy)} />
             <FeatureSection />
         </div>
     );

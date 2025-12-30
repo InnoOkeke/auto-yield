@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import ConnectWallet from '@/components/ConnectWallet';
 import SubscriptionForm from '@/components/SubscriptionForm';
@@ -10,6 +10,16 @@ import { useAutoYield } from '@/hooks/useAutoYield';
 export default function OnboardPage() {
     const { address, isConnected } = useAccount();
     const [step, setStep] = useState<'connect' | 'amount' | 'confirm'>('connect');
+
+    useEffect(() => {
+        // Fetch APY for display
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/stats`)
+            .then(r => r.json())
+            .then(d => {
+                if (d?.vault?.apy) window.localStorage.setItem('cached_apy', Number(d.vault.apy).toFixed(2));
+            })
+            .catch(console.error);
+    }, []);
 
     return (
         <div className="flex items-center justify-center p-4 min-h-[calc(100vh-8rem)]">
@@ -152,8 +162,14 @@ function ConfirmStep({ onBack }: { onBack: () => void }) {
                         <span className="font-semibold">Tomorrow 12:00 AM UTC</span>
                     </div>
                     <div className="flex justify-between">
-                        <span>Expected APY</span>
-                        <span className="font-semibold text-green-400">~12.5%</span>
+                        <span>Expected APY <span className="text-xs text-white/40">(Live)</span></span>
+                        {/* TODO: Pass APY prop or fetch here. Using static placeholder logic for now, ideally fetch */}
+                        {/* For speed, we will fetch in useEffect if we want it perfect, or standard placeholder */}
+                        <span className="font-semibold text-green-400">~{window.localStorage.getItem('cached_apy') || '12.5'}%</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span>Platform Fee</span>
+                        <span className="font-semibold text-yellow-400">0.5%</span>
                     </div>
                     <div className="flex justify-between">
                         <span>Gas Fees</span>
@@ -164,7 +180,8 @@ function ConfirmStep({ onBack }: { onBack: () => void }) {
 
             <div className="glass rounded-2xl p-6 bg-accent-500/10 border-accent-500/30">
                 <p className="text-white/80 text-sm">
-                    💡 <strong>Important:</strong> You can cancel anytime. Your funds remain in AvantisFi until you withdraw.
+                    💡 <strong>Important:</strong> You can cancel anytime.
+                    <br />Fees are deducted from deposits. 100% of yield is yours.
                 </p>
             </div>
 

@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
-export default function Hero() {
+export default function Hero({ apy = 12.5 }: { apy?: number }) {
     return (
         <div className="text-center py-12 md:py-20">
             <motion.div
@@ -54,7 +54,7 @@ export default function Hero() {
                 className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"
             >
                 {[
-                    { label: 'Current APY', value: '~12.5%', icon: '📈' },
+                    { label: 'Current APY', value: `~${apy}%`, icon: '📈' },
                     { label: 'Total Saved', value: '$250K+', icon: '💵' },
                     { label: 'Active Users', value: '500+', icon: '👥' },
                 ].map((stat, i) => (

@@ -15,9 +15,10 @@ async function main() {
 
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     const deployer = new ethers.Wallet(privateKey, provider);
-    let currentNonce = await provider.getTransactionCount(deployer.address);
+    // Use 'pending' to account for stuck transactions
+    let currentNonce = await provider.getTransactionCount(deployer.address, "pending");
 
-    console.log("Deploying contracts with account:", deployer.address, "Nonce:", currentNonce);
+    console.log("Deploying contracts with account:", deployer.address, "Pending Nonce:", currentNonce);
     // console.log("Account balance:", (await provider.getBalance(deployer.address)).toString());
 
     const networkName = process.env.HARDHAT_NETWORK || "base";
@@ -38,7 +39,7 @@ async function main() {
     console.log("\nDeploying AutoYieldFactory...");
     const factoryArtifact = await hre.artifacts.readArtifact("AutoYieldFactory");
     const AutoYieldFactory = new ethers.ContractFactory(factoryArtifact.abi, factoryArtifact.bytecode, deployer);
-    const factory = await AutoYieldFactory.deploy({ nonce: currentNonce++ });
+    const factory = await AutoYieldFactory.deploy();
     await factory.waitForDeployment();
     const factoryAddress = await factory.getAddress();
 
@@ -48,7 +49,7 @@ async function main() {
     console.log("\nDeploying AutoYieldVault...");
     const vaultArtifact = await hre.artifacts.readArtifact("AutoYieldVault");
     const AutoYieldVault = new ethers.ContractFactory(vaultArtifact.abi, vaultArtifact.bytecode, deployer);
-    const vault = await AutoYieldVault.deploy(usdcAddress, avantisLPVault, { nonce: currentNonce++ });
+    const vault = await AutoYieldVault.deploy(usdcAddress, avantisLPVault);
     await vault.waitForDeployment();
     const vaultAddress = await vault.getAddress();
 
@@ -56,9 +57,26 @@ async function main() {
 
     // Grant operator role to deployer
     const OPERATOR_ROLE = ethers.keccak256(ethers.toUtf8Bytes("OPERATOR_ROLE"));
-    const tx = await vault.grantRole(OPERATOR_ROLE, deployer.address, { nonce: currentNonce++ });
-    await tx.wait();
+    const DEFAULT_ADMIN_ROLE = ethers.ZeroHash;
+    const TREASURY_ADDRESS = "0xDceB7127fAEA6A6FAb8Eb01069DDA9b030892a56";
+
+    // Grant roles to Deployer (already has Default Admin)
+    await (await vault.grantRole(OPERATOR_ROLE, deployer.address)).wait();
     console.log("Granted OPERATOR_ROLE to:", deployer.address);
+
+    // Grant roles to Treasury
+    await (await vault.grantRole(OPERATOR_ROLE, TREASURY_ADDRESS)).wait();
+    console.log("Granted OPERATOR_ROLE to Treasury:", TREASURY_ADDRESS);
+
+    await (await vault.grantRole(DEFAULT_ADMIN_ROLE, TREASURY_ADDRESS)).wait();
+    console.log("Granted DEFAULT_ADMIN_ROLE to Treasury:", TREASURY_ADDRESS);
+
+    // Set Fee and Treasury (initially set by deployer)
+    await (await vault.setTreasury(TREASURY_ADDRESS)).wait();
+    console.log("Set Treasury address");
+
+    await (await vault.setPlatformFee(50)).wait(); // 0.5%
+    console.log("Set Platform Fee to 0.5%");
 
     console.log("\n✅ Deployment complete!");
     console.log("\n📝 Update your .env file with:");
