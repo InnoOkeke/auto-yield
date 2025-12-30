@@ -5,16 +5,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { http, createConfig } from 'wagmi';
-import { injected } from 'wagmi/connectors';
+import { injected, coinbaseWallet } from 'wagmi/connectors';
 
 const queryClient = new QueryClient();
 
 export default function Providers({ children }: { children: ReactNode }) {
     const config = useMemo(() => createConfig({
         chains: [base],
-        connectors: [injected()],
+        connectors: [
+            injected(),
+            coinbaseWallet({ appName: 'Meluri Auto Yield' }),
+        ],
         transports: {
-            [base.id]: http(process.env.NEXT_PUBLIC_BASE_RPC_URL),
+            [base.id]: http(process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org'),
         },
     }), []);
 

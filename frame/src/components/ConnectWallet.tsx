@@ -6,7 +6,7 @@ import { injected } from 'wagmi/connectors';
 import { isFarcasterContext } from '@/lib/farcaster';
 
 export default function ConnectWallet({ onConnect }: { onConnect: () => void }) {
-    const { connect } = useConnect();
+    const { connect, connectors } = useConnect();
     const { isConnected } = useAccount();
     const [loading, setLoading] = useState(false);
     const [inFarcaster, setInFarcaster] = useState(false);
@@ -48,18 +48,18 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
                 {loading ? 'Connecting...' : isConnected ? '✓ Wallet Connected' : '🔗 Connect Wallet'}
             </button>
 
-            <div className="grid grid-cols-2 gap-4">
-                {[
-                    { name: 'Coinbase Wallet', icon: '🔵' },
-                    { name: 'Base Wallet', icon: '⚡' },
-                ].map((wallet) => (
+            <div className="grid grid-cols-1 gap-4">
+                {connectors.map((connector) => (
                     <button
-                        key={wallet.name}
-                        onClick={handleConnect}
-                        className="py-4 px-4 rounded-xl glass hover:bg-white/20 transition-all text-white font-medium flex flex-col items-center gap-2"
+                        key={connector.uid}
+                        onClick={() => connect({ connector })}
+                        className="py-4 px-4 rounded-xl glass hover:bg-white/20 transition-all text-white font-medium flex items-center justify-center gap-3"
                     >
-                        <span className="text-3xl">{wallet.icon}</span>
-                        <span className="text-sm">{wallet.name}</span>
+                        <span className="text-xl">
+                            {connector.name === 'Coinbase Wallet' ? '🔵' :
+                                connector.name === 'MetaMask' ? '🦊' : '🔌'}
+                        </span>
+                        <span>{connector.name}</span>
                     </button>
                 ))}
             </div>
