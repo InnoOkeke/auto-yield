@@ -24,9 +24,26 @@ const AVANTIS_VAULT_ABI = [
 
 export class BlockchainService {
     constructor() {
+        const vaultAddress = process.env.VAULT_ADDRESS || process.env.NEXT_PUBLIC_VAULT_ADDRESS;
+
+        // Validate environment variables
+        if (!vaultAddress) {
+            console.error('❌ CRITICAL: VAULT_ADDRESS (or NEXT_PUBLIC_VAULT_ADDRESS) is missing');
+            throw new Error('VAULT_ADDRESS is required');
+        }
+        if (!process.env.AVANTIS_LP_VAULT) {
+            console.warn('⚠️ WARNING: AVANTIS_LP_VAULT is missing. Using default Base Mainnet address.');
+        }
+
         this.provider = new ethers.JsonRpcProvider(
             process.env.BASE_RPC_URL || 'https://mainnet.base.org'
         );
+
+        // Ensure private key is present
+        if (!process.env.OPERATOR_PRIVATE_KEY) {
+            console.error('❌ CRITICAL: OPERATOR_PRIVATE_KEY is missing');
+            throw new Error('OPERATOR_PRIVATE_KEY is required');
+        }
 
         this.wallet = new ethers.Wallet(
             process.env.OPERATOR_PRIVATE_KEY,
@@ -34,13 +51,14 @@ export class BlockchainService {
         );
 
         this.vaultContract = new ethers.Contract(
-            process.env.VAULT_ADDRESS,
+            vaultAddress,
             VAULT_ABI,
             this.wallet
         );
 
         this.avantisContract = new ethers.Contract(
-            process.env.AVANTIS_LP_VAULT,
+            // Fallback to official Avantis USDC Vault if missing
+            process.env.AVANTIS_LP_VAULT || '0x2B0Aea20dc6cCC302FDb0F302C9E38e7C934E17D',
             AVANTIS_VAULT_ABI,
             this.provider
         );
