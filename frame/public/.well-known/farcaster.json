@@ -6,13 +6,13 @@
     },
     "frame": {
         "version": "1",
-        "name": "Meluri Auto Yield",
-        "iconUrl": "https://meluri-auto-yield.vercel.app/logo.png",
-        "homeUrl": "https://meluri-auto-yield.vercel.app",
-        "imageUrl": "https://meluri-auto-yield.vercel.app/api/og",
+        "name": "Meluri Auto eight",
+        "iconUrl": "https://auto-yield-eight.vercel.app/logo.png",
+        "homeUrl": "https://auto-yield-eight.vercel.app",
+        "imageUrl": "https://auto-yield-eight.vercel.app/api/og",
         "buttonTitle": "Start Earning 💰",
-        "splashImageUrl": "https://meluri-auto-yield.vercel.app/splash.png",
+        "splashImageUrl": "https://auto-yield-eight.vercel.app/splash.png",
         "splashBackgroundColor": "#0f172a",
-        "webhookUrl": "https://meluri-auto-yield.vercel.app/api/webhook"
+        "webhookUrl": "https://auto-yield-eight.vercel.app/api/webhook"
     }
 }
