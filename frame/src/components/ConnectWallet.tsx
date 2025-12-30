@@ -39,29 +39,32 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
 
     return (
         <div className="space-y-4">
-            <button
-                onClick={handleConnect}
-                disabled={loading || isConnected}
-                className="w-full py-6 px-6 rounded-2xl bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-semibold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-2xl"
-            >
-                {loading && <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                {loading ? 'Connecting...' : isConnected ? '✓ Wallet Connected' : '🔗 Connect Wallet'}
-            </button>
+            <div className="text-center mb-6">
+                <p className="text-white/80">
+                    Connect with your Farcaster account or Smart Wallet to continue.
+                </p>
+            </div>
 
-            <div className="grid grid-cols-1 gap-4">
-                {connectors.map((connector) => (
-                    <button
-                        key={connector.uid}
-                        onClick={() => connect({ connector })}
-                        className="py-4 px-4 rounded-xl glass hover:bg-white/20 transition-all text-white font-medium flex items-center justify-center gap-3"
-                    >
-                        <span className="text-xl">
-                            {connector.name === 'Coinbase Wallet' ? '🔵' :
-                                connector.name === 'MetaMask' ? '🦊' : '🔌'}
-                        </span>
-                        <span>{connector.name}</span>
-                    </button>
-                ))}
+            <div className="space-y-4">
+                {connectors
+                    .filter(c => c.name === 'Coinbase Wallet' || c.id === 'injected')
+                    .map((connector) => (
+                        <button
+                            key={connector.uid}
+                            onClick={() => connect({ connector })}
+                            className={`w-full py-4 px-6 rounded-2xl font-semibold text-lg transition-all flex items-center justify-center gap-3 shadow-lg ${connector.name === 'Coinbase Wallet'
+                                ? 'bg-[#0052FF] hover:bg-[#0052FF]/90 text-white'
+                                : 'glass hover:bg-white/20 text-white'
+                                }`}
+                        >
+                            <span className="text-2xl">
+                                {connector.name === 'Coinbase Wallet' ? '🔵' : '🔌'}
+                            </span>
+                            <span>
+                                {connector.name === 'Coinbase Wallet' ? 'Smart Wallet (Recommended)' : 'Browser Wallet'}
+                            </span>
+                        </button>
+                    ))}
             </div>
 
             <p className="text-center text-white/50 text-sm mt-4">
