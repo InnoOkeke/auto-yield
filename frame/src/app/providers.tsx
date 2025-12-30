@@ -9,12 +9,25 @@ import { coinbaseWallet, injected } from 'wagmi/connectors';
 
 const queryClient = new QueryClient();
 
+import { farcasterSDK } from '@/lib/farcaster';
+
+// ...
+
 export default function Providers({ children }: { children: ReactNode }) {
     const config = useMemo(() => createConfig({
         chains: [base],
         connectors: [
             coinbaseWallet({ appName: 'Meluri Auto Yield', preference: 'smartWalletOnly' }),
-            injected(),
+            injected({
+                target: () => {
+                    // Prioritize Farcaster SDK provider if available
+                    if (typeof window !== 'undefined' && farcasterSDK.provider) {
+                        return farcasterSDK.provider;
+                    }
+                    // Fallback to standard window.ethereum
+                    return typeof window !== 'undefined' ? window.ethereum : undefined;
+                }
+            }),
         ],
         transports: {
             [base.id]: http(process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org'),
