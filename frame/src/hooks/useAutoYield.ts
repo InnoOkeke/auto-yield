@@ -32,7 +32,7 @@ export function useAutoYield() {
                 const approveTx = await writeContractAsync({
                     ...USDC_CONTRACT,
                     functionName: 'approve',
-                    args: [AUTO_YIELD_VAULT_CONTRACT.address, BigInt(ethers.MaxUint256) || 115792089237316195423570985008687907853269984665640564039457584007913129639935n],
+                    args: [AUTO_YIELD_VAULT_CONTRACT.address, 115792089237316195423570985008687907853269984665640564039457584007913129639935n],
                 });
                 // We need to wait for approval receipt before subscribing if we want to be safe, 
                 // but often UIs do this in two steps. For simplicity here, we might just fire approval.

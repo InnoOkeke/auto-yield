@@ -40,7 +40,7 @@ export async function GET() {
                             marginBottom: '20px',
                         }}
                     >
-                        AutoYield
+                        Meluri Auto Yield
                     </h1>
                     <p
                         style={{

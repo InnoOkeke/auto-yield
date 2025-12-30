@@ -7,8 +7,12 @@ import FarcasterInitializer from "@/components/FarcasterInitializer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "AutoYield - Automated DeFi Savings",
+    title: "Meluri Auto Yield - Automated DeFi Savings",
     description: "Automate your DeFi savings with daily USDC deductions earning yield on Base",
+    icons: {
+        icon: '/logo.png',
+        apple: '/logo.png',
+    },
     other: {
         "fc:frame": "vNext",
     },

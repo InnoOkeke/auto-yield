@@ -3,7 +3,7 @@ import Hero from '@/components/Hero';
 import FeatureSection from '@/components/FeatureSection';
 
 export const metadata: Metadata = {
-    title: 'AutoYield - Start Earning',
+    title: 'Meluri Auto Yield - Start Earning',
     other: {
         'fc:frame': 'vNext',
         'fc:frame:image': `${process.env.NEXT_PUBLIC_FRAME_URL}/api/og`,
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
         'fc:frame:button:2': 'My Dashboard 📊',
         'fc:frame:button:2:action': 'link',
         'fc:frame:button:2:target': `${process.env.NEXT_PUBLIC_FRAME_URL}/dashboard`,
-        'og:title': 'AutoYield - Automated DeFi Savings',
+        'og:title': 'Meluri Auto Yield - Automated DeFi Savings',
         'og:description': 'Save daily, earn automatically on Base',
         'og:image': `${process.env.NEXT_PUBLIC_FRAME_URL}/api/og`,
     },

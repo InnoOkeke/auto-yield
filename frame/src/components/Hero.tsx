@@ -11,9 +11,12 @@ export default function Hero() {
                 transition={{ duration: 0.5 }}
                 className="mb-8"
             >
+                <div className="flex justify-center mb-6">
+                    <img src="/logo.png" alt="Meluri Auto Yield Logo" className="w-24 h-24 md:w-32 md:h-32 object-contain" />
+                </div>
                 <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-float">
                     <span className="bg-gradient-to-r from-primary-300 to-accent-300 bg-clip-text text-transparent">
-                        AutoYield
+                        Meluri Auto Yield
                     </span>
                 </h1>
                 <p className="text-xl md:text-2xl text-white/80 mb-4">

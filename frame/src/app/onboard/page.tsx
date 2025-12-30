@@ -159,7 +159,7 @@ function ConfirmStep({ onBack }: { onBack: () => void }) {
                 </button>
                 <button
                     onClick={handleConfirm}
-                    disabled={loading}
+                    disabled={isPending}
                     className="flex-1 py-4 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-semibold transition-all disabled:opacity-50 animate-pulse-glow"
                 >
                     {isPending ? 'Confirming...' : 'Confirm Subscription'}
