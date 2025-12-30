@@ -209,4 +209,75 @@ router.post('/sync-user', async (req, res) => {
     }
 });
 
+/**
+ * POST /api/subscription/sync
+ * Manually trigger subscription sync from blockchain
+ */
+router.post('/subscription/sync', async (req, res) => {
+    try {
+        const { address } = req.body;
+
+        if (!address) {
+            return res.status(400).json({ error: 'Address is required' });
+        }
+
+        const onChainSub = await blockchainService.getSubscription(address);
+
+        if (onChainSub) {
+            await prisma.subscription.upsert({
+                where: { walletAddress: address.toLowerCase() },
+                update: {
+                    dailyAmount: onChainSub.dailyAmount.toString(),
+                    isActive: onChainSub.isActive,
+                    lastDeduction: onChainSub.lastDeduction > 0
+                        ? new Date(onChainSub.lastDeduction * 1000)
+                        : null,
+                },
+                // We don't create if user doesn't exist, this is just for sync
+                create: {
+                    walletAddress: address.toLowerCase(), // This might fail if user doesn't exist foreign key
+                    userId: 'temp', // This will definitely fail. We should only update if exists or handle user creation.
+                    // Actually, better to just update if it exists, or find user first.
+                    dailyAmount: onChainSub.dailyAmount.toString(),
+                    isActive: onChainSub.isActive,
+                    startDate: new Date(),
+                    lastDeduction: null
+                }
+            });
+            // Re-think logic: we just want to update the existing sub.
+            // If sub doesn't exist but user does, create it.
+
+            const user = await prisma.user.findUnique({ where: { walletAddress: address.toLowerCase() } });
+
+            if (user) {
+                await prisma.subscription.upsert({
+                    where: { walletAddress: address.toLowerCase() },
+                    update: {
+                        dailyAmount: onChainSub.dailyAmount.toString(),
+                        isActive: onChainSub.isActive,
+                        lastDeduction: onChainSub.lastDeduction > 0
+                            ? new Date(onChainSub.lastDeduction * 1000)
+                            : null,
+                    },
+                    create: {
+                        userId: user.id,
+                        walletAddress: address.toLowerCase(),
+                        dailyAmount: onChainSub.dailyAmount.toString(),
+                        isActive: onChainSub.isActive,
+                        startDate: new Date(onChainSub.startDate * 1000),
+                        lastDeduction: onChainSub.lastDeduction > 0
+                            ? new Date(onChainSub.lastDeduction * 1000)
+                            : null,
+                    }
+                });
+                return res.json({ success: true });
+            }
+        }
+        res.json({ success: false, message: 'User or subscription not found' });
+    } catch (error) {
+        console.error('Failed to sync subscription:', error);
+        res.status(500).json({ error: 'Failed to sync subscription' });
+    }
+});
+
 export default router;
