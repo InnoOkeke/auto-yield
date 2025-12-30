@@ -57,8 +57,8 @@ export class BlockchainService {
         );
 
         this.avantisContract = new ethers.Contract(
-            // Fallback to official Avantis USDC Vault if missing
-            process.env.AVANTIS_LP_VAULT || '0x2B0Aea20dc6cCC302FDb0F302C9E38e7C934E17D',
+            // Fallback to default from deploy.js if missing
+            process.env.AVANTIS_LP_VAULT || '0x944766f715b51967E56aFdE5f0Aa76cEaCc9E7f9',
             AVANTIS_VAULT_ABI,
             this.provider
         );
