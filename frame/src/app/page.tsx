@@ -37,7 +37,7 @@ async function getStats() {
 
 export default async function Home() {
     const stats = await getStats();
-    const apy = stats?.vault?.apy ? Number(stats.vault.apy).toFixed(2) : 12.5;
+    const apy = stats?.vault?.apy ? Number(stats.vault.apy).toFixed(2) : 9.45;
 
     return (
         <div className="container mx-auto px-4 py-8">

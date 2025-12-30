@@ -6,10 +6,13 @@ import ConnectWallet from '@/components/ConnectWallet';
 import SubscriptionForm from '@/components/SubscriptionForm';
 import { useAccount } from 'wagmi';
 import { useAutoYield } from '@/hooks/useAutoYield';
+import { getFarcasterUser } from '@/lib/farcaster';
+import axios from 'axios';
 
 export default function OnboardPage() {
     const { address, isConnected } = useAccount();
     const [step, setStep] = useState<'connect' | 'amount' | 'confirm'>('connect');
+    const [username, setUsername] = useState<string | null>(null);
 
     useEffect(() => {
         // Fetch APY for display
@@ -19,6 +22,11 @@ export default function OnboardPage() {
                 if (d?.vault?.apy) window.localStorage.setItem('cached_apy', Number(d.vault.apy).toFixed(2));
             })
             .catch(console.error);
+
+        // Fetch Farcaster User
+        getFarcasterUser().then(user => {
+            if (user?.username) setUsername(user.username);
+        });
     }, []);
 
     return (
@@ -54,7 +62,7 @@ export default function OnboardPage() {
                 <div className="glass-dark rounded-3xl p-8 backdrop-blur-xl">
                     <div className="text-center mb-8">
                         <h1 className="text-4xl font-bold text-white mb-3">
-                            {step === 'connect' && '🚀 Welcome to AutoYield'}
+                            {step === 'connect' && (username ? `🚀 Welcome, @${username}!` : '🚀 Welcome to AutoYield')}
                             {step === 'amount' && '💵 Set Your Daily Savings'}
                             {step === 'confirm' && '✅ Almost There!'}
                         </h1>
@@ -115,8 +123,6 @@ export default function OnboardPage() {
     );
 }
 
-import axios from 'axios';
-
 function ConfirmStep({ onBack }: { onBack: () => void }) {
     const { subscribe, isPending } = useAutoYield();
     const { address } = useAccount();
@@ -165,7 +171,12 @@ function ConfirmStep({ onBack }: { onBack: () => void }) {
                         <span>Expected APY <span className="text-xs text-white/40">(Live)</span></span>
                         {/* TODO: Pass APY prop or fetch here. Using static placeholder logic for now, ideally fetch */}
                         {/* For speed, we will fetch in useEffect if we want it perfect, or standard placeholder */}
-                        <span className="font-semibold text-green-400">~{window.localStorage.getItem('cached_apy') || '12.5'}%</span>
+                        <div className="flex justify-between">
+                            <span>Expected APY <span className="text-xs text-white/40">(Live)</span></span>
+                            {/* TODO: Pass APY prop or fetch here. Using static placeholder logic for now, ideally fetch */}
+                            {/* For speed, we will fetch in useEffect if we want it perfect, or standard placeholder */}
+                            <span className="font-semibold text-green-400">~{window.localStorage.getItem('cached_apy') || '9.45'}%</span>
+                        </div>
                     </div>
                     <div className="flex justify-between">
                         <span>Platform Fee</span>

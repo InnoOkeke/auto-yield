@@ -1,0 +1,18 @@
+{
+    "accountAssociation": {
+        "header": "eyJmaWQiOiA4Njk5OTksICJ0eXBlIjogImN1c3RvZHkiLCAia2V5IjogIjB4... (Sign this for prod)",
+        "payload": "eyJkb21haW4iOiAibWVsdXJpLWF1dG8teWllbGQudmVyY2VsLmFwcCJ9",
+        "signature": "MHg..."
+    },
+    "frame": {
+        "version": "1",
+        "name": "Meluri Auto Yield",
+        "iconUrl": "https://meluri-auto-yield.vercel.app/logo.png",
+        "homeUrl": "https://meluri-auto-yield.vercel.app",
+        "imageUrl": "https://meluri-auto-yield.vercel.app/api/og",
+        "buttonTitle": "Start Earning 💰",
+        "splashImageUrl": "https://meluri-auto-yield.vercel.app/splash.png",
+        "splashBackgroundColor": "#0f172a",
+        "webhookUrl": "https://meluri-auto-yield.vercel.app/api/webhook"
+    }
+}

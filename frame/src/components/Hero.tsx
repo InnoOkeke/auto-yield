@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
-export default function Hero({ apy = 12.5 }: { apy?: number }) {
+export default function Hero({ apy = 9.45 }: { apy?: number }) {
     return (
         <div className="text-center py-12 md:py-20">
             <motion.div

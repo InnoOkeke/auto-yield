@@ -49,7 +49,7 @@ export class AvantisService {
             }
 
             // Fallback if fetch failed and no cache
-            if (!apy) apy = 12.5;
+            if (!apy) apy = 9.45;
 
             return {
                 totalAssets: ethers.formatUnits(stats.totalAssets, 6), // USDC has 6 decimals
