@@ -6,21 +6,56 @@ export class AvantisService {
     /**
      * Get AvantisFi vault statistics
      */
+    constructor() {
+        this.cachedAPY = null;
+        this.lastAPYFetch = 0;
+    }
+
+    /**
+     * Get AvantisFi vault statistics
+     */
     async getVaultStats() {
         try {
             const stats = await blockchainService.getAvantisVaultStats();
 
             if (!stats) return null;
 
-            // Calculate APY (simplified - in production, fetch historical data)
-            // For now, use a placeholder
-            const estimatedAPY = 12.5; // 12.5% APY placeholder
+            if (!stats) return null;
+
+            // Fetch live APY from DefiLlama (cached)
+            let apy = this.cachedAPY;
+            const now = Date.now();
+
+            if (!apy || (now - this.lastAPYFetch) > 3600000) { // 1 hour cache
+                try {
+                    const response = await fetch('https://yields.llama.fi/pools');
+                    if (response.ok) {
+                        const json = await response.json();
+                        const pool = json.data.find(p =>
+                            p.project.toLowerCase().includes('avantis') &&
+                            p.symbol === 'USDC' &&
+                            p.chain === 'Base'
+                        );
+                        if (pool) {
+                            apy = pool.apy;
+                            this.cachedAPY = apy;
+                            this.lastAPYFetch = now;
+                            console.log(`Updated Avantis APY: ${apy}%`);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to fetch live APY:', e);
+                }
+            }
+
+            // Fallback if fetch failed and no cache
+            if (!apy) apy = 12.5;
 
             return {
                 totalAssets: ethers.formatUnits(stats.totalAssets, 6), // USDC has 6 decimals
                 totalSupply: stats.totalSupply,
                 sharePrice: stats.sharePrice,
-                apy: estimatedAPY,
+                apy: apy,
             };
         } catch (error) {
             console.error('Failed to get AvantisFi vault stats:', error);
