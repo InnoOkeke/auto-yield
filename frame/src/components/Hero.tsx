@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export default function Hero() {
     return (
@@ -11,9 +12,6 @@ export default function Hero() {
                 transition={{ duration: 0.5 }}
                 className="mb-8"
             >
-                <div className="flex justify-center mb-6">
-                    <img src="/logo.png" alt="Meluri Auto Yield Logo" className="w-24 h-24 md:w-32 md:h-32 object-contain" />
-                </div>
                 <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-float">
                     <span className="bg-gradient-to-r from-primary-300 to-accent-300 bg-clip-text text-transparent">
                         Meluri Auto Yield
@@ -34,18 +32,18 @@ export default function Hero() {
                 transition={{ delay: 0.3 }}
                 className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
-                <a
+                <Link
                     href="/onboard"
                     className="px-8 py-4 bg-gradient-to-r from-primary-500 to-accent-500 rounded-xl text-white font-semibold text-lg hover:scale-105 transition-transform animate-pulse-glow shadow-2xl"
                 >
                     Start Earning Now 💰
-                </a>
-                <a
+                </Link>
+                <Link
                     href="/dashboard"
                     className="px-8 py-4 glass-dark rounded-xl text-white font-semibold text-lg hover:scale-105 transition-transform"
                 >
                     View Dashboard 📊
-                </a>
+                </Link>
             </motion.div>
 
             {/* Stats */}

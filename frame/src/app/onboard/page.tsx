@@ -12,7 +12,7 @@ export default function OnboardPage() {
     const [step, setStep] = useState<'connect' | 'amount' | 'confirm'>('connect');
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-primary-900 via-primary-800 to-accent-900 flex items-center justify-center p-4">
+        <div className="flex items-center justify-center p-4 min-h-[calc(100vh-8rem)]">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -101,17 +101,35 @@ export default function OnboardPage() {
                     <p>Powered by Base Network • Secured by Smart Contracts</p>
                 </div>
             </motion.div>
-        </main>
+        </div>
     );
 }
 
+import axios from 'axios';
+
 function ConfirmStep({ onBack }: { onBack: () => void }) {
     const { subscribe, isPending } = useAutoYield();
+    const { address } = useAccount();
 
     const handleConfirm = async () => {
+        if (!address) return;
+
         try {
             const txHash = await subscribe('10'); // TODO: Pass dynamic amount from step 2
             console.log('Transaction submitted:', txHash);
+
+            // Sync user with backend
+            try {
+                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/sync-user`, {
+                    walletAddress: address,
+                    farcasterFid: 0, // Default for non-farcaster users
+                    username: 'User', // Placeholder
+                });
+            } catch (syncError) {
+                console.error('Failed to sync user:', syncError);
+                // Continue anyway as transaction succeeded
+            }
+
             // Optionally wait for receipt or show success message, then redirect
             window.location.href = '/dashboard';
         } catch (error) {

@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import Link from 'next/link';
+
 export default function QuickActions() {
     const [showMenu, setShowMenu] = useState(false);
 
@@ -39,7 +41,7 @@ export default function QuickActions() {
                             className="absolute right-0 mt-2 w-64 glass-dark rounded-2xl p-2 shadow-2xl z-50"
                         >
                             {actions.map((action, index) => (
-                                <a
+                                <Link
                                     key={index}
                                     href={action.href}
                                     className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/10 transition-all"
@@ -48,7 +50,7 @@ export default function QuickActions() {
                                         {action.icon}
                                     </div>
                                     <span className="text-white font-medium">{action.label}</span>
-                                </a>
+                                </Link>
                             ))}
                         </motion.div>
                     </>

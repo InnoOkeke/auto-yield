@@ -1,25 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAccount } from 'wagmi';
 import YieldStats from '@/components/YieldStats';
 import ActivityFeed from '@/components/ActivityFeed';
 import QuickActions from '@/components/QuickActions';
 import axios from 'axios';
+import Link from 'next/link';
 
 export default function DashboardPage() {
     const { address, isConnected } = useAccount();
     const [userData, setUserData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (isConnected && address) {
-            fetchUserData();
-        }
-    }, [isConnected, address]);
-
-    const fetchUserData = async () => {
+    const fetchUserData = useCallback(async () => {
         try {
             const response = await axios.get(
                 `${process.env.NEXT_PUBLIC_API_URL}/api/user/${address}`
@@ -30,38 +25,44 @@ export default function DashboardPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [address]);
+
+    useEffect(() => {
+        if (isConnected && address) {
+            fetchUserData();
+        }
+    }, [isConnected, address, fetchUserData]);
 
     if (!isConnected) {
         return (
-            <main className="min-h-screen bg-gradient-to-br from-primary-900 via-primary-800 to-accent-900 flex items-center justify-center p-4">
+            <div className="flex items-center justify-center p-4 min-h-[calc(100vh-8rem)]">
                 <div className="text-center">
                     <h1 className="text-3xl font-bold text-white mb-4">Connect Your Wallet</h1>
                     <p className="text-white/70 mb-8">Please connect your wallet to view your dashboard</p>
-                    <a
+                    <Link
                         href="/onboard"
                         className="inline-block px-8 py-4 bg-gradient-to-r from-primary-500 to-accent-500 rounded-xl text-white font-semibold hover:scale-105 transition-transform"
                     >
                         Connect Wallet
-                    </a>
+                    </Link>
                 </div>
-            </main>
+            </div>
         );
     }
 
     if (loading) {
         return (
-            <main className="min-h-screen bg-gradient-to-br from-primary-900 via-primary-800 to-accent-900 flex items-center justify-center">
+            <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
                 <div className="text-center">
                     <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4" />
                     <p className="text-white/70">Loading your dashboard...</p>
                 </div>
-            </main>
+            </div>
         );
     }
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-primary-900 via-primary-800 to-accent-900 p-4 md:p-8">
+        <div className="p-4 md:p-8">
             <div className="container mx-auto max-w-7xl">
                 {/* Header */}
                 <motion.div
@@ -139,6 +140,6 @@ export default function DashboardPage() {
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

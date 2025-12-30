@@ -21,11 +21,9 @@ export const metadata: Metadata = {
 
 export default function Home() {
     return (
-        <main className="min-h-screen bg-gradient-to-br from-primary-900 via-primary-800 to-accent-900">
-            <div className="container mx-auto px-4 py-8">
-                <Hero />
-                <FeatureSection />
-            </div>
-        </main>
+        <div className="container mx-auto px-4 py-8">
+            <Hero />
+            <FeatureSection />
+        </div>
     );
 }
