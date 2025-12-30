@@ -13,13 +13,22 @@ export default function OnboardPage() {
     const { address, isConnected } = useAccount();
     const [step, setStep] = useState<'connect' | 'amount' | 'confirm'>('connect');
     const [username, setUsername] = useState<string | null>(null);
+    const [apy, setApy] = useState<string>('9.45');
 
     useEffect(() => {
+        // Initialize from cache if available
+        const cached = window.localStorage.getItem('cached_apy');
+        if (cached) setApy(cached);
+
         // Fetch APY for display
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/stats`)
             .then(r => r.json())
             .then(d => {
-                if (d?.vault?.apy) window.localStorage.setItem('cached_apy', Number(d.vault.apy).toFixed(2));
+                if (d?.vault?.apy) {
+                    const val = Number(d.vault.apy).toFixed(2);
+                    window.localStorage.setItem('cached_apy', val);
+                    setApy(val);
+                }
             })
             .catch(console.error);
 
@@ -109,7 +118,7 @@ export default function OnboardPage() {
 
                     {step === 'confirm' && (
                         <div className="space-y-6">
-                            <ConfirmStep onBack={() => setStep('amount')} />
+                            <ConfirmStep onBack={() => setStep('amount')} apy={apy} />
                         </div>
                     )}
                 </div>
@@ -123,7 +132,7 @@ export default function OnboardPage() {
     );
 }
 
-function ConfirmStep({ onBack }: { onBack: () => void }) {
+function ConfirmStep({ onBack, apy }: { onBack: () => void, apy: string }) {
     const { subscribe, isPending } = useAutoYield();
     const { address } = useAccount();
 
@@ -175,7 +184,7 @@ function ConfirmStep({ onBack }: { onBack: () => void }) {
                             <span>Expected APY <span className="text-xs text-white/40">(Live)</span></span>
                             {/* TODO: Pass APY prop or fetch here. Using static placeholder logic for now, ideally fetch */}
                             {/* For speed, we will fetch in useEffect if we want it perfect, or standard placeholder */}
-                            <span className="font-semibold text-green-400">~{window.localStorage.getItem('cached_apy') || '9.45'}%</span>
+                            <span className="font-semibold text-green-400">~{apy}%</span>
                         </div>
                     </div>
                     <div className="flex justify-between">

@@ -59,8 +59,6 @@ export default function PausePage() {
                 {isSuccess && (
                     <p className="text-green-400 text-center mt-4 text-sm">
                         Subscription paused successfully! Redirecting...
-                        return '';
-                        })()}
                     </p>
                 )}
             </div>
