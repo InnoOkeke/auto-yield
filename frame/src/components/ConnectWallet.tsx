@@ -35,18 +35,18 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
     const handleConnect = async () => {
         setLoading(true);
         try {
-            if (inFarcaster) {
-                // In Farcaster, try injected first
+            // Check context directly to avoid stale state issues on mount
+            if (isFarcasterContext()) {
                 const fcWallet = connectors.find(c => c.id === 'injected');
                 if (fcWallet) {
-                    connect({ connector: fcWallet });
+                    await connect({ connector: fcWallet });
                     return;
                 }
             }
 
-            // Default to Coinbase Smart Wallet otherwise
-            const connector = connectors.find(c => c.name === 'Coinbase Wallet');
-            if (connector) connect({ connector });
+            // WE REMOVED THE COINBASE FALLBACK HERE
+            // If Farcaster wallet isn't found or fails, we do NOTHING.
+            // The user must manually click a button.
         } catch (error) {
             console.error('Failed to connect:', error);
         } finally {
@@ -84,14 +84,13 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
             <div className="space-y-4">
                 {connectors
                     .filter(c => {
-                        // In Farcaster context, HIDE Coinbase Wallet to prevent interruption
-                        // Only allow the injected wallet (which we mapped to Farcaster SDK)
-                        if (inFarcaster) {
-                            return c.id === 'injected';
-                        }
+                        // Always show Coinbase Wallet (Manual connect option)
+                        if (c.name === 'Coinbase Wallet') return true;
 
-                        // Outside Farcaster, show Coinbase Wallet
-                        return c.name === 'Coinbase Wallet';
+                        // Show Farcaster Wallet (injected) ONLY if in Farcaster context
+                        if (c.id === 'injected' && inFarcaster) return true;
+
+                        return false;
                     })
                     .map((connector) => (
                         <button
