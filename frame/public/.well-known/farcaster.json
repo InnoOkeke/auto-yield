@@ -1,12 +1,12 @@
 {
     "accountAssociation": {
         "header": "eyJmaWQiOiA4Njk5OTksICJ0eXBlIjogImN1c3RvZHkiLCAia2V5IjogIjB4... (Sign this for prod)",
-        "payload": "eyJkb21haW4iOiAibWVsdXJpLWF1dG8teWllbGQudmVyY2VsLmFwcCJ9",
+        "payload": "eyJkb21haW4iOiAiYXV0by15aWVsZC1laWdodC52ZXJjZWwuYXBwIn0=",
         "signature": "MHg..."
     },
     "frame": {
         "version": "1",
-        "name": "Meluri Auto eight",
+        "name": "Meluri Auto Yield",
         "iconUrl": "https://auto-yield-eight.vercel.app/logo.png",
         "homeUrl": "https://auto-yield-eight.vercel.app",
         "imageUrl": "https://auto-yield-eight.vercel.app/api/og",
