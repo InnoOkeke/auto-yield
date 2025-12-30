@@ -113,6 +113,7 @@ export default function OnboardPage() {
                         <SubscriptionForm
                             onBack={() => setStep('connect')}
                             onNext={() => setStep('confirm')}
+                            apy={Number(apy)}
                         />
                     )}
 

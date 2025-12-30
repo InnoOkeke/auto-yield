@@ -84,11 +84,14 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
             <div className="space-y-4">
                 {connectors
                     .filter(c => {
-                        // Always show Coinbase Wallet
-                        if (c.name === 'Coinbase Wallet') return true;
-                        // Show Injected (Farcaster) ONLY if in Farcaster context
-                        if (c.id === 'injected' && inFarcaster) return true;
-                        return false;
+                        // In Farcaster context, HIDE Coinbase Wallet to prevent interruption
+                        // Only allow the injected wallet (which we mapped to Farcaster SDK)
+                        if (inFarcaster) {
+                            return c.id === 'injected';
+                        }
+
+                        // Outside Farcaster, show Coinbase Wallet
+                        return c.name === 'Coinbase Wallet';
                     })
                     .map((connector) => (
                         <button

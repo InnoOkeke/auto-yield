@@ -6,34 +6,14 @@ import { motion } from 'framer-motion';
 export default function SubscriptionForm({
     onBack,
     onNext,
+    apy = 9.45,
 }: {
     onBack: () => void;
     onNext: () => void;
+    apy?: number;
 }) {
-    const [amount, setAmount] = useState('10');
-    const [customAmount, setCustomAmount] = useState('');
-    const [selectedPreset, setSelectedPreset] = useState('10');
-
-    const presets = [
-        { value: '5', label: '$5', desc: 'Starter' },
-        { value: '10', label: '$10', desc: 'Popular' },
-        { value: '25', label: '$25', desc: 'Growth' },
-        { value: '50', label: '$50', desc: 'Pro' },
-    ];
-
-    const handlePresetClick = (value: string) => {
-        setSelectedPreset(value);
-        setAmount(value);
-        setCustomAmount('');
-    };
-
-    const handleCustomChange = (value: string) => {
-        setCustomAmount(value);
-        setAmount(value);
-        setSelectedPreset('');
-    };
-
-    const projectedYield = parseFloat(amount || '0') * 365 * 0.125; // 12.5% APY
+    // ...
+    const projectedYield = parseFloat(amount || '0') * 365 * (apy / 100);
 
     return (
         <div className="space-y-6">
@@ -46,8 +26,8 @@ export default function SubscriptionForm({
                             key={preset.value}
                             onClick={() => handlePresetClick(preset.value)}
                             className={`p-4 rounded-xl transition-all ${selectedPreset === preset.value
-                                    ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white scale-105'
-                                    : 'glass text-white/70 hover:bg-white/20'
+                                ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white scale-105'
+                                : 'glass text-white/70 hover:bg-white/20'
                                 }`}
                         >
                             <div className="text-2xl font-bold">{preset.label}</div>
@@ -99,7 +79,7 @@ export default function SubscriptionForm({
                     </div>
                     <div className="h-px bg-white/20 my-2" />
                     <div className="flex justify-between text-white">
-                        <span className="font-semibold">Est. Yield (12.5% APY)</span>
+                        <span className="font-semibold">Est. Yield ({apy}% APY)</span>
                         <span className="font-bold text-green-400 text-xl">
                             +${projectedYield.toFixed(2)}
                         </span>
