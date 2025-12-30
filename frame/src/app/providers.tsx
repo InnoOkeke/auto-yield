@@ -20,12 +20,10 @@ export default function Providers({ children }: { children: ReactNode }) {
             coinbaseWallet({ appName: 'Meluri Auto Yield', preference: 'smartWalletOnly' }),
             injected({
                 target: () => {
-                    // Prioritize Farcaster SDK provider if available
-                    if (typeof window !== 'undefined' && farcasterSDK.provider) {
-                        return farcasterSDK.provider;
+                    if (typeof window !== 'undefined' && farcasterSDK.wallet?.ethProvider) {
+                        return farcasterSDK.wallet.ethProvider;
                     }
-                    // Fallback to standard window.ethereum
-                    return typeof window !== 'undefined' ? window.ethereum : undefined;
+                    return undefined;
                 }
             }),
         ],
