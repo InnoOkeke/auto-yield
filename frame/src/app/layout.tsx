@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
+import FarcasterInitializer from "@/components/FarcasterInitializer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,6 +22,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={inter.className}>
+                <FarcasterInitializer />
                 <Providers>{children}</Providers>
             </body>
         </html>

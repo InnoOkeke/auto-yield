@@ -6,8 +6,8 @@ export default function FeatureSection() {
     const features = [
         {
             icon: '⚡',
-            title: 'Gasless Subscriptions',
-            description: 'Subscribe without paying gas fees using EIP-2612 permits. Your first action is completely free.',
+            title: 'Automated Savings',
+            description: 'Set your daily amount and let our backend handle the rest. Built for efficiency.',
         },
         {
             icon: '🔄',

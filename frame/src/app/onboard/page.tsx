@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import ConnectWallet from '@/components/ConnectWallet';
 import SubscriptionForm from '@/components/SubscriptionForm';
 import { useAccount } from 'wagmi';
+import { useAutoYield } from '@/hooks/useAutoYield';
 
 export default function OnboardPage() {
     const { address, isConnected } = useAccount();
@@ -63,7 +64,7 @@ export default function OnboardPage() {
                                 <h3 className="text-xl font-semibold text-white mb-4">Why AutoYield?</h3>
                                 <div className="space-y-3">
                                     {[
-                                        { icon: '⚡', title: 'Gasless', desc: 'No gas fees for subscriptions' },
+                                        { icon: '⚡', title: 'Low Fees', desc: 'Minimal transaction costs on Base' },
                                         { icon: '🔄', title: 'Automated', desc: 'Daily deductions, zero effort' },
                                         { icon: '📈', title: 'Earn Yield', desc: 'Immediate AvantisFi deposits' },
                                         { icon: '🔐', title: 'Secure', desc: 'Non-custodial, you own your funds' },
@@ -105,14 +106,18 @@ export default function OnboardPage() {
 }
 
 function ConfirmStep({ onBack }: { onBack: () => void }) {
-    const [loading, setLoading] = useState(false);
+    const { subscribe, isPending } = useAutoYield();
 
     const handleConfirm = async () => {
-        setLoading(true);
-        // TODO: Call contract subscription function
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        setLoading(false);
-        window.location.href = '/dashboard';
+        try {
+            const txHash = await subscribe('10'); // TODO: Pass dynamic amount from step 2
+            console.log('Transaction submitted:', txHash);
+            // Optionally wait for receipt or show success message, then redirect
+            window.location.href = '/dashboard';
+        } catch (error) {
+            console.error('Subscription failed', error);
+            alert('Transaction failed. Please try again.');
+        }
     };
 
     return (
@@ -134,7 +139,7 @@ function ConfirmStep({ onBack }: { onBack: () => void }) {
                     </div>
                     <div className="flex justify-between">
                         <span>Gas Fees</span>
-                        <span className="font-semibold text-green-400">$0 (Gasless!)</span>
+                        <span className="font-semibold text-green-400">Standard Network Fee</span>
                     </div>
                 </div>
             </div>
@@ -157,7 +162,7 @@ function ConfirmStep({ onBack }: { onBack: () => void }) {
                     disabled={loading}
                     className="flex-1 py-4 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-semibold transition-all disabled:opacity-50 animate-pulse-glow"
                 >
-                    {loading ? 'Confirming...' : 'Confirm Subscription'}
+                    {isPending ? 'Confirming...' : 'Confirm Subscription'}
                 </button>
             </div>
         </>

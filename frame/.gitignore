@@ -10,8 +10,8 @@ build
 .env*.local
 
 # Logs
-*.log
-npm-debug.log*
+# *.log
+# npm-debug.log*
 
 # IDE
 .vscode

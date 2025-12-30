@@ -20,7 +20,7 @@ export default function Hero() {
                     Automate Your DeFi Savings
                 </p>
                 <p className="text-lg text-white/60 max-w-2xl mx-auto">
-                    Save daily, earn automatically. Set it and forget it with gasless USDC deductions
+                    Save daily, earn automatically. Set it and forget it with automated USDC deductions
                     earning yield on Base through AvantisFi.
                 </p>
             </motion.div>

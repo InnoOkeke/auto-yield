@@ -1,23 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useConnect, useAccount } from 'wagmi';
 import { injected } from 'wagmi/connectors';
+import { isFarcasterContext } from '@/lib/farcaster';
 
 export default function ConnectWallet({ onConnect }: { onConnect: () => void }) {
     const { connect } = useConnect();
     const { isConnected } = useAccount();
     const [loading, setLoading] = useState(false);
+    const [inFarcaster, setInFarcaster] = useState(false);
+
+    useEffect(() => {
+        setInFarcaster(isFarcasterContext());
+
+        // Auto-connect in Farcaster context
+        if (isFarcasterContext() && !isConnected) {
+            handleConnect();
+        }
+    }, []);
+
+    useEffect(() => {
+        if (isConnected && !loading) {
+            onConnect();
+        }
+    }, [isConnected]);
 
     const handleConnect = async () => {
         setLoading(true);
         try {
             connect({ connector: injected() });
-            setTimeout(() => {
-                if (isConnected) {
-                    onConnect();
-                }
-            }, 1000);
         } catch (error) {
             console.error('Failed to connect:', error);
         } finally {
