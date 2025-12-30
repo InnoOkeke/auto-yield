@@ -35,7 +35,16 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
     const handleConnect = async () => {
         setLoading(true);
         try {
-            // Default to Coinbase Smart Wallet
+            if (inFarcaster) {
+                // In Farcaster, try injected first
+                const fcWallet = connectors.find(c => c.id === 'injected');
+                if (fcWallet) {
+                    connect({ connector: fcWallet });
+                    return;
+                }
+            }
+
+            // Default to Coinbase Smart Wallet otherwise
             const connector = connectors.find(c => c.name === 'Coinbase Wallet');
             if (connector) connect({ connector });
         } catch (error) {
@@ -74,15 +83,28 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
 
             <div className="space-y-4">
                 {connectors
-                    .filter(c => c.name === 'Coinbase Wallet')
+                    .filter(c => {
+                        // Always show Coinbase Wallet
+                        if (c.name === 'Coinbase Wallet') return true;
+                        // Show Injected (Farcaster) ONLY if in Farcaster context
+                        if (c.id === 'injected' && inFarcaster) return true;
+                        return false;
+                    })
                     .map((connector) => (
                         <button
                             key={connector.uid}
                             onClick={() => connect({ connector })}
-                            className="w-full py-4 px-6 rounded-2xl font-semibold text-lg transition-all flex items-center justify-center gap-3 shadow-lg bg-[#0052FF] hover:bg-[#0052FF]/90 text-white"
+                            className={`w-full py-4 px-6 rounded-2xl font-semibold text-lg transition-all flex items-center justify-center gap-3 shadow-lg ${connector.name === 'Coinbase Wallet'
+                                ? 'bg-[#0052FF] hover:bg-[#0052FF]/90 text-white'
+                                : 'bg-[#855DCD] hover:bg-[#855DCD]/90 text-white'
+                                }`}
                         >
-                            <span className="text-2xl">🔵</span>
-                            <span>Smart Wallet (Recommended)</span>
+                            <span className="text-2xl">
+                                {connector.name === 'Coinbase Wallet' ? '🔵' : '🟣'}
+                            </span>
+                            <span>
+                                {connector.name === 'Coinbase Wallet' ? 'Smart Wallet' : 'Farcaster Wallet'}
+                            </span>
                         </button>
                     ))}
             </div>
