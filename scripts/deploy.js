@@ -1,73 +1,80 @@
-const hre = require("hardhat");
+import hre from "hardhat";
+import { ethers } from "ethers";
+import process from "process";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 async function main() {
-    const [deployer] = await hre.ethers.getSigners();
+    const rpcUrl = process.env.BASE_RPC_URL || "https://mainnet.base.org";
+    const privateKey = process.env.PRIVATE_KEY;
 
-    console.log("Deploying contracts with account:", deployer.address);
-    console.log("Account balance:", (await hre.ethers.provider.getBalance(deployer.address)).toString());
+    if (!privateKey) {
+        throw new Error("PRIVATE_KEY not set in .env");
+    }
 
-    const network = hre.network.name;
-    console.log("Network:", network);
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const deployer = new ethers.Wallet(privateKey, provider);
+    let currentNonce = await provider.getTransactionCount(deployer.address);
+
+    console.log("Deploying contracts with account:", deployer.address, "Nonce:", currentNonce);
+    // console.log("Account balance:", (await provider.getBalance(deployer.address)).toString());
+
+    const networkName = process.env.HARDHAT_NETWORK || "base";
+    console.log("Network:", networkName);
 
     // Contract addresses
-    let usdcAddress, avantisLPVault;
-
-    if (network === "base-sepolia") {
-        usdcAddress = process.env.SEPOLIA_USDC_ADDRESS || "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
-        avantisLPVault = process.env.SEPOLIA_AVANTIS_LP_VAULT || "";
-    } else if (network === "base") {
-        usdcAddress = process.env.USDC_ADDRESS || "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
-        avantisLPVault = process.env.AVANTIS_LP_VAULT || "";
-    } else {
-        throw new Error("Unsupported network. Use base-sepolia or base.");
-    }
-
-    if (!avantisLPVault) {
-        console.log("\n⚠️  Warning: AVANTIS_LP_VAULT not set in .env");
-        console.log("Please set the AvantisFi LP Vault address for your target network.");
-        console.log("\nFor testing, you can deploy mock contracts instead:");
-        console.log("Run: npx hardhat run scripts/deployMocks.js --network " + network);
-        return;
-    }
+    const usdcAddress = process.env.USDC_ADDRESS || "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+    const avantisLPVault = process.env.AVANTIS_LP_VAULT || "0x944766f715b51967E56aFdE5f0Aa76cEaCc9E7f9";
 
     console.log("\nUsing USDC address:", usdcAddress);
     console.log("Using AvantisFi LP Vault:", avantisLPVault);
 
+    if (!avantisLPVault) {
+        throw new Error("AVANTIS_LP_VAULT is required");
+    }
+
     // Deploy AutoYieldFactory
     console.log("\nDeploying AutoYieldFactory...");
-    const AutoYieldFactory = await hre.ethers.getContractFactory("AutoYieldFactory");
-    const factory = await AutoYieldFactory.deploy();
+    const factoryArtifact = await hre.artifacts.readArtifact("AutoYieldFactory");
+    const AutoYieldFactory = new ethers.ContractFactory(factoryArtifact.abi, factoryArtifact.bytecode, deployer);
+    const factory = await AutoYieldFactory.deploy({ nonce: currentNonce++ });
     await factory.waitForDeployment();
+    const factoryAddress = await factory.getAddress();
 
-    console.log("AutoYieldFactory deployed to:", await factory.getAddress());
+    console.log("AutoYieldFactory deployed to:", factoryAddress);
 
     // Deploy AutoYieldVault
     console.log("\nDeploying AutoYieldVault...");
-    const AutoYieldVault = await hre.ethers.getContractFactory("AutoYieldVault");
-    const vault = await AutoYieldVault.deploy(usdcAddress, avantisLPVault);
+    const vaultArtifact = await hre.artifacts.readArtifact("AutoYieldVault");
+    const AutoYieldVault = new ethers.ContractFactory(vaultArtifact.abi, vaultArtifact.bytecode, deployer);
+    const vault = await AutoYieldVault.deploy(usdcAddress, avantisLPVault, { nonce: currentNonce++ });
     await vault.waitForDeployment();
+    const vaultAddress = await vault.getAddress();
 
-    console.log("AutoYieldVault deployed to:", await vault.getAddress());
+    console.log("AutoYieldVault deployed to:", vaultAddress);
 
-    // Grant operator role to deployer (will be changed to backend relayer later)
-    const OPERATOR_ROLE = hre.ethers.keccak256(hre.ethers.toUtf8Bytes("OPERATOR_ROLE"));
-    await vault.grantRole(OPERATOR_ROLE, deployer.address);
+    // Grant operator role to deployer
+    const OPERATOR_ROLE = ethers.keccak256(ethers.toUtf8Bytes("OPERATOR_ROLE"));
+    const tx = await vault.grantRole(OPERATOR_ROLE, deployer.address, { nonce: currentNonce++ });
+    await tx.wait();
     console.log("Granted OPERATOR_ROLE to:", deployer.address);
 
     console.log("\n✅ Deployment complete!");
     console.log("\n📝 Update your .env file with:");
-    console.log(`VAULT_ADDRESS=${await vault.getAddress()}`);
-    console.log(`FACTORY_ADDRESS=${await factory.getAddress()}`);
+    console.log(`VAULT_ADDRESS=${vaultAddress}`);
+    console.log(`FACTORY_ADDRESS=${factoryAddress}`);
 
-    // Verify contracts on explorer
-    if (network !== "hardhat" && network !== "localhost") {
+    // Verify contracts
+    if (networkName !== "hardhat" && networkName !== "localhost") {
         console.log("\n⏳ Waiting for block confirmations...");
-        await vault.deploymentTransaction().wait(5);
+        // Wait a bit more for indexers
+        await new Promise(r => setTimeout(r, 10000));
 
         console.log("\n🔍 Verifying contracts on Basescan...");
         try {
             await hre.run("verify:verify", {
-                address: await vault.getAddress(),
+                address: vaultAddress,
                 constructorArguments: [usdcAddress, avantisLPVault],
             });
             console.log("AutoYieldVault verified!");
@@ -77,7 +84,7 @@ async function main() {
 
         try {
             await hre.run("verify:verify", {
-                address: await factory.getAddress(),
+                address: factoryAddress,
                 constructorArguments: [],
             });
             console.log("AutoYieldFactory verified!");

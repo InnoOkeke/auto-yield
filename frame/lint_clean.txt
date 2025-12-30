@@ -1,0 +1,6 @@
+
+> autoyield-frame@1.0.0 lint
+> next lint
+
+Failed to load config "next/typescript" to extend from.
+Referenced from: C:\Users\IMAOBONG\autoyield\frame\.eslintrc.json

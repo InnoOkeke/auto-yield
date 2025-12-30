@@ -40,7 +40,7 @@ export class BlockchainService {
         );
 
         this.avantisContract = new ethers.Contract(
-            process.env.AVANTIS_VAULT_ADDRESS,
+            process.env.AVANTIS_LP_VAULT,
             AVANTIS_VAULT_ABI,
             this.provider
         );

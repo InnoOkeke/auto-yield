@@ -1,4 +1,8 @@
-import "@nomicfoundation/hardhat-toolbox";
+import "@nomicfoundation/hardhat-ethers";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+require("@nomicfoundation/hardhat-verify");
+
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -15,12 +19,8 @@ export default {
         },
     },
     networks: {
-        "base-sepolia": {
-            url: process.env.BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org",
-            accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-            chainId: 84532,
-        },
         base: {
+            type: "http",
             url: process.env.BASE_RPC_URL || "https://mainnet.base.org",
             accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
             chainId: 8453,
@@ -28,8 +28,17 @@ export default {
     },
     etherscan: {
         apiKey: {
-            "base-sepolia": process.env.BASESCAN_API_KEY || "",
             base: process.env.BASESCAN_API_KEY || "",
         },
+        customChains: [
+            {
+                network: "base",
+                chainId: 8453,
+                urls: {
+                    apiURL: "https://api.basescan.org/api",
+                    browserURL: "https://basescan.org"
+                }
+            }
+        ]
     },
 };
