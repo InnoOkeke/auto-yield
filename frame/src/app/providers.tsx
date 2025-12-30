@@ -18,14 +18,12 @@ export default function Providers({ children }: { children: ReactNode }) {
         chains: [base],
         connectors: [
             coinbaseWallet({ appName: 'Meluri Auto Yield', preference: 'smartWalletOnly' }),
-            injected({
-                target: () => {
-                    if (typeof window !== 'undefined' && farcasterSDK.wallet?.ethProvider) {
-                        return farcasterSDK.wallet.ethProvider;
-                    }
-                    return undefined;
+            target: () => {
+                if (typeof window !== 'undefined' && farcasterSDK.wallet?.ethProvider) {
+                    return farcasterSDK.wallet.ethProvider as any;
                 }
-            }),
+                return undefined;
+            }
         ],
         transports: {
             [base.id]: http(process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org'),
