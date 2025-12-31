@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://auto-yield-eight.vercel.app";
+const appUrl = process.env.NEXT_PUBLIC_FRAME_URL || process.env.NEXT_PUBLIC_APP_URL || "https://auto-yield-eight.vercel.app";
 
 export const metadata: Metadata = {
     title: "Meluri Auto Yield - Automated DeFi Savings",

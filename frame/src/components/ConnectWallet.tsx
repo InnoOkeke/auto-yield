@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useConnect, useAccount, useChainId, useSwitchChain } from 'wagmi';
 import { base } from 'wagmi/chains';
-import { isFarcasterContext } from '@/lib/farcaster';
+import { injected } from 'wagmi/connectors';
+import { isFarcasterContext, farcasterSDK } from '@/lib/farcaster';
 
 export default function ConnectWallet({ onConnect }: { onConnect: () => void }) {
     const { connect, connectors } = useConnect();
@@ -36,18 +37,23 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
         try {
             console.log('Available connectors:', connectors.map(c => ({ id: c.id, name: c.name, type: c.type })));
 
-            // Try to find the specific injected connector we configured
+            // 1. Try to find the specific injected connector we configured
             let fcWallet = connectors.find(c => c.id === 'injected');
-
-            // Fallback: If not found (maybe because Wagmi dropped it if target was undefined initially),
-            // look for any connector that looks like injected or "Farcaster" equivalent if available.
-            // Note: In Wagmi v2, 'injected' is the ID.
 
             if (fcWallet) {
                 await connect({ connector: fcWallet });
             } else {
-                console.warn('Farcaster wallet connector not found in list. Available:', connectors.map(c => c.id));
-                alert('Wallet connector not found. Please reload the frame.');
+                // 2. Fallback: Instantiate a new injected connector targeting the Farcaster provider directly
+                console.warn('Farcaster connector not found in list. Attempting direct connection...');
+
+                await connect({
+                    connector: injected({
+                        target: () => {
+                            // Priority: Farcaster SDK Provider -> window.ethereum
+                            return farcasterSDK.wallet?.ethProvider || (window as any).ethereum;
+                        }
+                    })
+                });
             }
         } catch (error) {
             console.error('Failed to connect:', error);
