@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { parseUnits } from 'viem';
 import ConnectWallet from '@/components/ConnectWallet';
 import SubscriptionForm from '@/components/SubscriptionForm';
 import { useAccount } from 'wagmi';
@@ -11,6 +13,7 @@ import axios from 'axios';
 
 export default function OnboardPage() {
     const { address, isConnected } = useAccount();
+    const router = useRouter();
     const [step, setStep] = useState<'connect' | 'amount' | 'confirm'>('connect');
     const [username, setUsername] = useState<string | null>(null);
     const [apy, setApy] = useState<string>('9.45');
@@ -134,14 +137,40 @@ export default function OnboardPage() {
 }
 
 function ConfirmStep({ onBack, apy }: { onBack: () => void, apy: string }) {
-    const { subscribe, isPending } = useAutoYield();
+    const { subscribe, approve, allowance, isApproving, isSubscribing } = useAutoYield();
     const { address } = useAccount();
+    const router = useRouter();
+
+    // TODO: Pass dynamic amount from step 2
+    const dailyAmountStr = '10';
+    const amountBigInt = parseUnits(dailyAmountStr, 6);
+
+    // Check if we have enough allowance
+    // Use a small buffer if needed, or exact comparison.
+    // 365 days buffer is what we checked for previously, let's just check for > amount for now
+    // or maybe check for at least 1 day. 
+    // The previous logic checked for 365 days, let's stick to simple amount check for the button state
+    // but the approve function approves maxUint256.
+
+    // NOTE: allowance is bigint or undefined.
+    // If undefined, assume 0 (false).
+    const isAllowanceSufficient = allowance ? allowance >= amountBigInt : false;
+
+    const handleApprove = async () => {
+        try {
+            await approve();
+            // Toast or alert?
+        } catch (error) {
+            console.error('Approval failed', error);
+            alert('Approval failed. Please try again.');
+        }
+    };
 
     const handleConfirm = async () => {
         if (!address) return;
 
         try {
-            const txHash = await subscribe('10'); // TODO: Pass dynamic amount from step 2
+            const txHash = await subscribe(dailyAmountStr);
             console.log('Transaction submitted:', txHash);
 
             // Sync user with backend
@@ -156,8 +185,8 @@ function ConfirmStep({ onBack, apy }: { onBack: () => void, apy: string }) {
                 // Continue anyway as transaction succeeded
             }
 
-            // Optionally wait for receipt or show success message, then redirect
-            window.location.href = '/dashboard';
+            // Redirect using router
+            router.push('/dashboard');
         } catch (error) {
             console.error('Subscription failed', error);
             alert('Transaction failed. Please try again.');
@@ -171,7 +200,7 @@ function ConfirmStep({ onBack, apy }: { onBack: () => void, apy: string }) {
                 <div className="space-y-3 text-white/80">
                     <div className="flex justify-between">
                         <span>Daily Amount</span>
-                        <span className="font-semibold">$10 USDC</span>
+                        <span className="font-semibold">${dailyAmountStr} USDC</span>
                     </div>
                     <div className="flex justify-between">
                         <span>First Deduction</span>
@@ -179,14 +208,7 @@ function ConfirmStep({ onBack, apy }: { onBack: () => void, apy: string }) {
                     </div>
                     <div className="flex justify-between">
                         <span>Expected APY <span className="text-xs text-white/40">(Live)</span></span>
-                        {/* TODO: Pass APY prop or fetch here. Using static placeholder logic for now, ideally fetch */}
-                        {/* For speed, we will fetch in useEffect if we want it perfect, or standard placeholder */}
-                        <div className="flex justify-between">
-                            <span>Expected APY <span className="text-xs text-white/40">(Live)</span></span>
-                            {/* TODO: Pass APY prop or fetch here. Using static placeholder logic for now, ideally fetch */}
-                            {/* For speed, we will fetch in useEffect if we want it perfect, or standard placeholder */}
-                            <span className="font-semibold text-green-400">~{apy}%</span>
-                        </div>
+                        <span className="font-semibold text-green-400">~{apy}%</span>
                     </div>
                     <div className="flex justify-between">
                         <span>Platform Fee</span>
@@ -213,13 +235,24 @@ function ConfirmStep({ onBack, apy }: { onBack: () => void, apy: string }) {
                 >
                     Back
                 </button>
-                <button
-                    onClick={handleConfirm}
-                    disabled={isPending}
-                    className="flex-1 py-4 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-semibold transition-all disabled:opacity-50 animate-pulse-glow"
-                >
-                    {isPending ? 'Confirming...' : 'Confirm Subscription'}
-                </button>
+
+                {!isAllowanceSufficient ? (
+                    <button
+                        onClick={handleApprove}
+                        disabled={isApproving}
+                        className="flex-1 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold transition-all disabled:opacity-50 animate-pulse-glow"
+                    >
+                        {isApproving ? 'Approving...' : 'Approve USDC'}
+                    </button>
+                ) : (
+                    <button
+                        onClick={handleConfirm}
+                        disabled={isSubscribing}
+                        className="flex-1 py-4 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-semibold transition-all disabled:opacity-50 animate-pulse-glow"
+                    >
+                        {isSubscribing ? 'Confirming...' : 'Confirm Subscription'}
+                    </button>
+                )}
             </div>
         </>
     );
