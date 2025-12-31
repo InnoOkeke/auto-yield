@@ -6,107 +6,84 @@ import { base } from 'wagmi/chains';
 import { injected } from 'wagmi/connectors';
 import { isFarcasterContext, farcasterSDK } from '@/lib/farcaster';
 
+type SignInState = 'idle' | 'loading' | 'success' | 'error';
+
 export default function ConnectWallet({ onConnect }: { onConnect: () => void }) {
     const { connect, connectors } = useConnect();
     const { isConnected } = useAccount();
     const chainId = useChainId();
     const { switchChain } = useSwitchChain();
 
-    const [loading, setLoading] = useState(false);
+    const [signInState, setSignInState] = useState<SignInState>('idle');
     const [inFarcaster, setInFarcaster] = useState(false);
 
     useEffect(() => {
         setInFarcaster(isFarcasterContext());
 
-        // Auto-connect in Farcaster context
+        // Check if we already have a session? 
+        // For now, let's assume we rely on wagmi connection status or session state.
         if (isFarcasterContext() && !isConnected) {
-            handleConnect();
+            // Maybe auto-sign in? Or wait for user action?
+            // User requested "Sign In" button, so we likely wait.
         }
     }, []);
 
-    useEffect(() => {
-        if (isConnected && !loading) {
-            if (chainId === base.id) {
-                onConnect();
-            }
-        }
-    }, [isConnected, chainId, loading]);
-
-    const handleConnect = async () => {
-        setLoading(true);
+    const handleSignIn = async () => {
+        setSignInState('loading');
         try {
-            console.log('Available connectors:', connectors.map(c => ({ id: c.id, name: c.name, type: c.type })));
+            // 1. Request Sign In signature from Farcaster
+            const nonce = "example-nonce"; // In production, fetch from backend via API
+            const result = await farcasterSDK.actions.signIn({ nonce });
 
-            // 1. Try to find the specific injected connector we configured
+            console.log('Farcaster Sign In Result:', result);
+
+            // 2. Connect Wallet for Transactions (Injected Provider)
+            // Even though we signed in for auth, we need the provider for wagmi
             let fcWallet = connectors.find(c => c.id === 'injected');
 
             if (fcWallet) {
                 await connect({ connector: fcWallet });
             } else {
-                // 2. Fallback: Instantiate a new injected connector targeting the Farcaster provider directly
-                console.warn('Farcaster connector not found in list. Attempting direct connection...');
-
                 await connect({
                     connector: injected({
                         target: () => {
-                            // Priority: Farcaster SDK Provider -> window.ethereum
                             const provider = farcasterSDK.wallet?.ethProvider || (window as any).ethereum;
                             return provider as any;
                         }
                     })
                 });
             }
+
+            setSignInState('success');
+            onConnect();
+
         } catch (error) {
-            console.error('Failed to connect:', error);
-            // Optionally show user friendly error
+            console.error('Sign In Failed:', error);
+            setSignInState('error');
         } finally {
-            setLoading(false);
+            setSignInState('idle');
         }
     };
 
-    // Network Enforcement UI
-    if (isConnected && chainId !== base.id) {
+    if (isConnected) {
         return (
-            <div className="space-y-4 text-center animate-pulse-glow p-4 rounded-2xl bg-red-500/10 border border-red-500/20">
-                <div className="text-4xl mb-2">⚠️</div>
-                <h3 className="text-red-400 font-bold text-xl">Wrong Network</h3>
-                <p className="text-white/70 text-sm">
-                    Autoyield only works on Base. <br /> Please switch your network to continue.
-                </p>
-                <button
-                    onClick={() => switchChain({ chainId: base.id })}
-                    className="w-full py-3 px-6 rounded-xl font-bold transition-all shadow-lg bg-red-500 hover:bg-red-600 text-white mt-4"
-                >
-                    Switch to Base 🔵
-                </button>
+            <div className="text-center p-4 glass rounded-2xl">
+                <p className="text-green-400 font-bold mb-2">✅ Signed In</p>
+                <p className="text-sm text-white/60">Ready to earn yield</p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-4">
-            <div className="text-center mb-6">
-                <p className="text-white/80">
-                    Connect with your Farcaster Wallet to continue.
-                </p>
-            </div>
-
-            <div className="space-y-4">
-                <button
-                    onClick={handleConnect}
-                    disabled={loading || isConnected}
-                    className="w-full py-4 px-6 rounded-2xl font-semibold text-lg transition-all flex items-center justify-center gap-3 shadow-lg bg-[#855DCD] hover:bg-[#855DCD]/90 text-white disabled:opacity-50"
-                >
-                    <span className="text-2xl">{loading ? '⏳' : '🟣'}</span>
-                    <span>
-                        {loading ? 'Connecting...' : 'Connect Farcaster'}
-                    </span>
-                </button>
-            </div>
-
-            <p className="text-center text-white/50 text-sm mt-4">
-                By connecting, you agree to our Terms of Service
-            </p>
-        </div>
+        <button
+            onClick={handleSignIn}
+            disabled={signInState === 'loading'}
+            className="w-full py-4 px-6 rounded-2xl font-semibold text-lg transition-all flex items-center justify-center gap-3 shadow-lg bg-[#855DCD] hover:bg-[#855DCD]/90 text-white disabled:opacity-50"
+        >
+            <span className="text-2xl">{signInState === 'loading' ? '⏳' : '🟣'}</span>
+            <span>
+                {signInState === 'loading' ? 'Signing In...' : 'Sign in with Farcaster'}
+            </span>
+        </button>
     );
 }

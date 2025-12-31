@@ -1,16 +1,40 @@
 'use client';
 
+import { useState } from 'react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { farcasterSDK } from '@/lib/farcaster';
+import { injected } from 'wagmi/connectors';
 
 export default function HeaderConnect() {
     const { address, isConnected } = useAccount();
     const { connect, connectors } = useConnect();
     const { disconnect } = useDisconnect();
+    const [loading, setLoading] = useState(false);
 
-    const handleConnect = () => {
-        const fcWallet = connectors.find(c => c.id === 'injected');
-        if (fcWallet) {
-            connect({ connector: fcWallet });
+    const handleSignIn = async () => {
+        setLoading(true);
+        try {
+            // 1. Request Sign In signature from Farcaster
+            await farcasterSDK.actions.signIn({ nonce: "example-nonce" });
+
+            // 2. Connect Wallet for Transactions
+            let fcWallet = connectors.find(c => c.id === 'injected');
+            if (fcWallet) {
+                await connect({ connector: fcWallet });
+            } else {
+                await connect({
+                    connector: injected({
+                        target: () => {
+                            const provider = farcasterSDK.wallet?.ethProvider || (window as any).ethereum;
+                            return provider as any;
+                        }
+                    })
+                });
+            }
+        } catch (error) {
+            console.error('Sign In Failed:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -28,10 +52,20 @@ export default function HeaderConnect() {
 
     return (
         <button
-            onClick={handleConnect}
-            className="px-4 py-2 rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-medium text-sm transition-all"
+            onClick={handleSignIn}
+            disabled={loading}
+            className="px-4 py-2 rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-medium text-sm transition-all shadow-md disabled:opacity-50 flex items-center gap-2"
         >
-            Connect Wallet
+            {loading ? (
+                <>
+                    <span className="animate-spin text-xs">⏳</span>
+                    <span>Signing...</span>
+                </>
+            ) : (
+                <>
+                    <span>Sign In</span>
+                </>
+            )}
         </button>
     );
 }

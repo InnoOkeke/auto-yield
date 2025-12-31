@@ -88,7 +88,25 @@ export default function OnboardPage() {
                     {/* Step Content */}
                     {step === 'connect' && (
                         <div className="space-y-6">
-                            <ConnectWallet onConnect={() => setStep('amount')} />
+                            <div className="text-center">
+                                {/* User requested to remove connect button here, relying on Header for sign in */}
+                                <p className="text-white/80 mb-6">
+                                    Please sign in using the button in the top right to continue.
+                                </p>
+                                {!isConnected && (
+                                    <div className="animate-pulse text-sm text-accent-400">
+                                        Waiting for sign in...
+                                    </div>
+                                )}
+                                {isConnected && (
+                                    <button
+                                        onClick={() => setStep('amount')}
+                                        className="py-3 px-8 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-bold transition-all"
+                                    >
+                                        Continue to Savings ➝
+                                    </button>
+                                )}
+                            </div>
 
                             <div className="glass rounded-2xl p-6 space-y-4">
                                 <h3 className="text-xl font-semibold text-white mb-4">Why AutoYield?</h3>

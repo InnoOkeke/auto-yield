@@ -45,6 +45,19 @@ export const metadata: Metadata = {
         "fc:frame:button:1": "Start Earning",
         "fc:frame:action:1": "post",
         "fc:frame:target:1": appUrl,
+        "fc:miniapp": JSON.stringify({
+            version: "next",
+            imageUrl: `${appUrl}/splash.png`,
+            button: {
+                title: "Start Earning",
+                action: {
+                    type: "launch_frame",
+                    url: appUrl,
+                    splashImageUrl: `${appUrl}/splash.png`,
+                    splashBackgroundColor: "#0f172a"
+                }
+            }
+        })
     },
 };
 
