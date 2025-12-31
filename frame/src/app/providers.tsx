@@ -31,7 +31,7 @@ export default function Providers({ children }: { children: ReactNode }) {
                         console.log('Wagmi Provider: Found provider', { isSdk: !!farcasterSDK.wallet?.ethProvider, isWindow: !!(window as any).ethereum });
                     }
 
-                    return provider;
+                    return provider as any;
                 }
             }),
         ],
