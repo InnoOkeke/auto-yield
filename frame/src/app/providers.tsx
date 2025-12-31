@@ -7,6 +7,8 @@ import { base } from 'wagmi/chains';
 import { http, createConfig } from 'wagmi';
 import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector';
 
+const queryClient = new QueryClient();
+
 export default function Providers({ children }: { children: ReactNode }) {
     const config = useMemo(() => createConfig({
         chains: [base],
