@@ -25,7 +25,6 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
 
     useEffect(() => {
         if (isConnected && !loading) {
-            // Only proceed if on Base
             if (chainId === base.id) {
                 onConnect();
             }
@@ -35,18 +34,14 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
     const handleConnect = async () => {
         setLoading(true);
         try {
-            // Check context directly to avoid stale state issues on mount
-            if (isFarcasterContext()) {
-                const fcWallet = connectors.find(c => c.id === 'injected');
-                if (fcWallet) {
-                    await connect({ connector: fcWallet });
-                    return;
-                }
+            // In Farcaster context, we typically only have one injected connector 
+            // from our Providers configuration.
+            const fcWallet = connectors.find(c => c.id === 'injected');
+            if (fcWallet) {
+                await connect({ connector: fcWallet });
+            } else {
+                console.warn('Farcaster wallet connector not found');
             }
-
-            // WE REMOVED THE COINBASE FALLBACK HERE
-            // If Farcaster wallet isn't found or fails, we do NOTHING.
-            // The user must manually click a button.
         } catch (error) {
             console.error('Failed to connect:', error);
         } finally {
@@ -77,38 +72,21 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
         <div className="space-y-4">
             <div className="text-center mb-6">
                 <p className="text-white/80">
-                    Connect with your Smart Wallet to continue.
+                    Connect with your Farcaster Wallet to continue.
                 </p>
             </div>
 
             <div className="space-y-4">
-                {connectors
-                    .filter(c => {
-                        // Always show Coinbase Wallet (Manual connect option)
-                        if (c.name === 'Coinbase Wallet') return true;
-
-                        // Show Farcaster Wallet (injected) ONLY if in Farcaster context
-                        if (c.id === 'injected' && inFarcaster) return true;
-
-                        return false;
-                    })
-                    .map((connector) => (
-                        <button
-                            key={connector.uid}
-                            onClick={() => connect({ connector })}
-                            className={`w-full py-4 px-6 rounded-2xl font-semibold text-lg transition-all flex items-center justify-center gap-3 shadow-lg ${connector.name === 'Coinbase Wallet'
-                                ? 'bg-[#0052FF] hover:bg-[#0052FF]/90 text-white'
-                                : 'bg-[#855DCD] hover:bg-[#855DCD]/90 text-white'
-                                }`}
-                        >
-                            <span className="text-2xl">
-                                {connector.name === 'Coinbase Wallet' ? '🔵' : '🟣'}
-                            </span>
-                            <span>
-                                {connector.name === 'Coinbase Wallet' ? 'Smart Wallet' : 'Farcaster Wallet'}
-                            </span>
-                        </button>
-                    ))}
+                <button
+                    onClick={handleConnect}
+                    disabled={loading || isConnected}
+                    className="w-full py-4 px-6 rounded-2xl font-semibold text-lg transition-all flex items-center justify-center gap-3 shadow-lg bg-[#855DCD] hover:bg-[#855DCD]/90 text-white disabled:opacity-50"
+                >
+                    <span className="text-2xl">{loading ? '⏳' : '🟣'}</span>
+                    <span>
+                        {loading ? 'Connecting...' : 'Connect Farcaster'}
+                    </span>
+                </button>
             </div>
 
             <p className="text-center text-white/50 text-sm mt-4">

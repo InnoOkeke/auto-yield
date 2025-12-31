@@ -1,12 +1,18 @@
 'use client';
 
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
-import { injected } from 'wagmi/connectors';
 
 export default function HeaderConnect() {
     const { address, isConnected } = useAccount();
-    const { connect } = useConnect();
+    const { connect, connectors } = useConnect();
     const { disconnect } = useDisconnect();
+
+    const handleConnect = () => {
+        const fcWallet = connectors.find(c => c.id === 'injected');
+        if (fcWallet) {
+            connect({ connector: fcWallet });
+        }
+    };
 
     if (isConnected && address) {
         return (
@@ -22,7 +28,7 @@ export default function HeaderConnect() {
 
     return (
         <button
-            onClick={() => connect({ connector: injected() })}
+            onClick={handleConnect}
             className="px-4 py-2 rounded-lg bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-medium text-sm transition-all"
         >
             Connect Wallet

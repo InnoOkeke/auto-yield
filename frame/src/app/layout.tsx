@@ -16,8 +16,33 @@ export const metadata: Metadata = {
         icon: '/logo.png',
         apple: '/logo.png',
     },
+    openGraph: {
+        title: "Meluri Auto Yield",
+        description: "Automate your DeFi savings with daily USDC deductions earning yield on Base",
+        url: "https://auto-yield-eight.vercel.app",
+        siteName: "Meluri Auto Yield",
+        images: [
+            {
+                url: "https://auto-yield-eight.vercel.app/splash.png",
+                width: 1200,
+                height: 630,
+            },
+        ],
+        locale: "en_US",
+        type: "website",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Meluri Auto Yield",
+        description: "Automate your DeFi savings with daily USDC deductions earning yield on Base",
+        images: ["https://auto-yield-eight.vercel.app/splash.png"],
+    },
     other: {
         "fc:frame": "vNext",
+        "fc:frame:image": "https://auto-yield-eight.vercel.app/splash.png",
+        "fc:frame:button:1": "Start Earning",
+        "fc:frame:action:1": "post",
+        "fc:frame:target:1": "https://auto-yield-eight.vercel.app",
     },
 };
 

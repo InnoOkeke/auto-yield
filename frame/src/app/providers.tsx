@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { http, createConfig } from 'wagmi';
-import { coinbaseWallet, injected } from 'wagmi/connectors';
+import { injected } from 'wagmi/connectors';
 
 const queryClient = new QueryClient();
 
@@ -17,7 +17,6 @@ export default function Providers({ children }: { children: ReactNode }) {
     const config = useMemo(() => createConfig({
         chains: [base],
         connectors: [
-            coinbaseWallet({ appName: 'Meluri Auto Yield', preference: 'smartWalletOnly' }),
             injected({
                 target: () => {
                     if (typeof window !== 'undefined' && farcasterSDK.wallet?.ethProvider) {
