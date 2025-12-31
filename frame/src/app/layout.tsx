@@ -9,6 +9,8 @@ import Footer from "@/components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://auto-yield-eight.vercel.app";
+
 export const metadata: Metadata = {
     title: "Meluri Auto Yield - Automated DeFi Savings",
     description: "Automate your DeFi savings with daily USDC deductions earning yield on Base",
@@ -19,11 +21,11 @@ export const metadata: Metadata = {
     openGraph: {
         title: "Meluri Auto Yield",
         description: "Automate your DeFi savings with daily USDC deductions earning yield on Base",
-        url: "https://auto-yield-eight.vercel.app",
+        url: appUrl,
         siteName: "Meluri Auto Yield",
         images: [
             {
-                url: "https://auto-yield-eight.vercel.app/splash.png",
+                url: `${appUrl}/splash.png`,
                 width: 1200,
                 height: 630,
             },
@@ -35,14 +37,14 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "Meluri Auto Yield",
         description: "Automate your DeFi savings with daily USDC deductions earning yield on Base",
-        images: ["https://auto-yield-eight.vercel.app/splash.png"],
+        images: [`${appUrl}/splash.png`],
     },
     other: {
         "fc:frame": "vNext",
-        "fc:frame:image": "https://auto-yield-eight.vercel.app/splash.png",
+        "fc:frame:image": `${appUrl}/splash.png`,
         "fc:frame:button:1": "Start Earning",
         "fc:frame:action:1": "post",
-        "fc:frame:target:1": "https://auto-yield-eight.vercel.app",
+        "fc:frame:target:1": appUrl,
     },
 };
 

@@ -34,16 +34,24 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
     const handleConnect = async () => {
         setLoading(true);
         try {
-            // In Farcaster context, we typically only have one injected connector 
-            // from our Providers configuration.
-            const fcWallet = connectors.find(c => c.id === 'injected');
+            console.log('Available connectors:', connectors.map(c => ({ id: c.id, name: c.name, type: c.type })));
+
+            // Try to find the specific injected connector we configured
+            let fcWallet = connectors.find(c => c.id === 'injected');
+
+            // Fallback: If not found (maybe because Wagmi dropped it if target was undefined initially),
+            // look for any connector that looks like injected or "Farcaster" equivalent if available.
+            // Note: In Wagmi v2, 'injected' is the ID.
+
             if (fcWallet) {
                 await connect({ connector: fcWallet });
             } else {
-                console.warn('Farcaster wallet connector not found');
+                console.warn('Farcaster wallet connector not found in list. Available:', connectors.map(c => c.id));
+                alert('Wallet connector not found. Please reload the frame.');
             }
         } catch (error) {
             console.error('Failed to connect:', error);
+            // Optionally show user friendly error
         } finally {
             setLoading(false);
         }

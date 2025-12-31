@@ -19,10 +19,19 @@ export default function Providers({ children }: { children: ReactNode }) {
         connectors: [
             injected({
                 target: () => {
-                    if (typeof window !== 'undefined' && farcasterSDK.wallet?.ethProvider) {
-                        return farcasterSDK.wallet.ethProvider as any;
+                    if (typeof window === 'undefined') return undefined;
+
+                    // Priority: Farcaster SDK Provider -> window.ethereum
+                    // This handles cases where SDK might be slow or we are in a dev environment/shimmed environment
+                    const provider = farcasterSDK.wallet?.ethProvider || (window as any).ethereum;
+
+                    if (!provider) {
+                        console.warn('Wagmi Provider: No provider found (SDK or window.ethereum)');
+                    } else {
+                        console.log('Wagmi Provider: Found provider', { isSdk: !!farcasterSDK.wallet?.ethProvider, isWindow: !!(window as any).ethereum });
                     }
-                    return undefined;
+
+                    return provider;
                 }
             }),
         ],
