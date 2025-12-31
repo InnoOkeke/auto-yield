@@ -50,7 +50,8 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
                     connector: injected({
                         target: () => {
                             // Priority: Farcaster SDK Provider -> window.ethereum
-                            return farcasterSDK.wallet?.ethProvider || (window as any).ethereum;
+                            const provider = farcasterSDK.wallet?.ethProvider || (window as any).ethereum;
+                            return provider as any;
                         }
                     })
                 });
