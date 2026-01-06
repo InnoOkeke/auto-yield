@@ -39,11 +39,13 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
 
             // 2. Connect Wallet for Transactions (Injected Provider)
             // Even though we signed in for auth, we need the provider for wagmi
-            let fcWallet = connectors.find(c => c.id === 'injected');
+            // Look for the specific Farcaster connector first, or just use the first available one as we configured it in providers
+            const fcWallet = connectors.find(c => c.id === 'farcaster' || c.name.toLowerCase().includes('farcaster')) || connectors[0];
 
             if (fcWallet) {
                 await connect({ connector: fcWallet });
             } else {
+                // Fallback to manual injection if no connector found (unlikely)
                 await connect({
                     connector: injected({
                         target: () => {

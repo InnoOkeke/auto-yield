@@ -18,10 +18,14 @@ export default function HeaderConnect() {
             await farcasterSDK.actions.signIn({ nonce: "example-nonce" });
 
             // 2. Connect Wallet for Transactions
-            let fcWallet = connectors.find(c => c.id === 'injected');
+            // 2. Connect Wallet for Transactions
+            // Look for the specific Farcaster connector first, or just use the first available one as we configured it in providers
+            const fcWallet = connectors.find(c => c.id === 'farcaster' || c.name.toLowerCase().includes('farcaster')) || connectors[0];
+
             if (fcWallet) {
                 await connect({ connector: fcWallet });
             } else {
+                // Fallback to manual injection if no connector found
                 await connect({
                     connector: injected({
                         target: () => {
