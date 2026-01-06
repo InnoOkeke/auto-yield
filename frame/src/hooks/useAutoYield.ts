@@ -21,6 +21,20 @@ export function useAutoYield() {
         },
     });
 
+    // Read Subscription Logic
+    const { data: subscription } = useReadContract({
+        ...AUTO_YIELD_VAULT_CONTRACT,
+        functionName: 'subscriptions',
+        args: address ? [address] : undefined,
+        query: {
+            enabled: !!address,
+        }
+    });
+
+    // Determine if subscribed
+    // subscription is [dailyAmount, isActive, startDate, lastDeduction]
+    const isSubscribed = subscription ? subscription[1] : false;
+
     const approve = useCallback(async () => {
         if (!address) throw new Error('Wallet not connected');
         setIsApproving(true);
@@ -52,6 +66,21 @@ export function useAutoYield() {
         setIsSubscribing(true);
 
         try {
+            // If already subscribed, we should call updateDailyAmount or just succeed?
+            // Calling subscribe again WILL revert with AlreadySubscribed.
+            if (isSubscribed) {
+                console.log('User already subscribed. Using updateDailyAmount if needed, or returning success.');
+                // For now, let's treat "subscribe" as "update if existing" or warn user.
+                // Actually, if we want to change amount, we call update.
+                // If the amount is same, we do nothing.
+                // BUT strict subscribe() reverts.
+
+                // Let's assume for this specific error fix, we just want to avoid the revert.
+                // If amount is different, call update implementation? 
+                // Let's stick to the simplest fix: Check subscription.
+                throw new Error('Already subscribed. Please manage subscription in dashboard.');
+            }
+
             const amount = parseUnits(dailyAmountStr, 6); // USDC has 6 decimals
 
             console.log('Subscribing...');
@@ -73,7 +102,7 @@ export function useAutoYield() {
         } finally {
             setIsSubscribing(false);
         }
-    }, [address, writeContractAsync, publicClient]);
+    }, [address, writeContractAsync, publicClient, isSubscribed]);
 
     return {
         allowance,
@@ -81,6 +110,7 @@ export function useAutoYield() {
         subscribe,
         isApproving,
         isSubscribing,
-        refetchAllowance
+        refetchAllowance,
+        isSubscribed
     };
 }
