@@ -15,7 +15,8 @@ export default function HeaderConnect() {
         setLoading(true);
         try {
             // 1. Request Sign In signature from Farcaster
-            await farcasterSDK.actions.signIn({ nonce: "example-nonce" });
+            // Removed blocking signIn call as we don't use the signature for auth yet, and it might hang.
+            // await farcasterSDK.actions.signIn({ nonce: "example-nonce" });
 
             // 2. Connect Wallet for Transactions
             // 2. Connect Wallet for Transactions

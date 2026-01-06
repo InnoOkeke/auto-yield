@@ -32,10 +32,10 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
         setSignInState('loading');
         try {
             // 1. Request Sign In signature from Farcaster
-            const nonce = "example-nonce"; // In production, fetch from backend via API
-            const result = await farcasterSDK.actions.signIn({ nonce });
+            // const nonce = "example-nonce"; // In production, fetch from backend via API
+            // const result = await farcasterSDK.actions.signIn({ nonce });
 
-            console.log('Farcaster Sign In Result:', result);
+            // console.log('Farcaster Sign In Result:', result);
 
             // 2. Connect Wallet for Transactions (Injected Provider)
             // Even though we signed in for auth, we need the provider for wagmi
