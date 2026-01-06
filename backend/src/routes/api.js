@@ -6,6 +6,24 @@ import deductionService from '../services/deduction.js';
 
 const router = express.Router();
 
+// Middleware for API authentication
+const requireAuth = (req, res, next) => {
+    const apiKey = req.headers['x-api-key'];
+    const validKey = process.env.API_SECRET;
+
+    // Allow usage without key in development if specifically allowed, or strictly enforce
+    if (!validKey) {
+        console.warn('⚠️ API_SECRET not set, allowing request (unsafe)');
+        return next();
+    }
+
+    if (!apiKey || apiKey !== validKey) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    next();
+};
+
 /**
  * GET /api/stats
  * Get overall platform statistics
@@ -156,7 +174,7 @@ router.get('/transactions/:address', async (req, res) => {
  * POST /api/sync-user
  * Sync user data from blockchain to database
  */
-router.post('/sync-user', async (req, res) => {
+router.post('/sync-user', requireAuth, async (req, res) => {
     try {
         const { farcasterFid, walletAddress, username } = req.body;
 
@@ -213,7 +231,7 @@ router.post('/sync-user', async (req, res) => {
  * POST /api/subscription/sync
  * Manually trigger subscription sync from blockchain
  */
-router.post('/subscription/sync', async (req, res) => {
+router.post('/subscription/sync', requireAuth, async (req, res) => {
     try {
         const { address } = req.body;
 

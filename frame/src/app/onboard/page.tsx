@@ -191,9 +191,9 @@ function ConfirmStep({ onBack, apy }: { onBack: () => void, apy: string }) {
             const txHash = await subscribe(dailyAmountStr);
             console.log('Transaction submitted:', txHash);
 
-            // Sync user with backend
+            // Sync user with backend (via secure proxy)
             try {
-                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/sync-user`, {
+                await axios.post('/api/proxy/sync-user', {
                     walletAddress: address,
                     farcasterFid: 0, // Default for non-farcaster users
                     username: 'User', // Placeholder

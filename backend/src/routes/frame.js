@@ -1,6 +1,33 @@
 import express from 'express';
 import prisma from '../utils/database.js';
 import avantisService from '../services/avantis.js';
+import { getSSLHubRpcClient, Message } from '@farcaster/hub-nodejs';
+
+const HUB_URL = process.env.FARCASTER_HUB_URL || 'hub-grpc-api.neynar.com';
+const client = getSSLHubRpcClient(HUB_URL);
+
+async function verifyFrameRequest(req) {
+  if (process.env.SKIP_FRAME_VERIFY === 'true') return true;
+
+  // Allow unverified requests in dev if no Hub is configured (fallback warning)
+  if (process.env.NODE_ENV !== 'production' && !process.env.FARCASTER_HUB_URL) {
+    console.warn('⚠️ Skipping verification in dev: No FARCASTER_HUB_URL');
+    return true;
+  }
+
+  try {
+    const { trustedData } = req.body;
+    if (!trustedData?.messageBytes) return false;
+
+    const frameMessage = Message.decode(Buffer.from(trustedData.messageBytes, 'hex'));
+    const result = await client.validateMessage(frameMessage);
+
+    return result.isOk() && result.value.valid;
+  } catch (error) {
+    console.error('Frame verification error:', error);
+    return false;
+  }
+}
 
 const router = express.Router();
 
@@ -9,7 +36,7 @@ const router = express.Router();
  * Initial Frame render - Onboarding screen
  */
 router.get('/', async (req, res) => {
-    const frameHtml = `
+  const frameHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -39,8 +66,8 @@ router.get('/', async (req, res) => {
 </html>
   `;
 
-    res.setHeader('Content-Type', 'text/html');
-    res.send(frameHtml);
+  res.setHeader('Content-Type', 'text/html');
+  res.send(frameHtml);
 });
 
 /**
@@ -48,14 +75,19 @@ router.get('/', async (req, res) => {
  * Handle onboarding flow
  */
 router.post('/onboard', async (req, res) => {
-    try {
-        const { untrustedData, trustedData } = req.body;
+  try {
+    const { untrustedData, trustedData } = req.body;
 
-        // In production, verify trustedData signature
-        const fid = untrustedData?.fid;
-        const buttonIndex = untrustedData?.buttonIndex;
+    // Security: Verify signature
+    if (!(await verifyFrameRequest(req))) {
+      return res.status(401).send('Invalid Frame Signature');
+    }
 
-        const frameHtml = `
+    // In production, verify trustedData signature
+    const fid = untrustedData?.fid;
+    const buttonIndex = untrustedData?.buttonIndex;
+
+    const frameHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -79,12 +111,12 @@ router.post('/onboard', async (req, res) => {
 </html>
     `;
 
-        res.setHeader('Content-Type', 'text/html');
-        res.send(frameHtml);
-    } catch (error) {
-        console.error('Onboard error:', error);
-        res.status(500).send('Error processing request');
-    }
+    res.setHeader('Content-Type', 'text/html');
+    res.send(frameHtml);
+  } catch (error) {
+    console.error('Onboard error:', error);
+    res.status(500).send('Error processing request');
+  }
 });
 
 /**
@@ -92,29 +124,35 @@ router.post('/onboard', async (req, res) => {
  * Handle subscription creation
  */
 router.post('/subscribe', async (req, res) => {
-    try {
-        const { untrustedData } = req.body;
-        const { amount } = req.query;
-        const inputAmount = untrustedData?.inputText;
+  try {
+    const { untrustedData } = req.body;
+    const { amount } = req.query;
+    const inputAmount = untrustedData?.inputText;
 
-        const dailyAmount = amount || inputAmount || '10';
+    let dailyAmount = amount || inputAmount || '10';
 
-        // Generate transaction for user to sign
-        const txData = {
-            chainId: `eip155:${process.env.CHAIN_ID}`,
-            method: 'eth_sendTransaction',
-            params: {
-                abi: [{
-                    "inputs": [{ "type": "uint256", "name": "dailyAmount" }],
-                    "name": "subscribe",
-                    "type": "function"
-                }],
-                to: process.env.VAULT_ADDRESS,
-                data: `subscribe(${ethers.parseUnits(dailyAmount, 6)})`,
-            },
-        };
+    // Security: Validate dailyAmount is numeric to prevent XSS
+    if (!/^\d+(\.\d+)?$/.test(dailyAmount)) {
+      console.warn('Invalid dailyAmount received:', dailyAmount);
+      dailyAmount = '10';
+    }
 
-        const frameHtml = `
+    // Generate transaction for user to sign
+    const txData = {
+      chainId: `eip155:${process.env.CHAIN_ID}`,
+      method: 'eth_sendTransaction',
+      params: {
+        abi: [{
+          "inputs": [{ "type": "uint256", "name": "dailyAmount" }],
+          "name": "subscribe",
+          "type": "function"
+        }],
+        to: process.env.VAULT_ADDRESS,
+        data: `subscribe(${ethers.parseUnits(dailyAmount, 6)})`,
+      },
+    };
+
+    const frameHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -133,12 +171,12 @@ router.post('/subscribe', async (req, res) => {
 </html>
     `;
 
-        res.setHeader('Content-Type', 'text/html');
-        res.send(frameHtml);
-    } catch (error) {
-        console.error('Subscribe error:', error);
-        res.status(500).send('Error processing subscription');
-    }
+    res.setHeader('Content-Type', 'text/html');
+    res.send(frameHtml);
+  } catch (error) {
+    console.error('Subscribe error:', error);
+    res.status(500).send('Error processing subscription');
+  }
 });
 
 /**
@@ -146,26 +184,26 @@ router.post('/subscribe', async (req, res) => {
  * Show user dashboard with stats
  */
 router.post('/dashboard', async (req, res) => {
-    try {
-        const { untrustedData } = req.body;
-        const fid = untrustedData?.fid;
+  try {
+    const { untrustedData } = req.body;
+    const fid = untrustedData?.fid;
 
-        // Fetch user data
-        const user = await prisma.user.findUnique({
-            where: { farcasterFid: fid },
-            include: { subscription: true },
-        });
+    // Fetch user data
+    const user = await prisma.user.findUnique({
+      where: { farcasterFid: fid },
+      include: { subscription: true },
+    });
 
-        let yieldData = null;
-        if (user?.walletAddress) {
-            yieldData = await avantisService.getUserYieldData(user.walletAddress);
-        }
+    let yieldData = null;
+    if (user?.walletAddress) {
+      yieldData = await avantisService.getUserYieldData(user.walletAddress);
+    }
 
-        const imageUrl = yieldData
-            ? `${process.env.FRAME_BASE_URL}/images/dashboard?value=${yieldData.currentValue}&yield=${yieldData.yieldEarned}`
-            : `${process.env.FRAME_BASE_URL}/images/dashboard-empty.png`;
+    const imageUrl = yieldData
+      ? `${process.env.FRAME_BASE_URL}/images/dashboard?value=${yieldData.currentValue}&yield=${yieldData.yieldEarned}`
+      : `${process.env.FRAME_BASE_URL}/images/dashboard-empty.png`;
 
-        const frameHtml = `
+    const frameHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -192,12 +230,12 @@ router.post('/dashboard', async (req, res) => {
 </html>
     `;
 
-        res.setHeader('Content-Type', 'text/html');
-        res.send(frameHtml);
-    } catch (error) {
-        console.error('Dashboard error:', error);
-        res.status(500).send('Error loading dashboard');
-    }
+    res.setHeader('Content-Type', 'text/html');
+    res.send(frameHtml);
+  } catch (error) {
+    console.error('Dashboard error:', error);
+    res.status(500).send('Error loading dashboard');
+  }
 });
 
 /**
@@ -205,8 +243,8 @@ router.post('/dashboard', async (req, res) => {
  * Handle withdrawal request
  */
 router.post('/withdraw', async (req, res) => {
-    try {
-        const frameHtml = `
+  try {
+    const frameHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -226,12 +264,12 @@ router.post('/withdraw', async (req, res) => {
 </html>
     `;
 
-        res.setHeader('Content-Type', 'text/html');
-        res.send(frameHtml);
-    } catch (error) {
-        console.error('Withdraw error:', error);
-        res.status(500).send('Error processing withdrawal');
-    }
+    res.setHeader('Content-Type', 'text/html');
+    res.send(frameHtml);
+  } catch (error) {
+    console.error('Withdraw error:', error);
+    res.status(500).send('Error processing withdrawal');
+  }
 });
 
 export default router;
