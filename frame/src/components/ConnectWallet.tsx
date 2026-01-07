@@ -23,9 +23,10 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
         // Check if we already have a session? 
         // For now, let's assume we rely on wagmi connection status or session state.
         if (isFarcasterContext() && !isConnected) {
-            // Maybe auto-sign in? Or wait for user action?
+            // maybe auto-sign in? Or wait for user action?
             // User requested "Sign In" button, so we likely wait.
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleSignIn = async () => {

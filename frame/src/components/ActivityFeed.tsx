@@ -10,6 +10,7 @@ export default function ActivityFeed({ address }: { address: string }) {
 
     useEffect(() => {
         fetchTransactions();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [address]);
 
     const fetchTransactions = async () => {
