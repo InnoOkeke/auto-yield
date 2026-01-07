@@ -78,6 +78,7 @@ export default function RootLayout({
                         </main>
                         <Footer />
                     </div>
+                    <ChatWidget />
                 </Providers>
             </body>
         </html>
