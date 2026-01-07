@@ -42,7 +42,8 @@ export default function ChatWidget() {
             });
 
             setMessages(prev => [...prev, { role: 'ai', content: response.data.response }]);
-        } catch (error) {
+        } catch (error: any) {
+            console.error('Chat Error Details:', error.response?.data || error.message);
             setMessages(prev => [...prev, { role: 'ai', content: 'Sorry, I encountered an error. Please try again.' }]);
         } finally {
             setIsLoading(false);
@@ -79,8 +80,8 @@ export default function ChatWidget() {
                                 >
                                     <div
                                         className={`max-w-[80%] p-3 rounded-2xl text-sm ${msg.role === 'user'
-                                                ? 'bg-purple-600 text-white rounded-tr-sm'
-                                                : 'bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 rounded-tl-sm'
+                                            ? 'bg-purple-600 text-white rounded-tr-sm'
+                                            : 'bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 rounded-tl-sm'
                                             }`}
                                     >
                                         {msg.content}

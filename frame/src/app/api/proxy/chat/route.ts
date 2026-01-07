@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     } catch (error: any) {
         console.error('Proxy chat error:', error.message);
         return NextResponse.json(
-            { error: 'Failed to send message' },
+            { error: error.response?.data?.error || error.message || 'Failed to send message' },
             { status: error.response?.status || 500 }
         );
     }
