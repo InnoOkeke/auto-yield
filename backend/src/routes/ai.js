@@ -66,7 +66,10 @@ router.post('/message', requireAuth, async (req, res) => {
 
     } catch (error) {
         console.error('AI Chat Error:', error);
-        res.status(500).json({ error: 'Failed to process message' });
+        res.status(500).json({
+            error: error.message || 'Failed to process message',
+            details: error.toString()
+        });
     }
 });
 
