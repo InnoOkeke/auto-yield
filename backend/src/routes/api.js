@@ -7,7 +7,7 @@ import deductionService from '../services/deduction.js';
 const router = express.Router();
 
 // Middleware for API authentication
-const requireAuth = (req, res, next) => {
+export const requireAuth = (req, res, next) => {
     const apiKey = req.headers['x-api-key'];
     const validKey = process.env.API_SECRET;
 

@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import frameRoutes from './routes/frame.js';
 import apiRoutes from './routes/api.js';
+import aiRoutes from './routes/ai.js';
 import { startCronJobs } from './cron/index.js';
 import { initializeDatabase } from './utils/database.js';
 
@@ -24,6 +25,7 @@ app.get('/health', (req, res) => {
 // Routes
 app.use('/frame', frameRoutes);
 app.use('/api', apiRoutes);
+app.use('/api/chat', aiRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
