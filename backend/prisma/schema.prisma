@@ -11,15 +11,18 @@ datasource db {
 }
 
 model User {
-  id              String   @id @default(uuid())
-  farcasterFid    Int      @unique
-  walletAddress   String   @unique
-  username        String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                  String   @id @default(uuid())
+  farcasterFid        Int      @unique
+  walletAddress       String   @unique
+  username            String?
+  notificationUrl     String?  // Farcaster webhook URL
+  notificationToken   String?  // Auth token for notifications
+  notificationsEnabled Boolean @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
   
-  subscription    Subscription?
-  transactions    Transaction[]
+  subscription        Subscription?
+  transactions        Transaction[]
   
   @@index([walletAddress])
   @@index([farcasterFid])
