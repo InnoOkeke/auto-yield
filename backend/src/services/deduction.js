@@ -1,5 +1,6 @@
 import prisma from '../utils/database.js';
 import blockchainService from './blockchain.js';
+import notificationService from './notification.js';
 
 export class DeductionService {
     /**
@@ -127,6 +128,14 @@ export class DeductionService {
             });
 
             console.log(`✅ Recorded deduction for ${subscription.walletAddress}`);
+
+            // Send notification to user
+            if (subscription.user.notificationsEnabled) {
+                await notificationService.sendDeductionNotification(
+                    subscription.user,
+                    subscription.dailyAmount.toString()
+                );
+            }
         } catch (error) {
             console.error(`Failed to record deduction for ${subscription.walletAddress}:`, error);
         }
