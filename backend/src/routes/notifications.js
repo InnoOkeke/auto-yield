@@ -23,21 +23,33 @@ router.post('/enable', async (req, res) => {
             user = await prisma.user.findUnique({ where: { walletAddress } });
         }
 
+        // If user doesn't exist, create them
         if (!user) {
-            return res.status(404).json({
-                success: false,
-                error: 'User not found',
+            if (!fid && !walletAddress) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Either fid or walletAddress is required to create user',
+                });
+            }
+
+            user = await prisma.user.create({
+                data: {
+                    farcasterFid: fid ? parseInt(fid) : 0,
+                    walletAddress: walletAddress || `0x${Date.now()}`, // Temporary placeholder if no wallet
+                    notificationsEnabled: true,
+                },
+            });
+
+            console.log(`✅ Created new user with FID ${fid} or wallet ${walletAddress}`);
+        } else {
+            // Just mark as wanting notifications enabled
+            await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                    notificationsEnabled: true,
+                },
             });
         }
-
-        // Just mark as wanting notifications enabled
-        // The actual tokens will come from Farcaster webhook
-        await prisma.user.update({
-            where: { id: user.id },
-            data: {
-                notificationsEnabled: true,
-            },
-        });
 
         return res.json({
             success: true,
