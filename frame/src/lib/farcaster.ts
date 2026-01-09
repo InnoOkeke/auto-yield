@@ -54,7 +54,7 @@ export async function enableNotifications(
     fid: number
 ): Promise<{ success: boolean; error?: string; message?: string }> {
     try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
         const response = await axios.post(`${backendUrl}/api/notifications/enable`, {
             walletAddress,
@@ -82,7 +82,7 @@ export async function disableNotifications(
     fid: number
 ): Promise<{ success: boolean; error?: string }> {
     try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
         const response = await axios.delete(`${backendUrl}/api/notifications/disable`, {
             data: { walletAddress, fid },
@@ -106,7 +106,7 @@ export async function getNotificationStatus(
     fid: number
 ): Promise<{ enabled: boolean; configured: boolean; error?: string }> {
     try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
         const response = await axios.get(`${backendUrl}/api/notifications/status`, {
             params: { walletAddress, fid },
@@ -134,7 +134,7 @@ export async function sendTestNotification(
     fid: number
 ): Promise<{ success: boolean; error?: string }> {
     try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
         const response = await axios.post(`${backendUrl}/api/notifications/test`, {
             walletAddress,
