@@ -1,0 +1,11 @@
+{
+    "name": "AutoYield",
+    "shortName": "AutoYield",
+    "description": "Save daily, earn yield effortlessly on Base",
+    "icon": "https://autoyield.vercel.app/icon.png",
+    "splashImage": "https://autoyield.vercel.app/splash.png",
+    "splashBackgroundColor": "#0F172A",
+    "homeUrl": "https://autoyield.vercel.app",
+    "webhookUrl": "https://autoyield-backend.onrender.com/api/farcaster/webhook",
+    "notificationUrl": "https://autoyield-backend.onrender.com/api/farcaster/notifications"
+}

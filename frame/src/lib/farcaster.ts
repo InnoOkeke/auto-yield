@@ -30,73 +30,41 @@ export async function getFarcasterUser() {
 // ========= NOTIFICATION FUNCTIONS =========
 
 /**
- * Request notification permission from Farcaster
- * Returns notification credentials to save in backend
+ * IMPORTANT: Farcaster notifications work via manifest file (farcaster.json)
+ * Users enable notifications in their Farcaster client settings
+ * When enabled, Farcaster sends notification tokens to your backend webhook
+ * 
+ * The backend receives:
+ * - notificationUrl: URL to send notifications to
+ * - token: Auth token for notifications
+ * 
+ * This should be configured in your farcaster.json manifest:
+ * {
+ *   "notificationUrl": "https://your-backend.com/api/farcaster/notifications"
+ * }
  */
-export async function requestNotificationPermission(): Promise<{
-    success: boolean;
-    notificationUrl?: string;
-    token?: string;
-    error?: string;
-}> {
-    try {
-        if (!isFarcasterContext()) {
-            return {
-                success: false,
-                error: 'Not in Farcaster context',
-            };
-        }
-
-        console.log('Requesting notification permission from Farcaster...');
-
-        // Request notification permission via Farcaster SDK
-        const result = await sdk.actions.addNotification({
-            name: 'AutoYield Earnings',
-            url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/farcaster/notifications`,
-        });
-
-        if (result && result.notificationDetails) {
-            return {
-                success: true,
-                notificationUrl: result.notificationDetails.url,
-                token: result.notificationDetails.token,
-            };
-        }
-
-        return {
-            success: false,
-            error: 'No notification details returned',
-        };
-    } catch (error: any) {
-        console.error('Failed to request notification permission:', error);
-        return {
-            success: false,
-            error: error.message || 'Failed to request permission',
-        };
-    }
-}
 
 /**
  * Enable notifications in backend
- * Saves the notification credentials from Farcaster
+ * Call this when user clicks enable in the UI
+ * Backend will save the notification credentials received from Farcaster webhooks
  */
 export async function enableNotifications(
     walletAddress: string,
-    fid: number,
-    notificationUrl: string,
-    notificationToken: string
-): Promise<{ success: boolean; error?: string }> {
+    fid: number
+): Promise<{ success: boolean; error?: string; message?: string }> {
     try {
         const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
 
         const response = await axios.post(`${backendUrl}/api/notifications/enable`, {
             walletAddress,
             fid,
-            notificationUrl,
-            notificationToken,
         });
 
-        return { success: response.data.success };
+        return {
+            success: response.data.success,
+            message: response.data.message
+        };
     } catch (error: any) {
         console.error('Failed to enable notifications in backend:', error);
         return {

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import {
-    requestNotificationPermission,
     enableNotifications,
     disableNotifications,
     getNotificationStatus,
@@ -63,34 +62,19 @@ export default function NotificationSettings() {
         try {
             if (!isEnabled) {
                 // Enable notifications
-                setStatusMessage('📱 Requesting permission from Farcaster...');
+                setStatusMessage('💾 Enabling notifications...');
 
-                // Request permission from Farcaster
-                const permissionResult = await requestNotificationPermission();
-
-                if (!permissionResult.success) {
-                    setStatusMessage(`❌ ${permissionResult.error}`);
-                    setIsLoading(false);
-                    return;
-                }
-
-                // Save credentials to backend
-                setStatusMessage('💾 Saving notification settings...');
-                const enableResult = await enableNotifications(
-                    address,
-                    fid,
-                    permissionResult.notificationUrl!,
-                    permissionResult.token!
-                );
+                // Just tell backend to enable - Farcaster will send tokens via webhook
+                const enableResult = await enableNotifications(address, fid);
 
                 if (enableResult.success) {
                     setIsEnabled(true);
-                    setStatusMessage('✅ Notifications enabled successfully!');
+                    setStatusMessage('✅ Notifications enabled! Make sure notifications are enabled for this Mini App in your Warpcast settings.');
 
-                    // Clear success message after 3 seconds
-                    setTimeout(() => setStatusMessage(''), 3000);
+                    // Clear success message after 5 seconds
+                    setTimeout(() => setStatusMessage(''), 5000);
                 } else {
-                    setStatusMessage(`❌ ${enableResult.error}`);
+                    setStatusMessage(`❌ ${enableResult.error || 'Failed to enable notifications'}`);
                 }
             } else {
                 // Disable notifications
