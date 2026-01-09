@@ -6,6 +6,7 @@ import { VAULT_ABI } from '@/lib/abi';
 import { useRouter } from 'next/navigation';
 import { parseUnits, formatUnits } from 'viem';
 import axios from 'axios';
+import NotificationSettings from '@/components/NotificationSettings';
 
 export default function SettingsPage() {
     const router = useRouter();
@@ -56,43 +57,49 @@ export default function SettingsPage() {
 
     return (
         <div className="flex items-center justify-center p-4 min-h-[calc(100vh-8rem)]">
-            <div className="w-full max-w-lg glass-dark rounded-3xl p-8 border border-white/10">
-                <h1 className="text-3xl font-bold text-white mb-6">Adjust Daily Amount</h1>
+            <div className="w-full max-w-lg space-y-6">
+                {/* Daily Amount Adjuster */}
+                <div className="glass-dark rounded-3xl p-8 border border-white/10">
+                    <h1 className="text-3xl font-bold text-white mb-6">Adjust Daily Amount</h1>
 
-                <div className="mb-8">
-                    <label className="text-white/70 block mb-2">New Daily Amount (USDC)</label>
-                    <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50">$</span>
-                        <input
-                            type="number"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            className="w-full pl-8 pr-4 py-4 rounded-xl glass text-white text-xl font-semibold focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        />
+                    <div className="mb-8">
+                        <label className="text-white/70 block mb-2">New Daily Amount (USDC)</label>
+                        <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50">$</span>
+                            <input
+                                type="number"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                className="w-full pl-8 pr-4 py-4 rounded-xl glass text-white text-xl font-semibold focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                        </div>
                     </div>
+
+                    <div className="flex gap-4">
+                        <button
+                            onClick={() => router.back()}
+                            className="flex-1 py-4 rounded-xl glass hover:bg-white/20 text-white font-semibold"
+                            disabled={isWritePending || isConfirming}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleUpdate}
+                            disabled={isWritePending || isConfirming || isSuccess}
+                            className="flex-1 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:scale-105 transition-all text-white font-semibold disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
+                        >
+                            {isWritePending ? 'Check Wallet...' : isConfirming ? 'Updating...' : isSuccess ? 'Updated!' : 'Update Amount'}
+                        </button>
+                    </div>
+                    {isSuccess && (
+                        <p className="text-green-400 text-center mt-4 text-sm">
+                            Subscription updated successfully! Redirecting...
+                        </p>
+                    )}
                 </div>
 
-                <div className="flex gap-4">
-                    <button
-                        onClick={() => router.back()}
-                        className="flex-1 py-4 rounded-xl glass hover:bg-white/20 text-white font-semibold"
-                        disabled={isWritePending || isConfirming}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleUpdate}
-                        disabled={isWritePending || isConfirming || isSuccess}
-                        className="flex-1 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:scale-105 transition-all text-white font-semibold disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
-                    >
-                        {isWritePending ? 'Check Wallet...' : isConfirming ? 'Updating...' : isSuccess ? 'Updated!' : 'Update Amount'}
-                    </button>
-                </div>
-                {isSuccess && (
-                    <p className="text-green-400 text-center mt-4 text-sm">
-                        Subscription updated successfully! Redirecting...
-                    </p>
-                )}
+                {/* Notification Settings */}
+                <NotificationSettings />
             </div>
         </div>
     );
