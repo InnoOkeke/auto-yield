@@ -113,10 +113,12 @@ export default function NotificationSettings() {
                 setStatusMessage('✅ Test notification sent! Check Warpcast.');
                 setTimeout(() => setStatusMessage(''), 3000);
             } else {
-                setStatusMessage(`❌ ${result.error}`);
+                // Handle error - result.error might be undefined, so provide fallback
+                const errorMsg = result.error || 'Notification credentials not yet received. Please enable notifications in Warpcast settings.';
+                setStatusMessage(`❌ ${errorMsg}`);
             }
         } catch (error: any) {
-            setStatusMessage(`❌ ${error.message}`);
+            setStatusMessage(`❌ ${error.message || 'Failed to send test notification'}`);
         } finally {
             setIsLoading(false);
         }
