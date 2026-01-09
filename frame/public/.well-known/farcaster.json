@@ -13,7 +13,8 @@
         "splashImageUrl": "https://auto-yield-eight.vercel.app/splash.png",
         "splashBackgroundColor": "#0f172a",
         "buttonTitle": "Start Earning",
-        "webhookUrl": "https://auto-yield-eight.vercel.app/api/webhook",
+        "webhookUrl": "https://auto-yield-1.onrender.com/api/farcaster/webhook",
+        "notificationUrl": "https://auto-yield-1.onrender.com/api/farcaster/notifications",
         "subtitle": "Automated DeFi Savings",
         "description": "Automate your DeFi savings with daily USDC deductions earning yield on Base",
         "screenshotUrls": [
