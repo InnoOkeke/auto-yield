@@ -14,7 +14,18 @@ export class NotificationService {
             // Check if user has notifications enabled
             if (!user.notificationsEnabled || !user.notificationUrl || !user.notificationToken) {
                 console.log(`Notifications not enabled for user ${user.id}`);
-                return { success: false, reason: 'notifications_disabled' };
+
+                // Return more specific error message
+                if (!user.notificationsEnabled) {
+                    return { success: false, reason: 'notifications_disabled', error: 'Notifications are not enabled for this user' };
+                }
+                if (!user.notificationUrl || !user.notificationToken) {
+                    return {
+                        success: false,
+                        reason: 'credentials_missing',
+                        error: 'Notification credentials not yet received from Farcaster. Please enable notifications in your Warpcast settings for this Mini App.'
+                    };
+                }
             }
 
             console.log(`📱 Sending notification to user ${user.username || user.walletAddress}`);
