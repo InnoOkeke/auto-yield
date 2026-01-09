@@ -5,7 +5,6 @@ import frameRoutes from './routes/frame.js';
 import apiRoutes from './routes/api.js';
 import aiRoutes from './routes/ai.js';
 import notificationRoutes from './routes/notifications.js';
-import farcasterRoutes from './routes/farcaster.js';
 import { startCronJobs } from './cron/index.js';
 import { initializeDatabase } from './utils/database.js';
 
@@ -28,8 +27,7 @@ app.get('/health', (req, res) => {
 app.use('/frame', frameRoutes);
 app.use('/api', apiRoutes);
 app.use('/api/chat', aiRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/farcaster', farcasterRoutes);
+app.use('/api/farcaster', notificationRoutes); // Farcaster webhook for notifications
 
 // Error handling middleware
 app.use((err, req, res, next) => {

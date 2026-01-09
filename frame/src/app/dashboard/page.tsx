@@ -6,7 +6,6 @@ import { useAccount } from 'wagmi';
 import YieldStats from '@/components/YieldStats';
 import ActivityFeed from '@/components/ActivityFeed';
 import QuickActions from '@/components/QuickActions';
-import NotificationSettings from '@/components/NotificationSettings';
 import axios from 'axios';
 import Link from 'next/link';
 
@@ -122,15 +121,6 @@ export default function DashboardPage() {
                     {/* Right Column - Activity */}
                     <div className="space-y-6">
                         <ActivityFeed address={address!} />
-
-                        {/* Notification Settings */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.2 }}
-                        >
-                            <NotificationSettings />
-                        </motion.div>
 
                         {/* Info Card */}
                         <motion.div
