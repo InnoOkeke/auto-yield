@@ -160,13 +160,32 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                         <label className="block text-sm font-medium text-white/80 mb-2">
                                             What would you like to swap?
                                         </label>
-                                        <textarea
-                                            value={prompt}
-                                            onChange={(e) => setPrompt(e.target.value)}
-                                            placeholder="e.g., Swap 0.1 ETH to USDC"
-                                            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-primary-500 resize-none"
-                                            rows={2}
-                                        />
+                                        <div className="relative">
+                                            <textarea
+                                                value={prompt}
+                                                onChange={(e) => setPrompt(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                                        e.preventDefault();
+                                                        if (prompt.trim()) {
+                                                            generateSwapTransaction();
+                                                        }
+                                                    }
+                                                }}
+                                                placeholder="e.g., Swap 0.1 ETH to USDC"
+                                                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-primary-500 resize-none pr-12"
+                                                rows={2}
+                                                autoFocus
+                                            />
+                                            <button
+                                                onClick={generateSwapTransaction}
+                                                disabled={!prompt.trim() || !isConnected}
+                                                className="absolute right-2 bottom-2 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white/60 hover:text-white transition-all disabled:opacity-0"
+                                                title="Press Enter"
+                                            >
+                                                ↵
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {/* Example prompts */}
