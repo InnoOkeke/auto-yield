@@ -5,6 +5,7 @@ import frameRoutes from './routes/frame.js';
 import apiRoutes from './routes/api.js';
 import aiRoutes from './routes/ai.js';
 import notificationRoutes from './routes/notifications.js';
+import bankrRoutes from './routes/bankr.js';
 import { startCronJobs } from './cron/index.js';
 import { initializeDatabase } from './utils/database.js';
 
@@ -28,6 +29,7 @@ app.use('/frame', frameRoutes);
 app.use('/api', apiRoutes);
 app.use('/api/chat', aiRoutes);
 app.use('/api/farcaster', notificationRoutes); // Farcaster webhook for notifications
+app.use('/api/bankr', bankrRoutes); // Bankr AI swap integration
 
 // Error handling middleware
 app.use((err, req, res, next) => {
