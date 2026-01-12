@@ -43,7 +43,8 @@ router.post('/swap', async (req, res) => {
         if (!BANKR_API_KEY) {
             console.error('❌ BANKR_API_KEY not configured');
             return res.status(500).json({
-                error: 'Bankr API not configured'
+                error: 'Bankr API not configured',
+                message: 'Server configuration missing: BANKR_API_KEY not set. Please check backend logs.'
             });
         }
 
