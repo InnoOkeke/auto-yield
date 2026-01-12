@@ -131,7 +131,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-lg mx-auto z-50"
+                        className="fixed inset-x-4 top-[15%] max-w-lg mx-auto z-50 max-h-[80vh] overflow-y-auto custom-scrollbar"
                     >
                         <div className="glass-dark rounded-3xl p-6 shadow-2xl border border-white/10">
                             {/* Header */}
