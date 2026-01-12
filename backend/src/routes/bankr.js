@@ -95,10 +95,11 @@ router.post('/swap', async (req, res) => {
         // Handle specific error cases
         if (axios.isAxiosError(error)) {
             if (error.response) {
+                console.error('❌ BatchNorm API Error Response:', JSON.stringify(error.response.data, null, 2));
                 // Bankr API returned an error
                 return res.status(error.response.status).json({
                     error: 'Bankr API error',
-                    message: error.response.data?.message || 'Failed to generate swap transaction',
+                    message: error.response.data?.message || error.response.data?.error || 'Failed to generate swap transaction',
                     details: error.response.data
                 });
             } else if (error.code === 'ECONNABORTED') {
