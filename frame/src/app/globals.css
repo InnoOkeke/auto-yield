@@ -3,8 +3,10 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 229, 231, 235; /* Near white #E5E7EB */
-  --background-rgb: 11, 16, 32;    /* Very dark navy #0B1020 */
+  --foreground-rgb: 229, 231, 235;
+  /* Near white #E5E7EB */
+  --background-rgb: 11, 16, 32;
+  /* Very dark navy #0B1020 */
 }
 
 body {
@@ -36,7 +38,8 @@ body {
 
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(79, 70, 229, 0.4); /* Primary Indigo */
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
+    /* Primary Indigo */
   }
 
   50% {
@@ -54,14 +57,16 @@ body {
 
 /* Glassmorphism */
 .glass {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(11, 16, 32, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .glass-dark {
-  background: #111827; /* Dark slate Card background */
+  background: #111827;
+  /* Dark slate Card background */
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.06); /* White at 6% opacity */
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  /* White at 6% opacity */
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
