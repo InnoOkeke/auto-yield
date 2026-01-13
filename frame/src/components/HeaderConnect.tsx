@@ -47,7 +47,7 @@ export default function HeaderConnect() {
         return (
             <button
                 onClick={() => disconnect()}
-                className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium text-sm transition-colors flex items-center gap-2"
+                className="px-4 py-2 rounded-lg bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-foreground dark:text-white font-medium text-sm transition-colors flex items-center gap-2 border border-foreground/5"
             >
                 <div className="w-2 h-2 rounded-full bg-green-500" />
                 {address.slice(0, 6)}...{address.slice(-4)}

@@ -137,7 +137,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                             {/* Header */}
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 flex items-center justify-center text-2xl">
+                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-primary-500 to-accent-500 flex items-center justify-center text-2xl text-white">
                                         🔄
                                     </div>
                                     <div>
@@ -180,7 +180,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                             <button
                                                 onClick={generateSwapTransaction}
                                                 disabled={!prompt.trim() || !isConnected}
-                                                className="absolute right-2 bottom-2 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white/60 hover:text-white transition-all disabled:opacity-0"
+                                                className="absolute right-2 bottom-2 p-2 rounded-lg bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-muted hover:text-foreground transition-all disabled:opacity-0"
                                                 title="Press Enter"
                                             >
                                                 ↵
@@ -204,13 +204,13 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                     <button
                                         onClick={generateSwapTransaction}
                                         disabled={!prompt.trim() || !isConnected}
-                                        className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-semibold hover:from-indigo-600 hover:to-violet-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full py-4 rounded-xl bg-primary-600 dark:bg-gradient-to-r dark:from-indigo-500 dark:to-violet-500 text-white font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Generate Swap
                                     </button>
 
                                     {!isConnected && (
-                                        <p className="text-center text-sm text-yellow-400">
+                                        <p className="text-center text-sm text-yellow-600 dark:text-yellow-400">
                                             Please connect your wallet first
                                         </p>
                                     )}
@@ -233,8 +233,8 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                     </div>
 
                                     <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20">
-                                        <p className="text-sm text-green-400 mb-2">✓ Transaction ready</p>
-                                        <p className="text-xs text-white/60">
+                                        <p className="text-sm text-green-600 dark:text-green-400 mb-2 font-bold">✓ Transaction ready</p>
+                                        <p className="text-xs text-muted font-medium">
                                             Network: {metadata.chain?.toUpperCase() || 'BASE'}
                                         </p>
                                     </div>
@@ -249,7 +249,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                         <button
                                             onClick={executeSwap}
                                             disabled={isSending}
-                                            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium hover:from-green-600 hover:to-emerald-600 transition-all disabled:opacity-50"
+                                            className="flex-1 py-3 rounded-xl bg-green-600 dark:bg-gradient-to-r dark:from-green-500 dark:to-emerald-500 text-white font-medium hover:opacity-90 transition-all disabled:opacity-50"
                                         >
                                             {isSending ? 'Signing...' : 'Confirm Swap'}
                                         </button>
@@ -273,11 +273,11 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
 
                             {isConfirmed && (
                                 <div className="text-center py-8">
-                                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-4xl mx-auto mb-4">
+                                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-4xl text-white mx-auto mb-4">
                                         ✓
                                     </div>
-                                    <p className="text-white font-bold text-xl mb-2">Swap Complete!</p>
-                                    <p className="text-white/60 text-sm mb-4">Your tokens have been swapped successfully</p>
+                                    <p className="text-foreground font-bold text-xl mb-2">Swap Complete!</p>
+                                    <p className="text-muted text-sm mb-4">Your tokens have been swapped successfully</p>
                                     {txHash && (
                                         <a
                                             href={`https://basescan.org/tx/${txHash}`}
