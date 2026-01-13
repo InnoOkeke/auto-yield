@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { TrendingUp, DollarSign, Users } from 'lucide-react';
 
 export default function Hero({ apy = 9.45 }: { apy?: number }) {
     return (
@@ -12,8 +13,8 @@ export default function Hero({ apy = 9.45 }: { apy?: number }) {
                 transition={{ duration: 0.5 }}
                 className="mb-8"
             >
-                <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 animate-float">
-                    <span className="bg-gradient-to-r from-primary-300 to-accent-300 bg-clip-text text-transparent">
+                <h1 className="text-5xl md:text-7xl font-bold text-dark-text-primary mb-6 animate-float">
+                    <span className="bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
                         Meluri Auto Yield
                     </span>
                 </h1>
@@ -34,15 +35,15 @@ export default function Hero({ apy = 9.45 }: { apy?: number }) {
             >
                 <Link
                     href="/onboard"
-                    className="px-8 py-4 bg-gradient-to-r from-primary-500 to-accent-500 rounded-xl text-white font-semibold text-lg hover:scale-105 transition-transform animate-pulse-glow shadow-2xl"
+                    className="px-8 py-4 bg-gradient-signature rounded-xl text-white font-semibold text-lg hover:scale-105 transition-transform animate-pulse-glow shadow-2xl"
                 >
-                    Start Earning Now 💰
+                    Start Earning Now
                 </Link>
                 <Link
                     href="/dashboard"
                     className="px-8 py-4 glass-dark rounded-xl text-white font-semibold text-lg hover:scale-105 transition-transform"
                 >
-                    View Dashboard 📊
+                    View Dashboard
                 </Link>
             </motion.div>
 
@@ -54,13 +55,15 @@ export default function Hero({ apy = 9.45 }: { apy?: number }) {
                 className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"
             >
                 {[
-                    { label: 'Current APY', value: `~${apy}%`, icon: '📈' },
-                    { label: 'Total Saved', value: '$250K+', icon: '💵' },
-                    { label: 'Active Users', value: '500+', icon: '👥' },
+                    { label: 'Current APY', value: `~${apy}%`, icon: TrendingUp },
+                    { label: 'Total Saved', value: '$250K+', icon: DollarSign },
+                    { label: 'Active Users', value: '500+', icon: Users },
                 ].map((stat, i) => (
                     <div key={i} className="glass-dark rounded-2xl p-6 backdrop-blur-xl">
-                        <div className="text-4xl mb-2">{stat.icon}</div>
-                        <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
+                        <div className="flex justify-center mb-3">
+                            <stat.icon className="w-8 h-8 text-secondary-400" />
+                        </div>
+                        <div className="text-3xl font-bold text-gray-100 mb-1">{stat.value}</div>
                         <div className="text-white/60">{stat.label}</div>
                     </div>
                 ))}
