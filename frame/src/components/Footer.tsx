@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function Footer() {
     return (
@@ -15,8 +16,8 @@ export default function Footer() {
                     </div>
 
                     <div className="flex gap-6 text-sm text-white/40">
-                        <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-                        <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+                        <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                        <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
                         <a href="#" className="hover:text-white transition-colors">Twitter</a>
                     </div>
                 </div>
