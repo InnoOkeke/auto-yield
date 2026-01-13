@@ -19,22 +19,24 @@ export default function HeaderConnect() {
             // await farcasterSDK.actions.signIn({ nonce: "example-nonce" });
 
             // 2. Connect Wallet for Transactions
-            // 2. Connect Wallet for Transactions
-            // Look for the specific Farcaster connector first, or just use the first available one as we configured it in providers
-            const fcWallet = connectors.find(c => c.id === 'farcaster' || c.name.toLowerCase().includes('farcaster')) || connectors[0];
+            // First, check if we're in a Farcaster environment
+            const isInFarcaster = !!(window as any).farcaster?.context || connectors.some(c => c.id === 'farcaster');
 
-            if (fcWallet) {
-                await connect({ connector: fcWallet });
-            } else {
-                // Fallback to manual injection if no connector found
-                await connect({
-                    connector: injected({
-                        target: () => {
-                            const provider = farcasterSDK.wallet?.ethProvider || (window as any).ethereum;
-                            return provider as any;
-                        }
-                    })
-                });
+            if (isInFarcaster) {
+                const fcWallet = connectors.find(c => c.id === 'farcaster' || c.name.toLowerCase().includes('farcaster'));
+                if (fcWallet) {
+                    await connect({ connector: fcWallet });
+                    return;
+                }
+            }
+
+            // If not in Farcaster or Farcaster connector failed, try the first available injected wallet (MetaMask, etc.)
+            const injectedWallet = connectors.find(c => c.id === 'injected');
+            if (injectedWallet) {
+                await connect({ connector: injectedWallet });
+            } else if (connectors.length > 0) {
+                // Fallback to the first available connector
+                await connect({ connector: connectors[0] });
             }
         } catch (error) {
             console.error('Sign In Failed:', error);
