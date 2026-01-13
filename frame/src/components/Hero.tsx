@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { TrendingUp, DollarSign, Users } from 'lucide-react';
 
 export default function Hero({ apy = 9.45 }: { apy?: number }) {
@@ -11,8 +12,11 @@ export default function Hero({ apy = 9.45 }: { apy?: number }) {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="mb-8"
+                className="mb-8 flex flex-col items-center"
             >
+                <div className="mb-6 p-4 bg-white/50 dark:bg-white/5 rounded-3xl backdrop-blur-sm border border-foreground/5 dark:border-white/10 shadow-xl">
+                    <Image src="/logo.png" alt="Meluri AutoYield Logo" width={80} height={80} className="w-20 h-20 object-contain" priority />
+                </div>
                 <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-float">
                     <span className="text-primary-600 dark:text-primary-400">
                         Meluri AutoYield
