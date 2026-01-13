@@ -1,16 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import HeaderConnect from './HeaderConnect';
 import ThemeToggle from './ThemeToggle';
+import Logo from './Logo';
 
 export default function Header() {
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-foreground/5 dark:border-white/5">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                 <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
-                    <Image src="/logo.png" alt="Meluri AutoYield" width={40} height={40} className="w-10 h-10 object-contain" />
+                    <Logo className="w-9 h-9" />
                 </Link>
 
                 <nav className="flex items-center gap-3">

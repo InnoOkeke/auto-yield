@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import Logo from './Logo';
 
 export default function Footer() {
     return (
@@ -9,7 +9,7 @@ export default function Footer() {
             <div className="container mx-auto px-4">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-3">
-                        <Image src="/logo.png" alt="Meluri AutoYield" width={24} height={24} className="w-6 h-6 object-contain opacity-50 grayscale hover:grayscale-0 transition-all" />
+                        <Logo className="w-6 h-6 opacity-60 grayscale hover:grayscale-0 transition-all text-muted" />
                         <span className="text-muted text-sm font-medium">
                             © {new Date().getFullYear()} Meluri AutoYield
                         </span>
