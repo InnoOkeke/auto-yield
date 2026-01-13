@@ -122,7 +122,7 @@ export default function SubscriptionForm({
                 <button
                     onClick={onNext}
                     disabled={!amount || parseFloat(amount) < 1}
-                    className="flex-1 py-4 rounded-xl bg-gradient-to-r from-primary-500 to-accent-500 hover:from-primary-600 hover:to-accent-600 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 py-4 rounded-xl bg-primary-50 dark:bg-primary-600 dark:bg-gradient-to-r dark:from-primary-500 dark:to-accent-500 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                 >
                     Continue
                 </button>

@@ -41,7 +41,7 @@ export default function DashboardPage() {
                     <p className="text-muted mb-8 text-lg">Please connect your wallet to view your dashboard</p>
                     <Link
                         href="/onboard"
-                        className="inline-block px-8 py-4 bg-primary-600 dark:bg-gradient-to-r dark:from-primary-500 dark:to-accent-500 rounded-xl text-white font-semibold hover:opacity-90 transition-all shadow-lg"
+                        className="inline-block px-8 py-4 bg-primary-50 dark:bg-primary-600 dark:bg-gradient-to-r dark:from-primary-500 dark:to-accent-500 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg"
                     >
                         Connect Wallet
                     </Link>

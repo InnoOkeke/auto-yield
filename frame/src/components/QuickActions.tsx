@@ -29,7 +29,7 @@ export default function QuickActions() {
             {/* Primary Smart Swap Button */}
             <button
                 onClick={() => setShowSwapModal(true)}
-                className="px-6 py-3 rounded-xl bg-primary-600 dark:bg-gradient-to-r dark:from-indigo-500 dark:to-violet-500 text-white font-semibold hover:opacity-90 transition-all shadow-lg flex items-center gap-2"
+                className="px-6 py-3 rounded-xl bg-primary-50 dark:bg-primary-600 dark:bg-gradient-to-r dark:from-indigo-500 dark:to-violet-500 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold hover:opacity-90 transition-all shadow-lg flex items-center gap-2"
             >
                 <span>🔄</span>
                 <span>Smart Swap</span>

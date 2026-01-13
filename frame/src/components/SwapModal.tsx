@@ -204,7 +204,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                     <button
                                         onClick={generateSwapTransaction}
                                         disabled={!prompt.trim() || !isConnected}
-                                        className="w-full py-4 rounded-xl bg-primary-600 dark:bg-gradient-to-r dark:from-indigo-500 dark:to-violet-500 text-white font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full py-4 rounded-xl bg-primary-50 dark:bg-primary-600 dark:bg-gradient-to-r dark:from-indigo-500 dark:to-violet-500 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                                     >
                                         Generate Swap
                                     </button>
@@ -249,7 +249,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                         <button
                                             onClick={executeSwap}
                                             disabled={isSending}
-                                            className="flex-1 py-3 rounded-xl bg-green-600 dark:bg-gradient-to-r dark:from-green-500 dark:to-emerald-500 text-white font-medium hover:opacity-90 transition-all disabled:opacity-50"
+                                            className="flex-1 py-3 rounded-xl bg-primary-50 dark:bg-green-600 dark:bg-gradient-to-r dark:from-green-500 dark:to-emerald-500 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-medium hover:opacity-90 transition-all disabled:opacity-50 shadow-md"
                                         >
                                             {isSending ? 'Signing...' : 'Confirm Swap'}
                                         </button>

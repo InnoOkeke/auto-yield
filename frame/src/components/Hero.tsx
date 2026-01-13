@@ -35,7 +35,7 @@ export default function Hero({ apy = 9.45 }: { apy?: number }) {
             >
                 <Link
                     href="/onboard"
-                    className="px-8 py-4 bg-gradient-signature rounded-xl text-white font-semibold text-lg hover:scale-105 transition-transform animate-pulse-glow shadow-2xl"
+                    className="px-8 py-4 bg-primary-50 dark:bg-primary-600 text-primary-600 dark:text-white border-2 border-primary-600 dark:border-transparent rounded-xl font-semibold text-lg hover:scale-105 transition-transform animate-pulse-glow shadow-md dark:shadow-2xl"
                 >
                     Start Earning Now
                 </Link>
