@@ -9,7 +9,7 @@ export default function Footer() {
             <div className="container mx-auto px-4">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-3">
-                        <Logo className="w-10 h-10 opacity-60 grayscale hover:grayscale-0 transition-all text-muted" />
+                        <Logo className="w-20 h-20 opacity-70 grayscale hover:grayscale-0 transition-all text-muted" />
                         <span className="text-muted text-sm font-medium">
                             © {new Date().getFullYear()} Meluri AutoYield
                         </span>
