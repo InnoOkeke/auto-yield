@@ -61,7 +61,7 @@ export default function OnboardPage() {
                     </div>
                     <div className="h-2 bg-foreground/10 rounded-full overflow-hidden">
                         <motion.div
-                            className="h-full bg-gradient-to-r from-primary-400 to-accent-400"
+                            className="h-full bg-primary-500 shadow-sm"
                             initial={{ width: '0%' }}
                             animate={{
                                 width: step === 'connect' ? '33%' : step === 'amount' ? '66%' : '100%',
@@ -261,7 +261,7 @@ function ConfirmStep({ onBack, apy, dailyAmount }: { onBack: () => void, apy: st
                     <button
                         onClick={handleApprove}
                         disabled={isApproving}
-                        className="flex-1 py-4 rounded-xl bg-primary-50 dark:bg-primary-600 dark:bg-gradient-to-r dark:from-blue-500 dark:to-cyan-500 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold transition-all shadow-md disabled:opacity-50 animate-pulse-glow"
+                        className="flex-1 py-4 rounded-xl bg-primary-50 dark:bg-primary-600 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold transition-all shadow-md disabled:opacity-50 animate-pulse-glow"
                     >
                         {isApproving ? 'Approving...' : 'Approve USDC'}
                     </button>
@@ -269,7 +269,7 @@ function ConfirmStep({ onBack, apy, dailyAmount }: { onBack: () => void, apy: st
                     <button
                         onClick={handleConfirm}
                         disabled={isSubscribing}
-                        className="flex-1 py-4 rounded-xl bg-primary-50 dark:bg-primary-600 dark:bg-gradient-to-r dark:from-primary-500 dark:to-accent-500 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold transition-all shadow-md disabled:opacity-50 animate-pulse-glow"
+                        className="flex-1 py-4 rounded-xl bg-primary-50 dark:bg-primary-600 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold transition-all shadow-md disabled:opacity-50 animate-pulse-glow"
                     >
                         {isSubscribing ? 'Confirming...' : 'Confirm Subscription'}
                     </button>

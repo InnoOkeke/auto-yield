@@ -8,25 +8,25 @@ export default function YieldStats({ yieldData }: { yieldData: any }) {
             label: 'Total Deposited',
             value: `$${yieldData?.totalDeposited || '0.00'}`,
             icon: '💵',
-            color: 'from-blue-500 to-cyan-500',
+            color: 'text-blue-600 dark:text-blue-400',
         },
         {
             label: 'Current Value',
             value: `$${yieldData?.currentValue || '0.00'}`,
             icon: '💰',
-            color: 'from-green-500 to-emerald-500',
+            color: 'text-green-600 dark:text-green-400',
         },
         {
             label: 'Yield Earned',
             value: `$${yieldData?.yieldEarned || '0.00'}`,
             icon: '📈',
-            color: 'from-purple-500 to-pink-500',
+            color: 'text-purple-600 dark:text-purple-400',
         },
         {
             label: 'Yield %',
             value: `${yieldData?.yieldPercentage || '0.00'}%`,
             icon: '🎯',
-            color: 'from-orange-500 to-red-500',
+            color: 'text-orange-600 dark:text-orange-400',
         },
     ];
 
@@ -45,7 +45,7 @@ export default function YieldStats({ yieldData }: { yieldData: any }) {
                     className="glass-dark rounded-2xl p-6 backdrop-blur-xl hover:scale-105 transition-transform border border-foreground/5 shadow-sm"
                 >
                     <div className="text-4xl mb-3">{stat.icon}</div>
-                    <div className={`text-2xl md:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
+                    <div className={`text-2xl md:text-3xl font-bold ${stat.color} mb-1`}>
                         {stat.value}
                     </div>
                     <div className="text-muted text-sm font-medium">{stat.label}</div>

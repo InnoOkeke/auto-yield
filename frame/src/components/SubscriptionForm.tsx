@@ -50,7 +50,7 @@ export default function SubscriptionForm({
                             key={preset.value}
                             onClick={() => handlePresetClick(preset.value)}
                             className={`p-4 rounded-xl transition-all ${selectedPreset === preset.value
-                                ? 'bg-gradient-to-r from-primary-500 to-accent-500 text-white scale-105 shadow-lg'
+                                ? 'bg-primary-600 text-white scale-105 shadow-lg'
                                 : 'glass text-muted hover:bg-black/5 dark:hover:bg-white/20'
                                 }`}
                         >
@@ -85,7 +85,7 @@ export default function SubscriptionForm({
                 key={amount}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="glass rounded-2xl p-6 bg-gradient-to-r from-primary-500/10 to-accent-500/10 border border-primary-500/30"
+                className="glass rounded-2xl p-6 bg-primary-100 dark:bg-primary-900/20 border border-primary-500/30"
             >
                 <h3 className="text-foreground font-semibold mb-4">📊 Your Projected Returns</h3>
                 <div className="space-y-3">
@@ -122,7 +122,7 @@ export default function SubscriptionForm({
                 <button
                     onClick={onNext}
                     disabled={!amount || parseFloat(amount) < 1}
-                    className="flex-1 py-4 rounded-xl bg-primary-50 dark:bg-primary-600 dark:bg-gradient-to-r dark:from-primary-500 dark:to-accent-500 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                    className="flex-1 py-4 rounded-xl bg-primary-50 dark:bg-primary-600 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                 >
                     Continue
                 </button>

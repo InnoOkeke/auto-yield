@@ -12,7 +12,7 @@ export default function Header() {
                     <span className="text-sm font-bold text-muted uppercase tracking-wider">
                         Meluri
                     </span>
-                    <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 dark:from-white dark:to-white/80 bg-clip-text text-transparent font-display -mt-1">
+                    <span className="text-xl font-bold text-primary-600 dark:text-white font-display -mt-1">
                         AutoYield
                     </span>
                 </Link>

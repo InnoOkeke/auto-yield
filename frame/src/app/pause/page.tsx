@@ -51,7 +51,7 @@ export default function PausePage() {
                     <button
                         onClick={handlePause}
                         disabled={isWritePending || isConfirming || isSuccess}
-                        className="flex-1 py-4 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 hover:scale-105 transition-all text-white font-semibold disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
+                        className="flex-1 py-4 rounded-xl bg-yellow-600 hover:scale-105 transition-all text-white font-semibold disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
                     >
                         {isWritePending ? 'Check Wallet...' : isConfirming ? 'Pausing...' : isSuccess ? 'Paused!' : 'Confirm Pause'}
                     </button>

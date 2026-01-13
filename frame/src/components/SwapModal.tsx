@@ -137,7 +137,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                             {/* Header */}
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-primary-500 to-accent-500 flex items-center justify-center text-2xl text-white">
+                                    <div className="w-12 h-12 rounded-2xl bg-primary-600 flex items-center justify-center text-2xl text-white shadow-lg">
                                         🔄
                                     </div>
                                     <div>
@@ -204,7 +204,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                     <button
                                         onClick={generateSwapTransaction}
                                         disabled={!prompt.trim() || !isConnected}
-                                        className="w-full py-4 rounded-xl bg-primary-50 dark:bg-primary-600 dark:bg-gradient-to-r dark:from-indigo-500 dark:to-violet-500 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                                        className="w-full py-4 rounded-xl bg-primary-50 dark:bg-primary-600 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                                     >
                                         Generate Swap
                                     </button>
@@ -249,7 +249,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                         <button
                                             onClick={executeSwap}
                                             disabled={isSending}
-                                            className="flex-1 py-3 rounded-xl bg-primary-50 dark:bg-green-600 dark:bg-gradient-to-r dark:from-green-500 dark:to-emerald-500 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-medium hover:opacity-90 transition-all disabled:opacity-50 shadow-md"
+                                            className="flex-1 py-3 rounded-xl bg-primary-50 dark:bg-green-600 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-medium hover:opacity-90 transition-all disabled:opacity-50 shadow-md"
                                         >
                                             {isSending ? 'Signing...' : 'Confirm Swap'}
                                         </button>
@@ -273,7 +273,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
 
                             {isConfirmed && (
                                 <div className="text-center py-8">
-                                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-4xl text-white mx-auto mb-4">
+                                    <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center text-4xl text-white mx-auto mb-4 shadow-lg">
                                         ✓
                                     </div>
                                     <p className="text-foreground font-bold text-xl mb-2">Swap Complete!</p>

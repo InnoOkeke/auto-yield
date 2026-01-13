@@ -83,7 +83,7 @@ export default function SettingsPage() {
                     <button
                         onClick={handleUpdate}
                         disabled={isWritePending || isConfirming || isSuccess}
-                        className="flex-1 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:scale-105 transition-all text-white font-semibold disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
+                        className="flex-1 py-4 rounded-xl bg-blue-600 hover:scale-105 transition-all text-white font-semibold disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
                     >
                         {isWritePending ? 'Check Wallet...' : isConfirming ? 'Updating...' : isSuccess ? 'Updated!' : 'Update Amount'}
                     </button>

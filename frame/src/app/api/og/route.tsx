@@ -13,7 +13,7 @@ export async function GET() {
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: 'linear-gradient(135deg, #0c4a6e 0%, #701a75 100%)',
+                    background: '#0c4a6e',
                     fontFamily: 'sans-serif',
                 }}
             >
@@ -34,7 +34,7 @@ export async function GET() {
                         style={{
                             fontSize: '80px',
                             fontWeight: 'bold',
-                            background: 'linear-gradient(90deg, #7dd3fc 0%, #f0abfc 100%)',
+                            background: '#7dd3fc',
                             backgroundClip: 'text',
                             color: 'transparent',
                             marginBottom: '20px',

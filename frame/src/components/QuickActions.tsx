@@ -10,11 +10,11 @@ export default function QuickActions() {
     const [showSwapModal, setShowSwapModal] = useState(false);
 
     const actions = [
-        { label: 'Smart Swap', icon: '🔄', action: 'swap', color: 'from-indigo-500 to-violet-500' },
-        { label: 'Withdraw Funds', icon: '💰', href: '/withdraw', color: 'from-green-500 to-emerald-500' },
-        { label: 'Adjust Amount', icon: '⚙️', href: '/settings', color: 'from-blue-500 to-cyan-500' },
-        { label: 'Pause Subscription', icon: '⏸️', href: '/pause', color: 'from-yellow-500 to-orange-500' },
-        { label: 'View History', icon: '📊', href: '/history', color: 'from-purple-500 to-pink-500' },
+        { label: 'Smart Swap', icon: '🔄', action: 'swap', color: 'bg-indigo-600' },
+        { label: 'Withdraw Funds', icon: '💰', href: '/withdraw', color: 'bg-green-600' },
+        { label: 'Adjust Amount', icon: '⚙️', href: '/settings', color: 'bg-blue-600' },
+        { label: 'Pause Subscription', icon: '⏸️', href: '/pause', color: 'bg-yellow-600' },
+        { label: 'View History', icon: '📊', href: '/history', color: 'bg-purple-600' },
     ];
 
     const handleActionClick = (action: typeof actions[0]) => {
@@ -29,7 +29,7 @@ export default function QuickActions() {
             {/* Primary Smart Swap Button */}
             <button
                 onClick={() => setShowSwapModal(true)}
-                className="px-6 py-3 rounded-xl bg-primary-50 dark:bg-primary-600 dark:bg-gradient-to-r dark:from-indigo-500 dark:to-violet-500 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold hover:opacity-90 transition-all shadow-lg flex items-center gap-2"
+                className="px-6 py-3 rounded-xl bg-primary-50 dark:bg-primary-600 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold hover:opacity-90 transition-all shadow-lg flex items-center gap-2"
             >
                 <span>🔄</span>
                 <span>Smart Swap</span>
@@ -69,7 +69,7 @@ export default function QuickActions() {
                                                 href={action.href}
                                                 className="flex items-center gap-3 p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-all group"
                                             >
-                                                <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center text-xl shadow-sm`}>
+                                                <div className={`w-10 h-10 rounded-lg ${action.color} flex items-center justify-center text-xl shadow-sm text-white`}>
                                                     {action.icon}
                                                 </div>
                                                 <span className="text-foreground font-medium">{action.label}</span>
@@ -80,7 +80,7 @@ export default function QuickActions() {
                                                 onClick={() => handleActionClick(action)}
                                                 className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-all group"
                                             >
-                                                <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center text-xl shadow-sm`}>
+                                                <div className={`w-10 h-10 rounded-lg ${action.color} flex items-center justify-center text-xl shadow-sm text-white`}>
                                                     {action.icon}
                                                 </div>
                                                 <span className="text-foreground font-medium">{action.label}</span>

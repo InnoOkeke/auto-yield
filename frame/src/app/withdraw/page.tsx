@@ -61,7 +61,7 @@ export default function WithdrawPage() {
                     <button
                         onClick={handleWithdraw}
                         disabled={isWritePending || isConfirming || isSuccess}
-                        className="flex-1 py-4 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 hover:scale-105 transition-all text-white font-semibold disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
+                        className="flex-1 py-4 rounded-xl bg-red-600 hover:scale-105 transition-all text-white font-semibold disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2"
                     >
                         {isWritePending ? 'Check Wallet...' : isConfirming ? 'Confirming...' : isSuccess ? 'Success!' : 'Confirm Withdraw'}
                     </button>
