@@ -179,7 +179,7 @@ function ConfirmStep({ onBack, apy, dailyAmount }: { onBack: () => void, apy: st
 
     const handleApprove = async () => {
         try {
-            await approve();
+            await approve(dailyAmountStr);
             // Toast or alert?
         } catch (error) {
             console.error('Approval failed', error);

@@ -35,15 +35,17 @@ export function useAutoYield() {
     // subscription is [dailyAmount, isActive, startDate, lastDeduction]
     const isSubscribed = subscription ? subscription[1] : false;
 
-    const approve = useCallback(async () => {
+    const approve = useCallback(async (amountStr?: string) => {
         if (!address) throw new Error('Wallet not connected');
         setIsApproving(true);
         try {
             console.log('Approving USDC...');
+            const amount = amountStr ? parseUnits(amountStr, 6) : maxUint256;
+
             const hash = await writeContractAsync({
                 ...USDC_CONTRACT,
                 functionName: 'approve',
-                args: [AUTO_YIELD_VAULT_CONTRACT.address, maxUint256],
+                args: [AUTO_YIELD_VAULT_CONTRACT.address, amount],
             });
 
             // Wait for transaction receipt
