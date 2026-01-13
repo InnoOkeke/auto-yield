@@ -11,7 +11,7 @@ export default function TermsOfUse() {
                 <section className="mb-8">
                     <h2 className="text-2xl font-semibold mb-4 text-white">1. Acceptance of Terms</h2>
                     <p className="text-white/80">
-                        By accessing or using the Meluri Auto Yield application ("App"), you agree to be bound by these Terms of Use.
+                        By accessing or using the Meluri Auto Yield application (&quot;App&quot;), you agree to be bound by these Terms of Use.
                         If you do not agree to these terms, you may not access or use usage of the App.
                     </p>
                 </section>
@@ -51,7 +51,7 @@ export default function TermsOfUse() {
                     <h2 className="text-2xl font-semibold mb-4 text-white">4. No Financial Advice</h2>
                     <p className="text-white/80">
                         The information provided on this App does not constitute investment advice, financial advice, trading advice, or any other sort of advice.
-                        You should not treat any of the App's content as such. Meluri does not recommend that any crypto-asset should be bought, sold, or held by you.
+                        You should not treat any of the App&apos;s content as such. Meluri does not recommend that any crypto-asset should be bought, sold, or held by you.
                     </p>
                 </section>
 

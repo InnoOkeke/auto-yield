@@ -11,8 +11,8 @@ export default function PrivacyPolicy() {
                 <section className="mb-8">
                     <h2 className="text-2xl font-semibold mb-4 text-white">1. Introduction</h2>
                     <p className="text-white/80">
-                        Meluri ("we", "our", or "us") respects your privacy and is committed to protecting it through our compliance with this policy.
-                        This policy describes the types of information we may collect from you or that you may provide when you visit the Auto Yield application (the "App")
+                        Meluri (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) respects your privacy and is committed to protecting it through our compliance with this policy.
+                        This policy describes the types of information we may collect from you or that you may provide when you visit the Auto Yield application (the &quot;App&quot;)
                         and our practices for collecting, using, maintaining, protected, and disclosing that information.
                     </p>
                 </section>
