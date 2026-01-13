@@ -10,7 +10,7 @@
         "homeUrl": "https://auto-yield-eight.vercel.app",
         "iconUrl": "https://auto-yield-eight.vercel.app/logo.png",
         "imageUrl": "https://auto-yield-eight.vercel.app/logo.png",
-        "splashImageUrl": "https://auto-yield-eight.vercel.app/splash.png",
+        "splashImageUrl": "https://auto-yield-eight.vercel.app/logo.png",
         "splashBackgroundColor": "#0f172a",
         "buttonTitle": "Start Earning",
         "webhookUrl": "https://auto-yield-1.onrender.com/api/farcaster/webhook",
