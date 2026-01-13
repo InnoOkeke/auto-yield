@@ -6,6 +6,7 @@ import { WagmiProvider } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { http, createConfig } from 'wagmi';
 import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector';
+import { ThemeProvider } from 'next-themes';
 
 const queryClient = new QueryClient();
 
@@ -23,7 +24,9 @@ export default function Providers({ children }: { children: ReactNode }) {
     return (
         <WagmiProvider config={config}>
             <QueryClientProvider client={queryClient}>
-                {children}
+                <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+                    {children}
+                </ThemeProvider>
             </QueryClientProvider>
         </WagmiProvider>
     );

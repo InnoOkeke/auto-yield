@@ -3,15 +3,34 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 229, 231, 235;
-  /* Near white #E5E7EB */
-  --background-rgb: 11, 16, 32;
-  /* Very dark navy #0B1020 */
+  --background: 248, 250, 252;
+  /* #F8FAFC (Light Mode) */
+  --foreground: 15, 23, 42;
+  /* #0F172A (Light Mode Primary) */
+  --card: 255, 255, 255;
+  /* #FFFFFF (Light Mode Card) */
+  --muted: 71, 85, 105;
+  /* #475569 (Light Mode Secondary) */
+  --border: 15, 23, 42, 0.08;
+  /* Dark navy at 8% opacity */
+}
+
+.dark {
+  --background: 11, 16, 32;
+  /* #0B1020 (Dark Mode) */
+  --foreground: 229, 231, 235;
+  /* #E5E7EB (Dark Mode Primary) */
+  --card: 17, 24, 39;
+  /* #111827 (Dark Mode Card) */
+  --muted: 156, 163, 175;
+  /* #9CA3AF (Dark Mode Secondary) */
+  --border: 255, 255, 255, 0.06;
+  /* White at 6% opacity */
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
+  color: rgb(var(--foreground));
+  background: rgb(var(--background));
   min-height: 100vh;
 }
 
@@ -57,16 +76,14 @@ body {
 
 /* Glassmorphism */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--card), 0.7);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--border));
 }
 
 .glass-dark {
-  background: #111827;
-  /* Dark slate Card background */
+  background: rgb(var(--card));
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  /* White at 6% opacity */
+  border: 1px solid rgba(var(--border));
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
