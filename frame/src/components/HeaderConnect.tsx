@@ -19,10 +19,12 @@ export default function HeaderConnect() {
             // await farcasterSDK.actions.signIn({ nonce: "example-nonce" });
 
             // 2. Connect Wallet for Transactions
-            // First, check if we're in a Farcaster environment
-            const isInFarcaster = !!(window as any).farcaster?.context || connectors.some(c => c.id === 'farcaster');
+            // Check if we are actually inside a Farcaster environment
+            const isFarcasterEnv = !!(window as any).farcaster?.context;
 
-            if (isInFarcaster) {
+            console.log('Connectors available:', connectors.map(c => `${c.id} (${c.name})`));
+
+            if (isFarcasterEnv) {
                 const fcWallet = connectors.find(c => c.id === 'farcaster' || c.name.toLowerCase().includes('farcaster'));
                 if (fcWallet) {
                     await connect({ connector: fcWallet });
@@ -30,10 +32,12 @@ export default function HeaderConnect() {
                 }
             }
 
-            // If not in Farcaster or Farcaster connector failed, try the first available injected wallet (MetaMask, etc.)
-            const injectedWallet = connectors.find(c => c.id === 'injected');
-            if (injectedWallet) {
-                await connect({ connector: injectedWallet });
+            // If not in Farcaster, prioritize injected wallets (MetaMask, etc.)
+            const injectedWallet = connectors.find(c => c.id === 'injected' || c.id === 'metaMask' || c.id === 'io.metamask');
+            const targetConnector = injectedWallet || connectors.find(c => c.id !== 'farcaster');
+
+            if (targetConnector) {
+                await connect({ connector: targetConnector });
             } else if (connectors.length > 0) {
                 // Fallback to the first available connector
                 await connect({ connector: connectors[0] });

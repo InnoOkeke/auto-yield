@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useAccount } from 'wagmi';
+import { useAccount, useConnect } from 'wagmi';
 import YieldStats from '@/components/YieldStats';
 import ActivityFeed from '@/components/ActivityFeed';
 import QuickActions from '@/components/QuickActions';
@@ -11,8 +11,25 @@ import Link from 'next/link';
 
 export default function DashboardPage() {
     const { address, isConnected } = useAccount();
+    const { connect, connectors } = useConnect();
     const [userData, setUserData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+
+    const handleConnect = async () => {
+        try {
+            const isFarcasterEnv = !!(window as any).farcaster?.context;
+            const injectedWallet = connectors.find(c => c.id === 'injected' || c.id === 'metaMask' || c.id === 'io.metamask');
+            const fcWallet = connectors.find(c => c.id === 'farcaster' || c.name.toLowerCase().includes('farcaster'));
+
+            const targetConnector = isFarcasterEnv ? (fcWallet || injectedWallet) : (injectedWallet || connectors[0]);
+
+            if (targetConnector) {
+                await connect({ connector: targetConnector });
+            }
+        } catch (error) {
+            console.error('Connection failed:', error);
+        }
+    };
 
     const fetchUserData = useCallback(async () => {
         try {
@@ -39,12 +56,12 @@ export default function DashboardPage() {
                 <div className="text-center">
                     <h1 className="text-3xl font-bold text-foreground mb-4">Connect Your Wallet</h1>
                     <p className="text-muted mb-8 text-lg">Please connect your wallet to view your dashboard</p>
-                    <Link
-                        href="/onboard"
+                    <button
+                        onClick={handleConnect}
                         className="inline-block px-8 py-4 bg-primary-50 dark:bg-primary-600 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg"
                     >
                         Connect Wallet
-                    </Link>
+                    </button>
                 </div>
             </div>
         );

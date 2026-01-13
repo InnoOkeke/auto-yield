@@ -10,7 +10,7 @@ export default function Logo({ className = "w-10 h-10" }: { className?: string }
                 alt="Meluri AutoYield"
                 width={512}
                 height={512}
-                className="w-full h-full object-contain dark:invert scale-150"
+                className="w-full h-full object-contain dark:invert scale-110"
                 priority
             />
         </div>
