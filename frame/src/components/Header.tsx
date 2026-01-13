@@ -10,7 +10,7 @@ export default function Header() {
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                 <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
                     <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 dark:from-white dark:to-white/80 bg-clip-text text-transparent font-display">
-                        AutoYield
+                        Meluri AutoYield
                     </span>
                 </Link>
 

@@ -9,7 +9,7 @@ export default function Footer() {
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-2">
                         <span className="text-muted text-sm font-medium">
-                            © {new Date().getFullYear()} AutoYield
+                            © {new Date().getFullYear()} Meluri AutoYield
                         </span>
                     </div>
 
