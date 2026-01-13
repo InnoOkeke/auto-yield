@@ -58,7 +58,7 @@ export default function DashboardPage() {
                     <p className="text-muted mb-8 text-lg">Please connect your wallet to view your dashboard</p>
                     <button
                         onClick={handleConnect}
-                        className="inline-block px-8 py-4 bg-primary-50 dark:bg-primary-600 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg"
+                        className="inline-block px-6 py-3 bg-primary-50 dark:bg-primary-600 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent rounded-xl font-semibold hover:opacity-90 transition-all shadow-md text-sm"
                     >
                         Connect Wallet
                     </button>

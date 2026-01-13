@@ -102,7 +102,7 @@ export default function OnboardPage() {
                                 {isConnected && (
                                     <button
                                         onClick={() => setStep('amount')}
-                                        className="py-3 px-8 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-bold transition-all"
+                                        className="py-2.5 px-6 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-bold transition-all text-sm"
                                     >
                                         Continue to Savings ➝
                                     </button>
