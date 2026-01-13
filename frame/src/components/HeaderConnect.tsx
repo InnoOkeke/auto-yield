@@ -19,14 +19,14 @@ export default function HeaderConnect() {
             // await farcasterSDK.actions.signIn({ nonce: "example-nonce" });
 
             // 2. Connect Wallet for Transactions
-            // Check if we are actually inside a Farcaster environment
             const isFarcasterEnv = !!(window as any).farcaster?.context;
-
-            console.log('Connectors available:', connectors.map(c => `${c.id} (${c.name})`));
+            console.log('Connect Status - Env:', isFarcasterEnv ? 'Farcaster' : 'Browser');
+            console.log('Connect Status - Available Connectors:', connectors.map(c => c.id));
 
             if (isFarcasterEnv) {
                 const fcWallet = connectors.find(c => c.id === 'farcaster' || c.name.toLowerCase().includes('farcaster'));
                 if (fcWallet) {
+                    console.log('Connecting to Farcaster...');
                     await connect({ connector: fcWallet });
                     return;
                 }
@@ -37,10 +37,14 @@ export default function HeaderConnect() {
             const targetConnector = injectedWallet || connectors.find(c => c.id !== 'farcaster');
 
             if (targetConnector) {
+                console.log('Connecting to Wallet:', targetConnector.id);
                 await connect({ connector: targetConnector });
             } else if (connectors.length > 0) {
-                // Fallback to the first available connector
+                console.log('Fallback to first connector:', connectors[0].id);
                 await connect({ connector: connectors[0] });
+            } else {
+                console.error('No wallet connectors found');
+                alert('No wallet found. Please install MetaMask or another extension.');
             }
         } catch (error) {
             console.error('Sign In Failed:', error);
