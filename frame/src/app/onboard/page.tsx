@@ -17,6 +17,7 @@ export default function OnboardPage() {
     const [step, setStep] = useState<'connect' | 'amount' | 'confirm'>('connect');
     const [username, setUsername] = useState<string | null>(null);
     const [apy, setApy] = useState<string>('9.45');
+    const [dailyAmount, setDailyAmount] = useState('10');
 
     useEffect(() => {
         // Initialize from cache if available
@@ -135,12 +136,14 @@ export default function OnboardPage() {
                             onBack={() => setStep('connect')}
                             onNext={() => setStep('confirm')}
                             apy={Number(apy)}
+                            amount={dailyAmount}
+                            onChange={setDailyAmount}
                         />
                     )}
 
                     {step === 'confirm' && (
                         <div className="space-y-6">
-                            <ConfirmStep onBack={() => setStep('amount')} apy={apy} dailyAmount={dailyAmountStr} />
+                            <ConfirmStep onBack={() => setStep('amount')} apy={apy} dailyAmount={dailyAmount} />
                         </div>
                     )}
                 </div>

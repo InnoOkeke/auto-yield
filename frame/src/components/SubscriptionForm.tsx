@@ -7,14 +7,17 @@ export default function SubscriptionForm({
     onBack,
     onNext,
     apy = 9.45,
+    amount,
+    onChange,
 }: {
     onBack: () => void;
     onNext: () => void;
     apy?: number;
+    amount: string;
+    onChange: (val: string) => void;
 }) {
-    const [amount, setAmount] = useState('10');
     const [customAmount, setCustomAmount] = useState('');
-    const [selectedPreset, setSelectedPreset] = useState('10');
+    const [selectedPreset, setSelectedPreset] = useState(amount);
 
     const presets = [
         { value: '5', label: '$5', desc: 'Starter' },
@@ -25,13 +28,13 @@ export default function SubscriptionForm({
 
     const handlePresetClick = (value: string) => {
         setSelectedPreset(value);
-        setAmount(value);
+        onChange(value);
         setCustomAmount('');
     };
 
     const handleCustomChange = (value: string) => {
         setCustomAmount(value);
-        setAmount(value);
+        onChange(value);
         setSelectedPreset('');
     };
     const projectedYield = parseFloat(amount || '0') * 365 * (apy / 100);
