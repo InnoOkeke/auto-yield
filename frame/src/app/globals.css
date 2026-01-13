@@ -13,6 +13,7 @@
   /* #475569 (Light Mode Secondary) */
   --border: 15, 23, 42, 0.08;
   /* Dark navy at 8% opacity */
+  --gradient-signature: #4F46E5;
 }
 
 .dark {
@@ -26,6 +27,7 @@
   /* #9CA3AF (Dark Mode Secondary) */
   --border: 255, 255, 255, 0.06;
   /* White at 6% opacity */
+  --gradient-signature: linear-gradient(135deg, #4F46E5 0%, #22D3EE 100%);
 }
 
 body {

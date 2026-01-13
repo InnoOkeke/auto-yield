@@ -14,8 +14,8 @@ export default function Hero({ apy = 9.45 }: { apy?: number }) {
                 className="mb-8"
             >
                 <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-float">
-                    <span className="bg-gradient-to-r from-primary-600 to-secondary-500 dark:from-primary-400 dark:to-secondary-400 bg-clip-text text-transparent">
-                        Meluri Auto Yield
+                    <span className="text-primary-600 dark:bg-gradient-to-r dark:from-primary-400 dark:to-secondary-400 dark:bg-clip-text dark:text-transparent">
+                        AutoYield
                     </span>
                 </h1>
                 <p className="text-xl md:text-2xl text-foreground/80 mb-4 font-medium">

@@ -77,7 +77,7 @@ const config: Config = {
                 sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
             },
             backgroundImage: {
-                'gradient-signature': 'linear-gradient(135deg, #4F46E5 0%, #22D3EE 100%)',
+                'gradient-signature': 'var(--gradient-signature, linear-gradient(135deg, #4F46E5 0%, #22D3EE 100%))',
                 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
                 'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
             },
