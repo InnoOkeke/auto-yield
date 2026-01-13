@@ -11,8 +11,8 @@ export default function Header() {
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                     <Image src="/logo.png" alt="Meluri Auto Yield" width={32} height={32} className="w-8 h-8 object-contain" />
-                    <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 dark:from-white dark:to-white/80 bg-clip-text text-transparent">
-                        Meluri
+                    <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 dark:from-white dark:to-white/80 bg-clip-text text-transparent font-display">
+                        AutoYield
                     </span>
                 </Link>
 

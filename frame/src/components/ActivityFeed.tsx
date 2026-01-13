@@ -48,7 +48,7 @@ export default function ActivityFeed({ address }: { address: string }) {
             case 'REWARDS_CLAIM':
                 return 'text-purple-400';
             default:
-                return 'text-white';
+                return 'text-foreground';
         }
     };
 
@@ -57,23 +57,23 @@ export default function ActivityFeed({ address }: { address: string }) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="glass-dark rounded-3xl p-6 backdrop-blur-xl"
+            className="glass-dark rounded-3xl p-6 backdrop-blur-xl border border-foreground/5 shadow-sm"
         >
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Activity</h2>
-                <button className="text-primary-400 hover:text-primary-300 text-sm font-medium">
+                <h2 className="text-2xl font-bold text-foreground">Activity</h2>
+                <button className="text-primary-600 dark:text-primary-400 hover:opacity-80 text-sm font-medium">
                     View All
                 </button>
             </div>
 
             {loading ? (
                 <div className="text-center py-8">
-                    <div className="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto" />
+                    <div className="w-10 h-10 border-4 border-foreground/10 border-t-primary-500 rounded-full animate-spin mx-auto" />
                 </div>
             ) : transactions.length === 0 ? (
                 <div className="text-center py-8">
-                    <p className="text-white/40">No transactions yet</p>
-                    <p className="text-white/30 text-sm mt-2">Start saving to see your activity</p>
+                    <p className="text-muted/60">No transactions yet</p>
+                    <p className="text-muted/40 text-sm mt-2">Start saving to see your activity</p>
                 </div>
             ) : (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -83,7 +83,7 @@ export default function ActivityFeed({ address }: { address: string }) {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.05 }}
-                            className="glass rounded-xl p-4 hover:bg-white/10 transition-all"
+                            className="glass rounded-xl p-4 hover:bg-black/5 dark:hover:bg-white/10 transition-all border border-foreground/5"
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
@@ -92,20 +92,20 @@ export default function ActivityFeed({ address }: { address: string }) {
                                         <p className={`font-semibold ${getTypeColor(tx.type)}`}>
                                             {tx.type.replace('_', ' ')}
                                         </p>
-                                        <p className="text-white/40 text-xs">
+                                        <p className="text-muted text-xs">
                                             {new Date(tx.timestamp).toLocaleDateString()}
                                         </p>
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-white font-semibold">
+                                    <p className="text-foreground font-semibold">
                                         ${parseFloat(tx.amount).toFixed(2)}
                                     </p>
                                     <a
                                         href={`https://basescan.org/tx/${tx.txHash}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-primary-400 hover:text-primary-300 text-xs"
+                                        className="text-primary-600 dark:text-primary-400 hover:opacity-80 text-xs font-medium"
                                     >
                                         View →
                                     </a>

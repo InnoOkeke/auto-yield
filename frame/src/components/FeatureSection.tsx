@@ -44,10 +44,10 @@ export default function FeatureSection() {
                 transition={{ delay: 0.4 }}
                 className="text-center mb-12"
             >
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
                     Why Choose AutoYield?
                 </h2>
-                <p className="text-white/70 text-lg">
+                <p className="text-muted text-lg">
                     The easiest way to build wealth through DeFi
                 </p>
             </motion.div>
@@ -62,10 +62,10 @@ export default function FeatureSection() {
                         className="glass-dark rounded-2xl p-6 hover:scale-105 transition-transform cursor-pointer backdrop-blur-xl"
                     >
                         <div className="text-5xl mb-4">{feature.icon}</div>
-                        <h3 className="text-xl font-semibold text-white mb-2">
+                        <h3 className="text-xl font-semibold text-foreground mb-2">
                             {feature.title}
                         </h3>
-                        <p className="text-white/70">
+                        <p className="text-muted">
                             {feature.description}
                         </p>
                     </motion.div>

@@ -71,8 +71,8 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
     if (isConnected) {
         return (
             <div className="text-center p-4 glass rounded-2xl">
-                <p className="text-green-400 font-bold mb-2">✅ Signed In</p>
-                <p className="text-sm text-white/60">Ready to earn yield</p>
+                <p className="text-green-500 dark:text-green-400 font-bold mb-2">✅ Signed In</p>
+                <p className="text-sm text-muted">Ready to earn yield</p>
             </div>
         );
     }

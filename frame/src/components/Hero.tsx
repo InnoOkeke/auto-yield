@@ -13,15 +13,15 @@ export default function Hero({ apy = 9.45 }: { apy?: number }) {
                 transition={{ duration: 0.5 }}
                 className="mb-8"
             >
-                <h1 className="text-5xl md:text-7xl font-bold text-dark-text-primary mb-6 animate-float">
-                    <span className="bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
+                <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-float">
+                    <span className="bg-gradient-to-r from-primary-600 to-secondary-500 dark:from-primary-400 dark:to-secondary-400 bg-clip-text text-transparent">
                         Meluri Auto Yield
                     </span>
                 </h1>
-                <p className="text-xl md:text-2xl text-white/80 mb-4">
+                <p className="text-xl md:text-2xl text-foreground/80 mb-4 font-medium">
                     Automate Your DeFi Savings
                 </p>
-                <p className="text-lg text-white/60 max-w-2xl mx-auto">
+                <p className="text-lg text-muted max-w-2xl mx-auto">
                     Save daily, earn automatically. Set it and forget it with automated USDC deductions
                     earning yield on Base through AvantisFi.
                 </p>
@@ -41,7 +41,7 @@ export default function Hero({ apy = 9.45 }: { apy?: number }) {
                 </Link>
                 <Link
                     href="/dashboard"
-                    className="px-8 py-4 glass-dark rounded-xl text-white font-semibold text-lg hover:scale-105 transition-transform"
+                    className="px-8 py-4 glass-dark rounded-xl text-foreground font-semibold text-lg hover:scale-105 transition-transform border border-foreground/10"
                 >
                     View Dashboard
                 </Link>
@@ -59,12 +59,12 @@ export default function Hero({ apy = 9.45 }: { apy?: number }) {
                     { label: 'Total Saved', value: '$250K+', icon: DollarSign },
                     { label: 'Active Users', value: '500+', icon: Users },
                 ].map((stat, i) => (
-                    <div key={i} className="glass-dark rounded-2xl p-6 backdrop-blur-xl">
+                    <div key={i} className="glass-dark rounded-2xl p-6 backdrop-blur-xl border border-foreground/5 shadow-sm">
                         <div className="flex justify-center mb-3">
-                            <stat.icon className="w-8 h-8 text-secondary-400" />
+                            <stat.icon className="w-8 h-8 text-primary-500" />
                         </div>
-                        <div className="text-3xl font-bold text-gray-100 mb-1">{stat.value}</div>
-                        <div className="text-white/60">{stat.label}</div>
+                        <div className="text-3xl font-bold text-foreground mb-1">{stat.value}</div>
+                        <div className="text-muted">{stat.label}</div>
                     </div>
                 ))}
             </motion.div>

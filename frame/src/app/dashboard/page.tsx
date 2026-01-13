@@ -37,8 +37,8 @@ export default function DashboardPage() {
         return (
             <div className="flex items-center justify-center p-4 min-h-[calc(100vh-8rem)]">
                 <div className="text-center">
-                    <h1 className="text-3xl font-bold text-white mb-4">Connect Your Wallet</h1>
-                    <p className="text-white/70 mb-8">Please connect your wallet to view your dashboard</p>
+                    <h1 className="text-3xl font-bold text-foreground mb-4">Connect Your Wallet</h1>
+                    <p className="text-muted mb-8 text-lg">Please connect your wallet to view your dashboard</p>
                     <Link
                         href="/onboard"
                         className="inline-block px-8 py-4 bg-gradient-to-r from-primary-500 to-accent-500 rounded-xl text-white font-semibold hover:scale-105 transition-transform"
@@ -54,8 +54,8 @@ export default function DashboardPage() {
         return (
             <div className="flex items-center justify-center min-h-[calc(100vh-8rem)]">
                 <div className="text-center">
-                    <div className="w-16 h-16 border-4 border-white/20 border-t-white rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-white/70">Loading your dashboard...</p>
+                    <div className="w-16 h-16 border-4 border-foreground/10 border-t-primary-500 rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-muted">Loading your dashboard...</p>
                 </div>
             </div>
         );
@@ -72,10 +72,10 @@ export default function DashboardPage() {
                 >
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                         <div>
-                            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 font-display">
                                 Your AutoYield Dashboard
                             </h1>
-                            <p className="text-white/60">
+                            <p className="text-muted font-medium bg-black/5 dark:bg-white/5 py-1 px-3 rounded-full inline-block text-sm border border-foreground/5">
                                 {address?.slice(0, 6)}...{address?.slice(-4)}
                             </p>
                         </div>
@@ -84,12 +84,12 @@ export default function DashboardPage() {
 
                     {/* Subscription Status Banner */}
                     {userData?.user?.subscription?.isActive && (
-                        <div className="glass-dark rounded-2xl p-4 border-l-4 border-green-400">
+                        <div className="glass-dark rounded-2xl p-4 border-l-4 border-green-500 shadow-sm">
                             <div className="flex items-center gap-3">
-                                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
+                                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
                                 <div>
-                                    <p className="text-white font-semibold">Active Subscription</p>
-                                    <p className="text-white/60 text-sm">
+                                    <p className="text-foreground font-semibold">Active Subscription</p>
+                                    <p className="text-muted text-sm font-medium">
                                         ${userData.user.subscription.dailyAmount} USDC deposited daily
                                     </p>
                                 </div>
@@ -109,11 +109,11 @@ export default function DashboardPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="glass-dark rounded-3xl p-6"
+                            className="glass-dark rounded-3xl p-6 border border-foreground/5 shadow-sm"
                         >
-                            <h2 className="text-2xl font-bold text-white mb-4">Yield Performance</h2>
-                            <div className="h-64 flex items-center justify-center">
-                                <p className="text-white/40">Chart coming soon...</p>
+                            <h2 className="text-2xl font-bold text-foreground mb-4">Yield Performance</h2>
+                            <div className="h-64 flex items-center justify-center border-2 border-dashed border-foreground/5 rounded-2xl bg-black/5 dark:bg-white/5">
+                                <p className="text-muted/60 font-medium italic">Chart coming soon...</p>
                             </div>
                         </motion.div>
                     </div>
@@ -127,10 +127,10 @@ export default function DashboardPage() {
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="glass-dark rounded-3xl p-6"
+                            className="glass-dark rounded-3xl p-6 border border-foreground/5 shadow-sm"
                         >
-                            <h3 className="text-lg font-semibold text-white mb-4">💡 Did You Know?</h3>
-                            <div className="space-y-3 text-sm text-white/70">
+                            <h3 className="text-lg font-semibold text-foreground mb-4">💡 Did You Know?</h3>
+                            <div className="space-y-3 text-sm text-muted font-medium">
                                 <p>• Your funds are earning yield 24/7 in AvantisFi</p>
                                 <p>• You can withdraw anytime without penalties</p>
                                 <p>• All deductions are automated and gas-free</p>

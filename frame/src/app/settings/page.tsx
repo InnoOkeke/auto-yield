@@ -56,18 +56,18 @@ export default function SettingsPage() {
 
     return (
         <div className="flex items-center justify-center p-4 min-h-[calc(100vh-8rem)]">
-            <div className="w-full max-w-lg glass-dark rounded-3xl p-8 border border-white/10">
-                <h1 className="text-3xl font-bold text-white mb-6">Adjust Daily Amount</h1>
+            <div className="w-full max-w-lg glass-dark rounded-3xl p-8 border border-foreground/10 shadow-lg">
+                <h1 className="text-3xl font-bold text-foreground mb-6 font-display">Adjust Daily Amount</h1>
 
                 <div className="mb-8">
-                    <label className="text-white/70 block mb-2">New Daily Amount (USDC)</label>
+                    <label className="text-muted block mb-2 font-medium">New Daily Amount (USDC)</label>
                     <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50">$</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted/60 font-bold">$</span>
                         <input
                             type="number"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
-                            className="w-full pl-8 pr-4 py-4 rounded-xl glass text-white text-xl font-semibold focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            className="w-full pl-8 pr-4 py-4 rounded-xl glass text-foreground text-xl font-bold focus:outline-none focus:ring-2 focus:ring-primary-500 border border-foreground/5"
                         />
                     </div>
                 </div>
@@ -75,7 +75,7 @@ export default function SettingsPage() {
                 <div className="flex gap-4">
                     <button
                         onClick={() => router.back()}
-                        className="flex-1 py-4 rounded-xl glass hover:bg-white/20 text-white font-semibold"
+                        className="flex-1 py-4 rounded-xl glass hover:bg-black/5 dark:hover:bg-white/20 text-foreground font-semibold border border-foreground/5"
                         disabled={isWritePending || isConfirming}
                     >
                         Cancel

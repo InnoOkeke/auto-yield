@@ -51,14 +51,14 @@ export default function OnboardPage() {
                 {/* Progress Bar */}
                 <div className="mb-8">
                     <div className="flex justify-between items-center mb-2">
-                        <span className="text-white/60 text-sm">Step {step === 'connect' ? 1 : step === 'amount' ? 2 : 3} of 3</span>
-                        <span className="text-white font-medium">
+                        <span className="text-muted text-sm font-medium">Step {step === 'connect' ? 1 : step === 'amount' ? 2 : 3} of 3</span>
+                        <span className="text-foreground font-semibold">
                             {step === 'connect' && 'Connect Wallet'}
                             {step === 'amount' && 'Choose Amount'}
                             {step === 'confirm' && 'Confirm'}
                         </span>
                     </div>
-                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-2 bg-foreground/10 rounded-full overflow-hidden">
                         <motion.div
                             className="h-full bg-gradient-to-r from-primary-400 to-accent-400"
                             initial={{ width: '0%' }}
@@ -73,12 +73,12 @@ export default function OnboardPage() {
                 {/* Main Card */}
                 <div className="glass-dark rounded-3xl p-8 backdrop-blur-xl">
                     <div className="text-center mb-8">
-                        <h1 className="text-4xl font-bold text-white mb-3">
+                        <h1 className="text-4xl font-bold text-foreground mb-3 font-display">
                             {step === 'connect' && (username ? `🚀 Welcome, @${username}!` : '🚀 Welcome to AutoYield')}
                             {step === 'amount' && '💵 Set Your Daily Savings'}
                             {step === 'confirm' && '✅ Almost There!'}
                         </h1>
-                        <p className="text-white/70 text-lg">
+                        <p className="text-muted text-lg font-medium">
                             {step === 'connect' && 'Connect your wallet to start earning'}
                             {step === 'amount' && 'Choose how much to save daily'}
                             {step === 'confirm' && 'Review and confirm your subscription'}
@@ -90,11 +90,11 @@ export default function OnboardPage() {
                         <div className="space-y-6">
                             <div className="text-center">
                                 {/* User requested to remove connect button here, relying on Header for sign in */}
-                                <p className="text-white/80 mb-6">
+                                <p className="text-foreground/80 mb-6 font-medium">
                                     Please sign in using the button in the top right to continue.
                                 </p>
                                 {!isConnected && (
-                                    <div className="animate-pulse text-sm text-accent-400">
+                                    <div className="animate-pulse text-sm text-primary-600 dark:text-accent-400 font-bold">
                                         Waiting for sign in...
                                     </div>
                                 )}
@@ -108,8 +108,8 @@ export default function OnboardPage() {
                                 )}
                             </div>
 
-                            <div className="glass rounded-2xl p-6 space-y-4">
-                                <h3 className="text-xl font-semibold text-white mb-4">Why AutoYield?</h3>
+                            <div className="glass rounded-2xl p-6 space-y-4 border border-foreground/5 shadow-sm">
+                                <h3 className="text-xl font-semibold text-foreground mb-4 font-display">Why AutoYield?</h3>
                                 <div className="space-y-3">
                                     {[
                                         { icon: '⚡', title: 'Low Fees', desc: 'Minimal transaction costs on Base' },
@@ -120,8 +120,8 @@ export default function OnboardPage() {
                                         <div key={i} className="flex items-start gap-3">
                                             <span className="text-2xl">{feature.icon}</span>
                                             <div>
-                                                <p className="text-white font-medium">{feature.title}</p>
-                                                <p className="text-white/60 text-sm">{feature.desc}</p>
+                                                <p className="text-foreground font-semibold">{feature.title}</p>
+                                                <p className="text-muted text-sm font-medium">{feature.desc}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -140,13 +140,13 @@ export default function OnboardPage() {
 
                     {step === 'confirm' && (
                         <div className="space-y-6">
-                            <ConfirmStep onBack={() => setStep('amount')} apy={apy} />
+                            <ConfirmStep onBack={() => setStep('amount')} apy={apy} dailyAmount={dailyAmountStr} />
                         </div>
                     )}
                 </div>
 
                 {/* Info Footer */}
-                <div className="mt-6 text-center text-white/50 text-sm">
+                <div className="mt-6 text-center text-muted text-sm font-medium">
                     <p>Powered by Base Network • Secured by Smart Contracts</p>
                 </div>
             </motion.div>
@@ -154,13 +154,13 @@ export default function OnboardPage() {
     );
 }
 
-function ConfirmStep({ onBack, apy }: { onBack: () => void, apy: string }) {
+function ConfirmStep({ onBack, apy, dailyAmount }: { onBack: () => void, apy: string, dailyAmount?: string }) {
     const { subscribe, approve, allowance, isApproving, isSubscribing } = useAutoYield();
     const { address } = useAccount();
     const router = useRouter();
 
     // TODO: Pass dynamic amount from step 2
-    const dailyAmountStr = '10';
+    const dailyAmountStr = dailyAmount || '10';
     const amountBigInt = parseUnits(dailyAmountStr, 6);
 
     // Check if we have enough allowance
@@ -213,34 +213,34 @@ function ConfirmStep({ onBack, apy }: { onBack: () => void, apy: string }) {
 
     return (
         <>
-            <div className="glass rounded-2xl p-6 space-y-4">
-                <h3 className="text-xl font-semibold text-white">Subscription Summary</h3>
-                <div className="space-y-3 text-white/80">
+            <div className="glass rounded-2xl p-6 space-y-4 border border-foreground/5 shadow-sm">
+                <h3 className="text-xl font-semibold text-foreground font-display">Subscription Summary</h3>
+                <div className="space-y-3 text-muted font-medium">
                     <div className="flex justify-between">
                         <span>Daily Amount</span>
-                        <span className="font-semibold">${dailyAmountStr} USDC</span>
+                        <span className="font-semibold text-foreground">${dailyAmountStr} USDC</span>
                     </div>
                     <div className="flex justify-between">
                         <span>First Deduction</span>
-                        <span className="font-semibold">Tomorrow 12:00 AM UTC</span>
+                        <span className="font-semibold text-foreground">Tomorrow 12:00 AM UTC</span>
                     </div>
                     <div className="flex justify-between">
-                        <span>Expected APY <span className="text-xs text-white/40">(Live)</span></span>
-                        <span className="font-semibold text-green-400">~{apy}%</span>
+                        <span>Expected APY <span className="text-xs text-muted/60 font-mono">(Live)</span></span>
+                        <span className="font-semibold text-green-500 dark:text-green-400">~{apy}%</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between text-yellow-600 dark:text-yellow-400">
                         <span>Platform Fee</span>
-                        <span className="font-semibold text-yellow-400">0.5%</span>
+                        <span className="font-semibold">0.5%</span>
                     </div>
                     <div className="flex justify-between">
                         <span>Gas Fees</span>
-                        <span className="font-semibold text-green-400">Standard Network Fee</span>
+                        <span className="font-semibold text-green-500 dark:text-green-400">Standard Network Fee</span>
                     </div>
                 </div>
             </div>
 
-            <div className="glass rounded-2xl p-6 bg-accent-500/10 border-accent-500/30">
-                <p className="text-white/80 text-sm">
+            <div className="glass rounded-2xl p-6 bg-primary-500/5 border border-primary-500/20 shadow-sm">
+                <p className="text-muted text-sm font-medium">
                     💡 <strong>Important:</strong> You can cancel anytime.
                     <br />Fees are deducted from deposits. 100% of yield is yours.
                 </p>
@@ -249,7 +249,7 @@ function ConfirmStep({ onBack, apy }: { onBack: () => void, apy: string }) {
             <div className="flex gap-4">
                 <button
                     onClick={onBack}
-                    className="flex-1 py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold transition-all disabled:opacity-50"
+                    className="flex-1 py-4 rounded-xl glass hover:bg-black/5 dark:hover:bg-white/20 text-foreground font-semibold transition-all disabled:opacity-50 border border-foreground/5"
                 >
                     Back
                 </button>

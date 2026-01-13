@@ -35,17 +35,17 @@ export default function WithdrawPage() {
 
     return (
         <div className="flex items-center justify-center p-4 min-h-[calc(100vh-8rem)]">
-            <div className="w-full max-w-lg glass-dark rounded-3xl p-8 border border-white/10">
-                <h1 className="text-3xl font-bold text-white mb-6">Withdraw Funds</h1>
+            <div className="w-full max-w-lg glass-dark rounded-3xl p-8 border border-foreground/10 shadow-lg">
+                <h1 className="text-3xl font-bold text-foreground mb-6 font-display">Withdraw Funds</h1>
 
-                <p className="text-white/70 mb-8">
+                <p className="text-muted mb-8 font-medium">
                     Withdrawal will redeem your AvantisFi LP shares and transfer USDC back to your wallet.
                     This handles the complete exit process.
                 </p>
 
-                <div className="bg-white/5 rounded-xl p-4 mb-8">
-                    <p className="text-sm text-yellow-400 mb-2">⚠️ Review</p>
-                    <p className="text-xs text-white/50">
+                <div className="bg-black/5 dark:bg-white/5 rounded-2xl p-4 mb-8 border border-foreground/5 shadow-inner">
+                    <p className="text-sm text-yellow-600 dark:text-yellow-400 font-bold mb-2">⚠️ Review</p>
+                    <p className="text-xs text-muted font-medium">
                         This action will withdraw ALL your deposited funds and earnings.
                     </p>
                 </div>
@@ -53,7 +53,7 @@ export default function WithdrawPage() {
                 <div className="flex gap-4">
                     <button
                         onClick={() => router.back()}
-                        className="flex-1 py-4 rounded-xl glass hover:bg-white/20 text-white font-semibold"
+                        className="flex-1 py-4 rounded-xl glass hover:bg-black/5 dark:hover:bg-white/20 text-foreground font-semibold border border-foreground/5"
                         disabled={isWritePending || isConfirming}
                     >
                         Cancel

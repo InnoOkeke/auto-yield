@@ -133,7 +133,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         className="fixed inset-x-4 top-[15%] max-w-lg mx-auto z-50 max-h-[80vh] overflow-y-auto custom-scrollbar"
                     >
-                        <div className="glass-dark rounded-3xl p-6 shadow-2xl border border-white/10">
+                        <div className="glass-dark rounded-3xl p-6 shadow-2xl border border-foreground/10">
                             {/* Header */}
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
@@ -141,13 +141,13 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                         🔄
                                     </div>
                                     <div>
-                                        <h2 className="text-xl font-bold text-white">Smart Swap</h2>
-                                        <p className="text-sm text-white/60">Powered by Bankr AI</p>
+                                        <h2 className="text-xl font-bold text-foreground">Smart Swap</h2>
+                                        <p className="text-sm text-muted">Powered by Bankr AI</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={handleClose}
-                                    className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/20 transition-all"
+                                    className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/10 flex items-center justify-center text-muted hover:text-foreground hover:bg-black/10 dark:hover:bg-white/20 transition-all font-bold"
                                 >
                                     ✕
                                 </button>
@@ -157,7 +157,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                             {state === 'idle' && (
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-white/80 mb-2">
+                                        <label className="block text-sm font-medium text-foreground/80 mb-2">
                                             What would you like to swap?
                                         </label>
                                         <div className="relative">
@@ -173,7 +173,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                                     }
                                                 }}
                                                 placeholder="e.g., Swap 0.1 ETH to USDC"
-                                                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-primary-500 resize-none pr-12"
+                                                className="w-full px-4 py-3 rounded-xl bg-black/5 dark:bg-white/5 border border-foreground/10 text-foreground placeholder-muted focus:outline-none focus:border-primary-500 resize-none pr-12"
                                                 rows={2}
                                                 autoFocus
                                             />
@@ -194,7 +194,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                             <button
                                                 key={index}
                                                 onClick={() => setPrompt(example)}
-                                                className="px-3 py-1.5 rounded-full bg-white/5 text-xs text-white/60 hover:bg-white/10 hover:text-white transition-all"
+                                                className="px-3 py-1.5 rounded-full bg-black/5 dark:bg-white/5 text-xs text-muted hover:bg-black/10 dark:hover:bg-white/10 hover:text-foreground transition-all border border-foreground/5 shadow-sm"
                                             >
                                                 {example}
                                             </button>
@@ -219,17 +219,17 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
 
                             {state === 'loading' && (
                                 <div className="text-center py-8">
-                                    <div className="w-16 h-16 border-4 border-white/20 border-t-violet-500 rounded-full animate-spin mx-auto mb-4" />
-                                    <p className="text-white/80">Bankr is analyzing your request...</p>
-                                    <p className="text-sm text-white/60 mt-2">Finding the best swap route</p>
+                                    <div className="w-16 h-16 border-4 border-foreground/10 border-t-violet-500 rounded-full animate-spin mx-auto mb-4" />
+                                    <p className="text-foreground/80 font-medium">Bankr is analyzing your request...</p>
+                                    <p className="text-sm text-muted mt-2">Finding the best swap route</p>
                                 </div>
                             )}
 
                             {state === 'preview' && transaction && metadata && (
                                 <div className="space-y-4">
-                                    <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-                                        <p className="text-sm text-white/60 mb-2">Your request:</p>
-                                        <p className="text-white font-medium">{metadata.prompt}</p>
+                                    <div className="p-4 rounded-xl bg-black/5 dark:bg-white/5 border border-foreground/10">
+                                        <p className="text-sm text-muted mb-2">Your request:</p>
+                                        <p className="text-foreground font-medium">{metadata.prompt}</p>
                                     </div>
 
                                     <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20">
@@ -242,7 +242,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                     <div className="flex gap-3">
                                         <button
                                             onClick={resetModal}
-                                            className="flex-1 py-3 rounded-xl bg-white/10 text-white font-medium hover:bg-white/20 transition-all"
+                                            className="flex-1 py-3 rounded-xl bg-black/5 dark:bg-white/10 text-foreground font-medium hover:bg-black/10 dark:hover:bg-white/20 transition-all border border-foreground/10"
                                         >
                                             Cancel
                                         </button>
@@ -259,12 +259,12 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
 
                             {(state === 'signing' || state === 'pending') && (
                                 <div className="text-center py-8">
-                                    <div className="w-16 h-16 border-4 border-white/20 border-t-green-500 rounded-full animate-spin mx-auto mb-4" />
-                                    <p className="text-white/80">
+                                    <div className="w-16 h-16 border-4 border-foreground/10 border-t-green-500 rounded-full animate-spin mx-auto mb-4" />
+                                    <p className="text-foreground/80 font-medium">
                                         {state === 'signing' ? 'Please sign in your wallet...' : 'Transaction pending...'}
                                     </p>
                                     {txHash && (
-                                        <p className="text-xs text-white/60 mt-2 break-all">
+                                        <p className="text-xs text-muted mt-2 break-all font-mono">
                                             Tx: {txHash.slice(0, 10)}...{txHash.slice(-8)}
                                         </p>
                                     )}
@@ -290,7 +290,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                     )}
                                     <button
                                         onClick={handleClose}
-                                        className="w-full mt-6 py-3 rounded-xl bg-white/10 text-white font-medium hover:bg-white/20 transition-all"
+                                        className="w-full mt-6 py-3 rounded-xl bg-black/5 dark:bg-white/10 text-foreground font-medium hover:bg-black/10 dark:hover:bg-white/20 transition-all border border-foreground/10"
                                     >
                                         Done
                                     </button>
@@ -302,11 +302,11 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                     <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center text-4xl mx-auto mb-4">
                                         ⚠️
                                     </div>
-                                    <p className="text-white font-bold text-xl mb-2">Swap Failed</p>
-                                    <p className="text-white/60 text-sm mb-4">{error}</p>
+                                    <p className="text-foreground font-bold text-xl mb-2">Swap Failed</p>
+                                    <p className="text-muted text-sm mb-4">{error}</p>
                                     <button
                                         onClick={resetModal}
-                                        className="w-full py-3 rounded-xl bg-white/10 text-white font-medium hover:bg-white/20 transition-all"
+                                        className="w-full py-3 rounded-xl bg-black/5 dark:bg-white/10 text-foreground font-medium hover:bg-black/10 dark:hover:bg-white/20 transition-all border border-foreground/10"
                                     >
                                         Try Again
                                     </button>
@@ -314,8 +314,8 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                             )}
 
                             {/* Footer info */}
-                            <div className="mt-6 pt-4 border-t border-white/10">
-                                <p className="text-xs text-white/40 text-center">
+                            <div className="mt-6 pt-4 border-t border-foreground/10">
+                                <p className="text-xs text-muted/60 text-center">
                                     Swaps powered by Bankr AI • Routing via 0x Protocol
                                 </p>
                             </div>

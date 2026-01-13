@@ -32,10 +32,10 @@ export default function PausePage() {
 
     return (
         <div className="flex items-center justify-center p-4 min-h-[calc(100vh-8rem)]">
-            <div className="w-full max-w-lg glass-dark rounded-3xl p-8 border border-white/10">
-                <h1 className="text-3xl font-bold text-white mb-6">Pause Subscription</h1>
+            <div className="w-full max-w-lg glass-dark rounded-3xl p-8 border border-foreground/10 shadow-lg">
+                <h1 className="text-3xl font-bold text-foreground mb-6 font-display">Pause Subscription</h1>
 
-                <p className="text-white/70 mb-8">
+                <p className="text-muted mb-8 font-medium">
                     Pausing will stop future daily deductions. You can resume anytime.
                     Your existing funds will continue to earn yield.
                 </p>
@@ -43,7 +43,7 @@ export default function PausePage() {
                 <div className="flex gap-4">
                     <button
                         onClick={() => router.back()}
-                        className="flex-1 py-4 rounded-xl glass hover:bg-white/20 text-white font-semibold"
+                        className="flex-1 py-4 rounded-xl glass hover:bg-black/5 dark:hover:bg-white/20 text-foreground font-semibold border border-foreground/5"
                         disabled={isWritePending || isConfirming}
                     >
                         Cancel

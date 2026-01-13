@@ -39,7 +39,7 @@ export default function QuickActions() {
             <div className="relative">
                 <button
                     onClick={() => setShowMenu(!showMenu)}
-                    className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold transition-all backdrop-blur-md"
+                    className="px-6 py-3 rounded-xl bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-foreground font-semibold transition-all backdrop-blur-md border border-foreground/5"
                 >
                     Actions ⚡
                 </button>
@@ -67,23 +67,23 @@ export default function QuickActions() {
                                             <Link
                                                 key={index}
                                                 href={action.href}
-                                                className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/10 transition-all"
+                                                className="flex items-center gap-3 p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-all group"
                                             >
-                                                <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center text-xl`}>
+                                                <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center text-xl shadow-sm`}>
                                                     {action.icon}
                                                 </div>
-                                                <span className="text-white font-medium">{action.label}</span>
+                                                <span className="text-foreground font-medium">{action.label}</span>
                                             </Link>
                                         ) : (
                                             <button
                                                 key={index}
                                                 onClick={() => handleActionClick(action)}
-                                                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/10 transition-all"
+                                                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-all group"
                                             >
-                                                <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center text-xl`}>
+                                                <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center text-xl shadow-sm`}>
                                                     {action.icon}
                                                 </div>
-                                                <span className="text-white font-medium">{action.label}</span>
+                                                <span className="text-foreground font-medium">{action.label}</span>
                                             </button>
                                         )
                                     )

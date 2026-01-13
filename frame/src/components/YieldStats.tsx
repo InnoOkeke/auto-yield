@@ -42,13 +42,13 @@ export default function YieldStats({ yieldData }: { yieldData: any }) {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.1 }}
-                    className="glass-dark rounded-2xl p-6 backdrop-blur-xl hover:scale-105 transition-transform"
+                    className="glass-dark rounded-2xl p-6 backdrop-blur-xl hover:scale-105 transition-transform border border-foreground/5 shadow-sm"
                 >
                     <div className="text-4xl mb-3">{stat.icon}</div>
                     <div className={`text-2xl md:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
                         {stat.value}
                     </div>
-                    <div className="text-white/60 text-sm">{stat.label}</div>
+                    <div className="text-muted text-sm font-medium">{stat.label}</div>
                 </motion.div>
             ))}
         </motion.div>

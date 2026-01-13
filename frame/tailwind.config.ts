@@ -66,7 +66,12 @@ const config: Config = {
                     bg: '#F8FAFC', // Soft off-white
                     card: '#FFFFFF', // Pure white
                     border: 'rgba(11, 16, 32, 0.08)',
-                }
+                },
+                // Theme-aware colors
+                background: 'rgb(var(--background))',
+                foreground: 'rgb(var(--foreground))',
+                card: 'rgb(var(--card))',
+                muted: 'rgb(var(--muted))',
             },
             fontFamily: {
                 sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
