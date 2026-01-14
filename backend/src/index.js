@@ -29,6 +29,7 @@ app.use('/frame', frameRoutes);
 app.use('/api', apiRoutes);
 app.use('/api/chat', aiRoutes);
 app.use('/api/farcaster', notificationRoutes); // Farcaster webhook for notifications
+app.use('/api/notifications', notificationRoutes); // General notification routes
 app.use('/api/bankr', bankrRoutes); // Bankr AI swap integration
 
 // Error handling middleware

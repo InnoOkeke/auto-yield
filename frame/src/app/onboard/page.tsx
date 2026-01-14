@@ -14,7 +14,7 @@ import axios from 'axios';
 export default function OnboardPage() {
     const { address, isConnected } = useAccount();
     const router = useRouter();
-    const [step, setStep] = useState<'connect' | 'amount' | 'confirm'>('connect');
+    const [step, setStep] = useState<'connect' | 'notifications' | 'amount' | 'confirm'>('connect');
     const [username, setUsername] = useState<string | null>(null);
     const [apy, setApy] = useState<string>('9.45');
     const [dailyAmount, setDailyAmount] = useState('10');
@@ -52,9 +52,10 @@ export default function OnboardPage() {
                 {/* Progress Bar */}
                 <div className="mb-8">
                     <div className="flex justify-between items-center mb-2">
-                        <span className="text-muted text-sm font-medium">Step {step === 'connect' ? 1 : step === 'amount' ? 2 : 3} of 3</span>
+                        <span className="text-muted text-sm font-medium">Step {step === 'connect' ? 1 : step === 'notifications' ? 2 : step === 'amount' ? 3 : 4} of 4</span>
                         <span className="text-foreground font-semibold">
                             {step === 'connect' && 'Connect Wallet'}
+                            {step === 'notifications' && 'Enable Notifications'}
                             {step === 'amount' && 'Choose Amount'}
                             {step === 'confirm' && 'Confirm'}
                         </span>
@@ -64,7 +65,7 @@ export default function OnboardPage() {
                             className="h-full bg-primary-500 shadow-sm"
                             initial={{ width: '0%' }}
                             animate={{
-                                width: step === 'connect' ? '33%' : step === 'amount' ? '66%' : '100%',
+                                width: step === 'connect' ? '25%' : step === 'notifications' ? '50%' : step === 'amount' ? '75%' : '100%',
                             }}
                             transition={{ duration: 0.3 }}
                         />
@@ -76,11 +77,13 @@ export default function OnboardPage() {
                     <div className="text-center mb-8">
                         <h1 className="text-4xl font-bold text-foreground mb-3 font-display">
                             {step === 'connect' && (username ? `🚀 Welcome, @${username}!` : '🚀 Welcome to AutoYield')}
+                            {step === 'notifications' && '🔔 Stay Updated'}
                             {step === 'amount' && '💵 Set Your Daily Savings'}
                             {step === 'confirm' && '✅ Almost There!'}
                         </h1>
                         <p className="text-muted text-lg font-medium">
                             {step === 'connect' && 'Connect your wallet to start earning'}
+                            {step === 'notifications' && 'Enable notifications to track your savings'}
                             {step === 'amount' && 'Choose how much to save daily'}
                             {step === 'confirm' && 'Review and confirm your subscription'}
                         </p>
@@ -101,10 +104,10 @@ export default function OnboardPage() {
                                 )}
                                 {isConnected && (
                                     <button
-                                        onClick={() => setStep('amount')}
+                                        onClick={() => setStep('notifications')}
                                         className="py-2.5 px-6 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-bold transition-all text-sm"
                                     >
-                                        Continue to Savings ➝
+                                        Continue ➝
                                     </button>
                                 )}
                             </div>
@@ -133,12 +136,44 @@ export default function OnboardPage() {
 
                     {step === 'amount' && (
                         <SubscriptionForm
-                            onBack={() => setStep('connect')}
+                            onBack={() => setStep('notifications')}
                             onNext={() => setStep('confirm')}
                             apy={Number(apy)}
                             amount={dailyAmount}
                             onChange={setDailyAmount}
                         />
+                    )}
+
+                    {step === 'notifications' && (
+                        <div className="space-y-6 text-center">
+                            <div className="glass rounded-2xl p-8 border border-primary-500/20 bg-primary-500/5">
+                                <div className="text-5xl mb-4">🔔</div>
+                                <h3 className="text-xl font-bold mb-2">Enable Farcaster Notifications</h3>
+                                <p className="text-muted mb-6">
+                                    Get alerts when you save money, earn yield, or when there's an issue with your account.
+                                </p>
+                                <div className="flex flex-col gap-3">
+                                    <button
+                                        onClick={async () => {
+                                            const { enableNotifications } = await import('@/lib/farcaster');
+                                            if (address) {
+                                                await enableNotifications(address, 0); // FID will be handled by SDK
+                                            }
+                                            setStep('amount');
+                                        }}
+                                        className="w-full py-4 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-bold transition-all shadow-lg"
+                                    >
+                                        Enable Notifications
+                                    </button>
+                                    <button
+                                        onClick={() => setStep('amount')}
+                                        className="text-muted text-sm hover:underline"
+                                    >
+                                        Maybe later
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     )}
 
                     {step === 'confirm' && (

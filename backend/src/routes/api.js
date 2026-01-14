@@ -198,6 +198,8 @@ router.post('/sync-user', requireAuth, async (req, res) => {
 
         if (onChainSub && onChainSub.isActive) {
             // Sync subscription to database
+            const isNew = !await prisma.subscription.findUnique({ where: { walletAddress: walletAddress.toLowerCase() } });
+
             await prisma.subscription.upsert({
                 where: { walletAddress: walletAddress.toLowerCase() },
                 update: {
@@ -218,6 +220,11 @@ router.post('/sync-user', requireAuth, async (req, res) => {
                         : null,
                 },
             });
+
+            // Send notification if new subscription
+            if (isNew && user.notificationsEnabled) {
+                await notificationService.sendSubscriptionActivatedNotification(user, onChainSub.dailyAmount.toString());
+            }
         }
 
         res.json({ success: true, user });
@@ -268,6 +275,9 @@ router.post('/subscription/sync', requireAuth, async (req, res) => {
             const user = await prisma.user.findUnique({ where: { walletAddress: address.toLowerCase() } });
 
             if (user) {
+                const existingSub = await prisma.subscription.findUnique({ where: { walletAddress: address.toLowerCase() } });
+                const wasActive = existingSub?.isActive || false;
+
                 await prisma.subscription.upsert({
                     where: { walletAddress: address.toLowerCase() },
                     update: {
@@ -288,6 +298,21 @@ router.post('/subscription/sync', requireAuth, async (req, res) => {
                             : null,
                     }
                 });
+
+                // Trigger notifications based on status change
+                if (user.notificationsEnabled) {
+                    if (!wasActive && onChainSub.isActive) {
+                        await notificationService.sendSubscriptionActivatedNotification(user, onChainSub.dailyAmount.toString());
+                    } else if (wasActive && !onChainSub.isActive) {
+                        await notificationService.sendNotification(
+                            user,
+                            '⏸️ Subscription Paused',
+                            'Your daily deductions have been paused. You can resume anytime from the dashboard.',
+                            process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
+                        );
+                    }
+                }
+
                 return res.json({ success: true });
             }
         }

@@ -88,6 +88,30 @@ export default function SettingsPage() {
                         {isWritePending ? 'Check Wallet...' : isConfirming ? 'Updating...' : isSuccess ? 'Updated!' : 'Update Amount'}
                     </button>
                 </div>
+
+                <div className="mt-8 pt-8 border-t border-foreground/10">
+                    <h3 className="text-xl font-semibold text-foreground mb-4 font-display">Notifications</h3>
+                    <p className="text-muted text-sm mb-4">
+                        Test if your Farcaster notifications are configured correctly.
+                    </p>
+                    <button
+                        onClick={async () => {
+                            const { sendTestNotification } = await import('@/lib/farcaster');
+                            if (address) {
+                                const result = await sendTestNotification(address, 0);
+                                if (result.success) {
+                                    alert('Test notification sent! Check your Warpcast.');
+                                } else {
+                                    alert('Failed to send test notification: ' + result.error);
+                                }
+                            }
+                        }}
+                        className="w-full py-4 rounded-xl glass hover:bg-black/5 dark:hover:bg-white/20 text-foreground font-semibold border border-foreground/5 flex items-center justify-center gap-2"
+                    >
+                        <span>🔔</span> Send Test Notification
+                    </button>
+                </div>
+
                 {isSuccess && (
                     <p className="text-green-400 text-center mt-4 text-sm">
                         Subscription updated successfully! Redirecting...

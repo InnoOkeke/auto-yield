@@ -56,14 +56,24 @@ export async function enableNotifications(
     try {
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-        const response = await axios.post(`${backendUrl}/api/notifications/enable`, {
+        // 1. Call backend to initialize (optional but ensures user exists)
+        await axios.post(`${backendUrl}/api/notifications/enable`, {
             walletAddress,
             fid,
         });
 
+        // 2. Prompt user to add frame with notifications if SDK is available
+        if (typeof window !== 'undefined' && farcasterSDK.actions.addFrame) {
+            try {
+                await farcasterSDK.actions.addFrame();
+            } catch (sdkError) {
+                console.warn('Farcaster SDK addFrame failed or cancelled:', sdkError);
+            }
+        }
+
         return {
-            success: response.data.success,
-            message: response.data.message
+            success: true,
+            message: 'Notifications enablement requested'
         };
     } catch (error: any) {
         console.error('Failed to enable notifications in backend:', error);
