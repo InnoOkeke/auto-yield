@@ -160,3 +160,23 @@ export async function sendTestNotification(
         };
     }
 }
+
+/**
+ * Share streak on Farcaster
+ */
+export async function shareStreak(streak: number) {
+    const text = `I'm on a ${streak}-day savings streak with AutoYield! 🔥\n\nAutomating my DeFi savings on Base.`;
+    const appUrl = process.env.NEXT_PUBLIC_FRAME_URL || 'https://autoyield.app';
+    const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(appUrl)}`;
+
+    if (isFarcasterContext()) {
+        try {
+            await sdk.actions.openUrl(url);
+        } catch (e) {
+            console.error('Failed to open URL via SDK:', e);
+            window.open(url, '_blank');
+        }
+    } else {
+        window.open(url, '_blank');
+    }
+}

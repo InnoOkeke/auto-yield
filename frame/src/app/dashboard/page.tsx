@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAccount, useConnect } from 'wagmi';
 import YieldStats from '@/components/YieldStats';
+import StreakCard from '@/components/StreakCard';
 import ActivityFeed from '@/components/ActivityFeed';
 import QuickActions from '@/components/QuickActions';
 import axios from 'axios';
@@ -119,6 +120,14 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column - Stats */}
                     <div className="lg:col-span-2 space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <StreakCard
+                                currentStreak={userData?.user?.subscription?.currentStreak || 0}
+                                bestStreak={userData?.user?.subscription?.bestStreak || 0}
+                            />
+                            {/* Placeholder for future specific stats if needed, or expand StreakCard */}
+                        </div>
+
                         <YieldStats yieldData={userData?.yield} />
 
                         {/* Yield Chart Placeholder */}

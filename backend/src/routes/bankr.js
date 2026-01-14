@@ -90,29 +90,23 @@ router.post('/swap', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Bankr swap error:', error.message);
+        console.error('❌ Bankr swap error object:', error);
 
-        // Handle specific error cases
         if (axios.isAxiosError(error)) {
-            if (error.response) {
-                console.error('❌ BatchNorm API Error Response:', JSON.stringify(error.response.data, null, 2));
-                // Bankr API returned an error
-                return res.status(error.response.status).json({
-                    error: 'Bankr API error',
-                    message: error.response.data?.message || error.response.data?.error || 'Failed to generate swap transaction',
-                    details: error.response.data
-                });
-            } else if (error.code === 'ECONNABORTED') {
-                return res.status(504).json({
-                    error: 'Bankr API timeout',
-                    message: 'The request took too long. Please try again.'
-                });
-            }
+            const apiError = error.response?.data;
+            console.error('❌ Bankr API Response Details:', JSON.stringify(apiError, null, 2));
+            console.error('❌ Bankr API Status:', error.response?.status);
+
+            return res.status(error.response?.status || 500).json({
+                error: 'Bankr API Error',
+                message: apiError?.message || apiError?.error || 'Failed to generate swap transaction from external API',
+                details: apiError
+            });
         }
 
         res.status(500).json({
-            error: 'Failed to generate swap transaction',
-            message: error.message
+            error: 'Internal Server Error',
+            message: 'Failed to generate swap transaction: ' + error.message
         });
     }
 });
