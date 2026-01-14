@@ -37,6 +37,8 @@ model Subscription {
   startDate       DateTime @default(now())
   lastDeduction   DateTime?
   nextDeduction   DateTime?
+  currentStreak   Int      @default(0)
+  bestStreak      Int      @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   

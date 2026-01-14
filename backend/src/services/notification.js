@@ -148,11 +148,15 @@ export class NotificationService {
      * @param {Object} user - User object
      * @param {string|number} amount - Amount deducted
      */
-    async sendDeductionNotification(user, amount) {
+    async sendDeductionNotification(user, amount, streak = 0) {
+        let message = `Successfully saved ${amount} USDC today! Keep building your yield.`;
+        if (streak > 1) {
+            message = `Successfully saved ${amount} USDC today! 🔥 ${streak}-day streak! Keep it up!`;
+        }
         return this.sendNotification(
             user,
             '💰 AutoYield Savings',
-            `Successfully saved ${amount} USDC today! Keep building your yield.`,
+            message,
             process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
         );
     }

@@ -11,6 +11,7 @@ export default function SettingsPage() {
     const router = useRouter();
     const { address } = useAccount();
     const [amount, setAmount] = useState('');
+    const [sendingTest, setSendingTest] = useState(false);
 
     // Read current subscription
     const { data: subscription } = useReadContract({
@@ -96,16 +97,32 @@ export default function SettingsPage() {
                     </p>
                     <button
                         onClick={async () => {
-                            const { sendTestNotification } = await import('@/lib/farcaster');
-                            if (address) {
+                            console.log('🔔 Test Notification clicked');
+                            if (!address) {
+                                alert('Please connect your wallet first!');
+                                return;
+                            }
+
+                            try {
+                                setSendingTest(true);
+                                const { sendTestNotification } = await import('@/lib/farcaster');
+                                console.log('Sending test notification to:', address);
                                 const result = await sendTestNotification(address, 0);
+                                console.log('Test result:', result);
+
                                 if (result.success) {
                                     alert('Test notification sent! Check your Warpcast.');
                                 } else {
                                     alert('Failed to send test notification: ' + result.error);
                                 }
+                            } catch (e) {
+                                console.error('Test notification error:', e);
+                                alert('Error sending notification');
+                            } finally {
+                                setSendingTest(false);
                             }
                         }}
+                        disabled={sendingTest}
                         className="w-full py-4 rounded-xl glass hover:bg-black/5 dark:hover:bg-white/20 text-foreground font-semibold border border-foreground/5 flex items-center justify-center gap-2"
                     >
                         <span>🔔</span> Send Test Notification

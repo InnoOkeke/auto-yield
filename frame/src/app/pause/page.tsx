@@ -21,7 +21,19 @@ export default function PausePage() {
     }, [isSuccess, address, router]);
 
     const handlePause = () => {
-        if (!process.env.NEXT_PUBLIC_VAULT_ADDRESS) return;
+        console.log('Pause clicked');
+        if (!process.env.NEXT_PUBLIC_VAULT_ADDRESS) {
+            alert('Vault address not configured!');
+            console.error('Missing NEXT_PUBLIC_VAULT_ADDRESS');
+            return;
+        }
+
+        if (!address) {
+            alert('Please connect your wallet first!');
+            return;
+        }
+
+        console.log('Unsubscribing from vault:', process.env.NEXT_PUBLIC_VAULT_ADDRESS);
 
         writeContract({
             address: process.env.NEXT_PUBLIC_VAULT_ADDRESS as `0x${string}`,

@@ -118,22 +118,29 @@ export class DeductionService {
                 },
             });
 
-            // Update subscription last deduction time
+            // Calculate new streaks
+            const newCurrentStreak = (subscription.currentStreak || 0) + 1;
+            const newBestStreak = Math.max(subscription.bestStreak || 0, newCurrentStreak);
+
+            // Update subscription last deduction time and streaks
             await prisma.subscription.update({
                 where: { id: subscription.id },
                 data: {
                     lastDeduction: new Date(),
                     nextDeduction: new Date(Date.now() + 24 * 60 * 60 * 1000), // +24 hours
+                    currentStreak: newCurrentStreak,
+                    bestStreak: newBestStreak,
                 },
             });
 
-            console.log(`✅ Recorded deduction for ${subscription.walletAddress}`);
+            console.log(`✅ Recorded deduction for ${subscription.walletAddress} (Streak: ${newCurrentStreak})`);
 
             // Send notification to user
             if (subscription.user.notificationsEnabled) {
                 await notificationService.sendDeductionNotification(
                     subscription.user,
-                    subscription.dailyAmount.toString()
+                    subscription.dailyAmount.toString(),
+                    newCurrentStreak // Pass streak to notification
                 );
             }
         } catch (error) {
@@ -159,7 +166,15 @@ export class DeductionService {
                 },
             });
 
-            console.log(`⚠️ Recorded failed deduction for ${subscription.walletAddress}`);
+            // Reset streak on failure
+            await prisma.subscription.update({
+                where: { id: subscription.id },
+                data: {
+                    currentStreak: 0,
+                },
+            });
+
+            console.log(`⚠️ Recorded failed deduction for ${subscription.walletAddress} (Streak reset)`);
         } catch (error) {
             console.error(`Failed to record failed deduction for ${subscription.walletAddress}:`, error);
         }
