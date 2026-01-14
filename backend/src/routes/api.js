@@ -3,6 +3,7 @@ import prisma from '../utils/database.js';
 import blockchainService from '../services/blockchain.js';
 import avantisService from '../services/avantis.js';
 import deductionService from '../services/deduction.js';
+import notificationService from '../services/notification.js';
 
 const router = express.Router();
 

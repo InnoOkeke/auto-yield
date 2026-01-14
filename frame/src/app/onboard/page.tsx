@@ -150,7 +150,7 @@ export default function OnboardPage() {
                                 <div className="text-5xl mb-4">🔔</div>
                                 <h3 className="text-xl font-bold mb-2">Enable Farcaster Notifications</h3>
                                 <p className="text-muted mb-6">
-                                    Get alerts when you save money, earn yield, or when there's an issue with your account.
+                                    Get alerts when you save money, earn yield, or when there&apos;s an issue with your account.
                                 </p>
                                 <div className="flex flex-col gap-3">
                                     <button
