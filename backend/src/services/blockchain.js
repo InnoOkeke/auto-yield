@@ -231,6 +231,26 @@ export class BlockchainService {
             return null;
         }
     }
+
+    /**
+     * Get user's USDC balance for Smart Pause detection
+     * @param {string} userAddress - User's wallet address
+     * @returns {bigint} USDC balance in wei (6 decimals)
+     */
+    async getUserUsdcBalance(userAddress) {
+        try {
+            // Base Mainnet USDC address
+            const USDC_ADDRESS = process.env.USDC_ADDRESS || '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+            const ERC20_ABI = ['function balanceOf(address) view returns (uint256)'];
+
+            const usdcContract = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, this.provider);
+            const balance = await usdcContract.balanceOf(userAddress);
+            return balance;
+        } catch (error) {
+            console.error(`Failed to get USDC balance for ${userAddress}:`, error);
+            return 0n;
+        }
+    }
 }
 
 export default new BlockchainService();

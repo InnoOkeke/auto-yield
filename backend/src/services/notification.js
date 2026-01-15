@@ -217,6 +217,47 @@ export class NotificationService {
             process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
         );
     }
+
+    /**
+     * Smart Pause notification - friendly and non-alarming
+     * @param {Object} user - User object
+     * @param {string} currentBalance - User's current USDC balance
+     * @param {string} requiredAmount - Required amount for daily save
+     */
+    async sendSmartPauseNotification(user, currentBalance, requiredAmount) {
+        return this.sendNotification(
+            user,
+            '💤 We\'ve Got Your Back',
+            `We paused your daily save so you don't overdraft. Fund your wallet with at least $${requiredAmount} USDC to resume. Your streak is safe!`,
+            process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
+        );
+    }
+
+    /**
+     * Auto-resume notification - celebratory
+     * @param {Object} user - User object
+     */
+    async sendAutoResumeNotification(user) {
+        return this.sendNotification(
+            user,
+            '🎉 You\'re Back in Action!',
+            `Your wallet is funded and daily saves have resumed. Keep building that streak!`,
+            process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
+        );
+    }
+
+    /**
+     * Manual resume notification - confirmation
+     * @param {Object} user - User object
+     */
+    async sendManualResumeNotification(user) {
+        return this.sendNotification(
+            user,
+            '✅ Resumed Successfully',
+            `Your daily saves are back on. Let's keep building!`,
+            process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
+        );
+    }
 }
 
 export default new NotificationService();

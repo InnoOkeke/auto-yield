@@ -39,6 +39,14 @@ model Subscription {
   nextDeduction   DateTime?
   currentStreak   Int      @default(0)
   bestStreak      Int      @default(0)
+  
+  // Smart Pause fields - auto-pause when balance is low
+  isPaused          Boolean   @default(false)   // System-initiated pause
+  pauseReason       String?                     // "LOW_BALANCE" | "MANUAL" | null
+  pausedAt          DateTime?                   // When pause was triggered
+  autoResumeEnabled Boolean   @default(true)    // Can auto-resume when funded
+  pauseNotifiedAt   DateTime?                   // When user was notified of pause
+  
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   

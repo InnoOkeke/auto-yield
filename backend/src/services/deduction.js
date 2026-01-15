@@ -1,6 +1,7 @@
 import prisma from '../utils/database.js';
 import blockchainService from './blockchain.js';
 import notificationService from './notification.js';
+import { ethers } from 'ethers';
 
 export class DeductionService {
     /**
@@ -10,10 +11,11 @@ export class DeductionService {
         console.log('🔄 Starting daily deduction process...');
 
         try {
-            // Get all active subscriptions from database
+            // Get all active subscriptions that are NOT paused
             const activeSubscriptions = await prisma.subscription.findMany({
                 where: {
                     isActive: true,
+                    isPaused: false, // Skip Smart Paused subscriptions
                 },
                 include: {
                     user: true,
@@ -40,19 +42,36 @@ export class DeductionService {
                     success: true,
                     processed: 0,
                     failed: 0,
+                    paused: 0,
                 };
             }
+
+            // Pre-check balances and smart pause users with low balance
+            const usersToProcess = [];
+            let pausedCount = 0;
+
+            for (const sub of eligibleUsers) {
+                const shouldPause = await this.checkAndSmartPause(sub);
+                if (shouldPause) {
+                    pausedCount++;
+                } else {
+                    usersToProcess.push(sub);
+                }
+            }
+
+            console.log(`⏸️ Smart Paused ${pausedCount} users due to low balance`);
+            console.log(`💰 ${usersToProcess.length} users will be processed`);
 
             // Process in batches of 10 for gas efficiency
             const BATCH_SIZE = 10;
             let processed = 0;
             let failed = 0;
 
-            for (let i = 0; i < eligibleUsers.length; i += BATCH_SIZE) {
-                const batch = eligibleUsers.slice(i, i + BATCH_SIZE);
+            for (let i = 0; i < usersToProcess.length; i += BATCH_SIZE) {
+                const batch = usersToProcess.slice(i, i + BATCH_SIZE);
                 const addresses = batch.map(s => s.walletAddress);
 
-                console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(eligibleUsers.length / BATCH_SIZE)}`);
+                console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(usersToProcess.length / BATCH_SIZE)}`);
 
                 const result = await blockchainService.batchExecuteDeductions(addresses);
 
@@ -78,17 +97,18 @@ export class DeductionService {
                 }
 
                 // Small delay between batches to prevent RPC rate limiting
-                if (i + BATCH_SIZE < eligibleUsers.length) {
+                if (i + BATCH_SIZE < usersToProcess.length) {
                     await new Promise(resolve => setTimeout(resolve, 2000));
                 }
             }
 
-            console.log(`✅ Deduction process complete: ${processed} processed, ${failed} failed`);
+            console.log(`✅ Deduction process complete: ${processed} processed, ${failed} failed, ${pausedCount} paused`);
 
             return {
                 success: true,
                 processed,
                 failed,
+                paused: pausedCount,
                 total: eligibleUsers.length,
             };
         } catch (error) {
@@ -257,6 +277,184 @@ export class DeductionService {
         } catch (error) {
             console.error('Failed to get deduction stats:', error);
             return null;
+        }
+    }
+
+    /**
+     * Smart Pause: Check user balance and pause if too low
+     * Returns true if user was paused, false if they should proceed
+     */
+    async checkAndSmartPause(subscription) {
+        try {
+            const userBalance = await blockchainService.getUserUsdcBalance(subscription.walletAddress);
+            const requiredAmount = ethers.parseUnits(subscription.dailyAmount.toString(), 6);
+
+            // Add 10% buffer to avoid edge cases
+            const requiredWithBuffer = requiredAmount + (requiredAmount / 10n);
+
+            if (userBalance < requiredWithBuffer) {
+                // Trigger Smart Pause
+                await this.triggerSmartPause(subscription, userBalance, requiredAmount);
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            console.error(`Failed to check balance for ${subscription.walletAddress}:`, error);
+            // If we can't check balance, proceed with deduction attempt
+            return false;
+        }
+    }
+
+    /**
+     * Trigger Smart Pause for a subscription
+     * Preserves streak and sends friendly notification
+     */
+    async triggerSmartPause(subscription, currentBalance, requiredAmount) {
+        try {
+            // Update subscription to paused state
+            await prisma.subscription.update({
+                where: { id: subscription.id },
+                data: {
+                    isPaused: true,
+                    pauseReason: 'LOW_BALANCE',
+                    pausedAt: new Date(),
+                    pauseNotifiedAt: new Date(),
+                    // Keep streak intact! Don't reset it
+                },
+            });
+
+            const formattedBalance = ethers.formatUnits(currentBalance, 6);
+            const formattedRequired = ethers.formatUnits(requiredAmount, 6);
+
+            console.log(`⏸️ Smart Paused: ${subscription.walletAddress} (Balance: $${formattedBalance}, Required: $${formattedRequired})`);
+
+            // Send friendly notification
+            if (subscription.user.notificationsEnabled) {
+                await notificationService.sendSmartPauseNotification(
+                    subscription.user,
+                    formattedBalance,
+                    formattedRequired
+                );
+            }
+        } catch (error) {
+            console.error(`Failed to trigger Smart Pause for ${subscription.walletAddress}:`, error);
+        }
+    }
+
+    /**
+     * Check paused subscriptions and auto-resume when funded
+     */
+    async checkAndResumeSubscriptions() {
+        console.log('🔄 Checking paused subscriptions for auto-resume...');
+
+        try {
+            const pausedSubs = await prisma.subscription.findMany({
+                where: {
+                    isPaused: true,
+                    pauseReason: 'LOW_BALANCE',
+                    autoResumeEnabled: true,
+                },
+                include: { user: true },
+            });
+
+            console.log(`Found ${pausedSubs.length} paused subscriptions to check`);
+
+            let resumed = 0;
+
+            for (const sub of pausedSubs) {
+                const balance = await blockchainService.getUserUsdcBalance(sub.walletAddress);
+                const required = ethers.parseUnits(sub.dailyAmount.toString(), 6);
+
+                // Require at least 3 days of savings to auto-resume
+                const resumeThreshold = required * 3n;
+
+                if (balance >= resumeThreshold) {
+                    // Resume subscription
+                    await prisma.subscription.update({
+                        where: { id: sub.id },
+                        data: {
+                            isPaused: false,
+                            pauseReason: null,
+                            pausedAt: null,
+                            pauseNotifiedAt: null,
+                        },
+                    });
+
+                    const formattedBalance = ethers.formatUnits(balance, 6);
+                    console.log(`▶️ Auto-resumed: ${sub.walletAddress} (Balance: $${formattedBalance})`);
+
+                    // Send celebratory notification
+                    if (sub.user.notificationsEnabled) {
+                        await notificationService.sendAutoResumeNotification(sub.user);
+                    }
+
+                    resumed++;
+                }
+            }
+
+            console.log(`✅ Auto-resume check complete: ${resumed} subscriptions resumed`);
+
+            return { success: true, resumed };
+        } catch (error) {
+            console.error('Failed to check/resume subscriptions:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Manually resume a paused subscription
+     */
+    async manualResume(walletAddress) {
+        try {
+            const sub = await prisma.subscription.findUnique({
+                where: { walletAddress },
+                include: { user: true },
+            });
+
+            if (!sub) {
+                return { success: false, error: 'Subscription not found' };
+            }
+
+            if (!sub.isPaused) {
+                return { success: false, error: 'Subscription is not paused' };
+            }
+
+            // Check if they have enough balance
+            const balance = await blockchainService.getUserUsdcBalance(walletAddress);
+            const required = ethers.parseUnits(sub.dailyAmount.toString(), 6);
+
+            if (balance < required) {
+                const formattedBalance = ethers.formatUnits(balance, 6);
+                const formattedRequired = ethers.formatUnits(required, 6);
+                return {
+                    success: false,
+                    error: `Insufficient balance. You have $${formattedBalance} but need at least $${formattedRequired}`
+                };
+            }
+
+            // Resume subscription
+            await prisma.subscription.update({
+                where: { walletAddress },
+                data: {
+                    isPaused: false,
+                    pauseReason: null,
+                    pausedAt: null,
+                    pauseNotifiedAt: null,
+                },
+            });
+
+            console.log(`▶️ Manually resumed: ${walletAddress}`);
+
+            // Send confirmation notification
+            if (sub.user.notificationsEnabled) {
+                await notificationService.sendManualResumeNotification(sub.user);
+            }
+
+            return { success: true };
+        } catch (error) {
+            console.error(`Failed to manually resume ${walletAddress}:`, error);
+            return { success: false, error: error.message };
         }
     }
 }
