@@ -9,6 +9,7 @@ import SummaryCard from '@/components/SummaryCard';
 import SmartPauseCard from '@/components/SmartPauseCard';
 import ActivityFeed from '@/components/ActivityFeed';
 import QuickActions from '@/components/QuickActions';
+import YieldChart from '@/components/YieldChart';
 import axios from 'axios';
 import Link from 'next/link';
 
@@ -168,18 +169,8 @@ export default function DashboardPage() {
 
                         <YieldStats yieldData={userData?.yield} />
 
-                        {/* Yield Chart Placeholder */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="glass-dark rounded-3xl p-6 border border-foreground/5 shadow-sm"
-                        >
-                            <h2 className="text-2xl font-bold text-foreground mb-4">Yield Performance</h2>
-                            <div className="h-64 flex items-center justify-center border-2 border-dashed border-foreground/5 rounded-2xl bg-black/5 dark:bg-white/5">
-                                <p className="text-muted/60 font-medium italic">Chart coming soon...</p>
-                            </div>
-                        </motion.div>
+                        {/* Yield Performance Chart */}
+                        <YieldChart yieldData={userData?.yield} />
                     </div>
 
                     {/* Right Column - Activity */}
