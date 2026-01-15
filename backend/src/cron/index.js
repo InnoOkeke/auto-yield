@@ -58,4 +58,17 @@ export function startCronJobs() {
     });
 
     console.log('📅 Vault health check cron scheduled: hourly');
+
+    // Smart Pause auto-resume check - runs every 2 hours
+    cron.schedule('0 */2 * * *', async () => {
+        console.log('⏰ Cron: Checking paused subscriptions for auto-resume');
+        try {
+            const result = await deductionService.checkAndResumeSubscriptions();
+            console.log(`Cron: Auto-resume check completed - ${result.resumed || 0} resumed`);
+        } catch (error) {
+            console.error('Cron: Auto-resume check failed:', error);
+        }
+    });
+
+    console.log('📅 Smart Pause auto-resume cron scheduled: every 2 hours');
 }

@@ -324,4 +324,82 @@ router.post('/subscription/sync', requireAuth, async (req, res) => {
     }
 });
 
+/**
+ * POST /api/subscription/resume
+ * Manually resume a Smart Paused subscription
+ */
+router.post('/subscription/resume', async (req, res) => {
+    try {
+        const { address } = req.body;
+
+        if (!address) {
+            return res.status(400).json({ error: 'Address is required' });
+        }
+
+        const result = await deductionService.manualResume(address.toLowerCase());
+
+        if (result.success) {
+            res.json({ success: true, message: 'Subscription resumed successfully' });
+        } else {
+            res.status(400).json({ success: false, error: result.error });
+        }
+    } catch (error) {
+        console.error('Failed to resume subscription:', error);
+        res.status(500).json({ error: 'Failed to resume subscription' });
+    }
+});
+
+/**
+ * GET /api/subscription/pause-status/:address
+ * Get Smart Pause status for a subscription
+ */
+router.get('/subscription/pause-status/:address', async (req, res) => {
+    try {
+        const { address } = req.params;
+
+        const subscription = await prisma.subscription.findUnique({
+            where: { walletAddress: address.toLowerCase() },
+            select: {
+                isPaused: true,
+                pauseReason: true,
+                pausedAt: true,
+                autoResumeEnabled: true,
+                dailyAmount: true,
+                currentStreak: true,
+                bestStreak: true,
+            },
+        });
+
+        if (!subscription) {
+            return res.status(404).json({ error: 'Subscription not found' });
+        }
+
+        // Get current balance if paused
+        let currentBalance = null;
+        let requiredAmount = null;
+
+        if (subscription.isPaused) {
+            const balance = await blockchainService.getUserUsdcBalance(address);
+            const { ethers } = await import('ethers');
+            currentBalance = ethers.formatUnits(balance, 6);
+            requiredAmount = subscription.dailyAmount.toString();
+        }
+
+        res.json({
+            isPaused: subscription.isPaused,
+            pauseReason: subscription.pauseReason,
+            pausedAt: subscription.pausedAt,
+            autoResumeEnabled: subscription.autoResumeEnabled,
+            currentStreak: subscription.currentStreak,
+            bestStreak: subscription.bestStreak,
+            dailyAmount: subscription.dailyAmount.toString(),
+            currentBalance,
+            requiredAmount,
+        });
+    } catch (error) {
+        console.error('Failed to get pause status:', error);
+        res.status(500).json({ error: 'Failed to get pause status' });
+    }
+});
+
 export default router;
