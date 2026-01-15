@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useAccount, useConnect } from 'wagmi';
 import YieldStats from '@/components/YieldStats';
 import StreakCard from '@/components/StreakCard';
+import SummaryCard from '@/components/SummaryCard';
 import SmartPauseCard from '@/components/SmartPauseCard';
 import ActivityFeed from '@/components/ActivityFeed';
 import QuickActions from '@/components/QuickActions';
@@ -156,7 +157,13 @@ export default function DashboardPage() {
                                 currentStreak={pauseData?.currentStreak || userData?.user?.subscription?.currentStreak || 0}
                                 bestStreak={pauseData?.bestStreak || userData?.user?.subscription?.bestStreak || 0}
                             />
-                            {/* Placeholder for future specific stats if needed, or expand StreakCard */}
+                            <SummaryCard
+                                totalDeposited={userData?.yield?.totalDeposited || '0.00'}
+                                yieldEarned={userData?.yield?.yieldEarned || '0.00'}
+                                currentStreak={pauseData?.currentStreak || userData?.user?.subscription?.currentStreak || 0}
+                                dailyAmount={userData?.user?.subscription?.dailyAmount?.toString() || '0.00'}
+                                currentValue={userData?.yield?.currentValue || '0.00'}
+                            />
                         </div>
 
                         <YieldStats yieldData={userData?.yield} />

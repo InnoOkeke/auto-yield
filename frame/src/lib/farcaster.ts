@@ -180,3 +180,41 @@ export async function shareStreak(streak: number) {
         window.open(url, '_blank');
     }
 }
+
+/**
+ * Share daily/weekly summary on Farcaster
+ */
+export interface SummaryData {
+    totalSaved: string;
+    yieldEarned: string;
+    currentStreak: number;
+    period: 'daily' | 'weekly';
+}
+
+export async function shareSummary(data: SummaryData) {
+    const periodLabel = data.period === 'daily' ? 'Today' : 'This Week';
+    const emoji = data.period === 'daily' ? '📊' : '📈';
+
+    const text = `${emoji} My AutoYield ${periodLabel}:
+
+💵 Saved: $${data.totalSaved} USDC
+✨ Yield earned: $${data.yieldEarned}
+🔥 Streak: ${data.currentStreak} days
+
+Automating my savings on Base with AutoYield! 🚀`;
+
+    const appUrl = process.env.NEXT_PUBLIC_FRAME_URL || 'https://autoyield.app';
+    const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(appUrl)}`;
+
+    if (isFarcasterContext()) {
+        try {
+            await sdk.actions.openUrl(url);
+        } catch (e) {
+            console.error('Failed to open URL via SDK:', e);
+            window.open(url, '_blank');
+        }
+    } else {
+        window.open(url, '_blank');
+    }
+}
+
