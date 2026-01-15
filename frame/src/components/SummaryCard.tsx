@@ -174,7 +174,6 @@ export default function SummaryCard({
                     <p className="text-xs text-muted font-medium">
                         One-tap share
                     </p>
-
                     <button
                         onClick={handleShare}
                         disabled={isSharing}
