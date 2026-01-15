@@ -100,8 +100,8 @@ export default function SummaryCard({
                         <button
                             onClick={() => setPeriod('daily')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${period === 'daily'
-                                    ? 'bg-purple-500 text-white shadow-md'
-                                    : 'text-muted hover:text-foreground'
+                                ? 'bg-purple-500 text-white shadow-md'
+                                : 'text-muted hover:text-foreground'
                                 }`}
                         >
                             Daily
@@ -109,8 +109,8 @@ export default function SummaryCard({
                         <button
                             onClick={() => setPeriod('weekly')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${period === 'weekly'
-                                    ? 'bg-purple-500 text-white shadow-md'
-                                    : 'text-muted hover:text-foreground'
+                                ? 'bg-purple-500 text-white shadow-md'
+                                : 'text-muted hover:text-foreground'
                                 }`}
                         >
                             Weekly
@@ -169,34 +169,29 @@ export default function SummaryCard({
                     <p className="text-2xl font-bold text-purple-500 font-display">${currentValue}</p>
                 </div>
 
-                {/* Share Button */}
-                <motion.button
-                    onClick={handleShare}
-                    disabled={isSharing}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-500 to-blue-500 text-white font-bold transition-all disabled:opacity-50 shadow-lg shadow-purple-500/20 flex items-center justify-center gap-3"
-                >
-                    {isSharing ? (
-                        <>
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            Sharing...
-                        </>
-                    ) : (
-                        <>
-                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H8l4-7v4h3l-4 7z" />
-                            </svg>
-                            Share {periodLabel} Summary
-                            <span className="text-lg">🚀</span>
-                        </>
-                    )}
-                </motion.button>
+                {/* Footer with Share Button */}
+                <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted font-medium">
+                        One-tap share to Farcaster 💜
+                    </p>
 
-                {/* Footer */}
-                <p className="text-center text-xs text-muted mt-3 font-medium">
-                    One-tap share to Farcaster • Free distribution 💜
-                </p>
+                    <button
+                        onClick={handleShare}
+                        disabled={isSharing}
+                        className="text-xs font-bold text-white bg-purple-500 hover:bg-purple-600 py-2 px-4 rounded-xl transition-all shadow-md hover:shadow-purple-500/20 flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                        {isSharing ? (
+                            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                            <>
+                                <span>Share</span>
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                </svg>
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
         </motion.div>
     );
