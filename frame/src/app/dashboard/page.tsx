@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useAccount, useConnect } from 'wagmi';
 import YieldStats from '@/components/YieldStats';
 import StreakCard from '@/components/StreakCard';
+import SmartPauseCard from '@/components/SmartPauseCard';
 import ActivityFeed from '@/components/ActivityFeed';
 import QuickActions from '@/components/QuickActions';
 import axios from 'axios';
@@ -14,6 +15,7 @@ export default function DashboardPage() {
     const { address, isConnected } = useAccount();
     const { connect, connectors } = useConnect();
     const [userData, setUserData] = useState<any>(null);
+    const [pauseData, setPauseData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     const handleConnect = async () => {
@@ -34,10 +36,15 @@ export default function DashboardPage() {
 
     const fetchUserData = useCallback(async () => {
         try {
-            const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/user/${address}`
-            );
-            setUserData(response.data);
+            const [userResponse, pauseResponse] = await Promise.all([
+                axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/user/${address}`),
+                axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/subscription/pause-status/${address}`).catch(() => null),
+            ]);
+
+            setUserData(userResponse.data);
+            if (pauseResponse?.data) {
+                setPauseData(pauseResponse.data);
+            }
         } catch (error) {
             console.error('Failed to fetch user data:', error);
         } finally {
@@ -101,7 +108,19 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Subscription Status Banner */}
-                    {userData?.user?.subscription?.isActive && (
+                    {pauseData?.isPaused ? (
+                        <div className="glass-dark rounded-2xl p-4 border-l-4 border-amber-500 shadow-sm">
+                            <div className="flex items-center gap-3">
+                                <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse" />
+                                <div>
+                                    <p className="text-foreground font-semibold">💤 Daily Saves Paused</p>
+                                    <p className="text-muted text-sm font-medium">
+                                        We paused to protect you • Your streak is safe!
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    ) : userData?.user?.subscription?.isActive && (
                         <div className="glass-dark rounded-2xl p-4 border-l-4 border-green-500 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
@@ -120,10 +139,22 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column - Stats */}
                     <div className="lg:col-span-2 space-y-6">
+                        {/* Smart Pause Card - Show prominently when paused */}
+                        {pauseData?.isPaused && (
+                            <SmartPauseCard
+                                pauseData={pauseData}
+                                address={address!}
+                                onResume={() => {
+                                    setPauseData(null);
+                                    fetchUserData();
+                                }}
+                            />
+                        )}
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <StreakCard
-                                currentStreak={userData?.user?.subscription?.currentStreak || 0}
-                                bestStreak={userData?.user?.subscription?.bestStreak || 0}
+                                currentStreak={pauseData?.currentStreak || userData?.user?.subscription?.currentStreak || 0}
+                                bestStreak={pauseData?.bestStreak || userData?.user?.subscription?.bestStreak || 0}
                             />
                             {/* Placeholder for future specific stats if needed, or expand StreakCard */}
                         </div>
