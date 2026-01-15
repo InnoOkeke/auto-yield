@@ -171,6 +171,9 @@ export default function SummaryCard({
 
                 {/* Footer with Share Button */}
                 <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted font-medium">
+                        One-tap share
+                    </p>
 
                     <button
                         onClick={handleShare}
