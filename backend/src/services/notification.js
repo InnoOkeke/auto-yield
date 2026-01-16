@@ -258,6 +258,21 @@ export class NotificationService {
             process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
         );
     }
+
+    /**
+     * Auto-increase notification - premium feature celebration
+     * @param {Object} user - User object
+     * @param {string} oldAmount - Previous daily amount
+     * @param {string} newAmount - New daily amount
+     */
+    async sendAutoIncreaseNotification(user, oldAmount, newAmount) {
+        return this.sendNotification(
+            user,
+            '📈 Daily Savings Increased!',
+            `Your auto-increase rule kicked in! Daily savings: $${oldAmount} → $${newAmount}. Building wealth on autopilot! 🚀`,
+            process.env.FRONTEND_URL || 'https://autoyield.vercel.app/settings'
+        );
+    }
 }
 
 export default new NotificationService();

@@ -11,7 +11,10 @@ export class DeductionService {
         console.log('🔄 Starting daily deduction process...');
 
         try {
-            // Get all active subscriptions that are NOT paused
+            // Step 1: Apply auto-increases for eligible subscriptions
+            await this.applyAutoIncreases();
+
+            // Step 2: Get all active subscriptions that are NOT paused
             const activeSubscriptions = await prisma.subscription.findMany({
                 where: {
                     isActive: true,
@@ -454,6 +457,141 @@ export class DeductionService {
             return { success: true };
         } catch (error) {
             console.error(`Failed to manually resume ${walletAddress}:`, error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Apply auto-increases for eligible subscriptions
+     * Runs before daily deductions to update amounts
+     */
+    async applyAutoIncreases() {
+        console.log('📈 Checking for auto-increase eligibility...');
+
+        try {
+            // Find subscriptions with auto-increase enabled
+            const eligibleSubs = await prisma.subscription.findMany({
+                where: {
+                    isActive: true,
+                    isPaused: false,
+                    autoIncreaseEnabled: true,
+                    autoIncreaseType: { not: null },
+                    autoIncreaseAmount: { not: null },
+                },
+                include: { user: true },
+            });
+
+            if (eligibleSubs.length === 0) {
+                console.log('📈 No subscriptions with auto-increase enabled');
+                return { increased: 0 };
+            }
+
+            console.log(`📈 Found ${eligibleSubs.length} subscriptions with auto-increase enabled`);
+
+            let increasedCount = 0;
+            const now = new Date();
+
+            for (const sub of eligibleSubs) {
+                const shouldIncrease = this.shouldApplyAutoIncrease(sub, now);
+
+                if (shouldIncrease) {
+                    const result = await this.applyAutoIncrease(sub);
+                    if (result.success) {
+                        increasedCount++;
+                    }
+                }
+            }
+
+            console.log(`📈 Auto-increase complete: ${increasedCount} subscriptions updated`);
+            return { increased: increasedCount };
+        } catch (error) {
+            console.error('❌ Failed to apply auto-increases:', error);
+            return { increased: 0, error: error.message };
+        }
+    }
+
+    /**
+     * Check if a subscription should receive an auto-increase
+     */
+    shouldApplyAutoIncrease(subscription, now) {
+        const intervalDays = subscription.autoIncreaseIntervalDays || 30;
+        const lastIncrease = subscription.lastAutoIncreaseAt;
+
+        if (!lastIncrease) {
+            // First increase: check if subscription is old enough
+            const startDate = subscription.startDate || subscription.createdAt;
+            const daysSinceStart = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+            return daysSinceStart >= intervalDays;
+        }
+
+        const daysSinceLastIncrease = Math.floor((now - lastIncrease) / (1000 * 60 * 60 * 24));
+        return daysSinceLastIncrease >= intervalDays;
+    }
+
+    /**
+     * Apply auto-increase to a subscription
+     */
+    async applyAutoIncrease(subscription) {
+        try {
+            const currentAmount = parseFloat(subscription.dailyAmount.toString());
+            const increaseAmount = parseFloat(subscription.autoIncreaseAmount.toString());
+            const maxAmount = subscription.autoIncreaseMaxAmount
+                ? parseFloat(subscription.autoIncreaseMaxAmount.toString())
+                : null;
+
+            let newAmount;
+
+            if (subscription.autoIncreaseType === 'FIXED') {
+                // Fixed increase: add flat amount (e.g., +$0.50)
+                newAmount = currentAmount + increaseAmount;
+            } else if (subscription.autoIncreaseType === 'PERCENTAGE') {
+                // Percentage increase: add percentage of current amount
+                newAmount = currentAmount * (1 + increaseAmount / 100);
+            } else {
+                return { success: false, error: 'Invalid auto-increase type' };
+            }
+
+            // Round to 2 decimal places
+            newAmount = Math.round(newAmount * 100) / 100;
+
+            // Apply max cap if set
+            if (maxAmount && newAmount > maxAmount) {
+                console.log(`📈 ${subscription.walletAddress}: Capped at $${maxAmount} (would be $${newAmount})`);
+                newAmount = maxAmount;
+            }
+
+            // Don't increase if already at max
+            if (newAmount === currentAmount) {
+                return { success: false, reason: 'Already at max amount' };
+            }
+
+            // Update subscription with new amount
+            await prisma.subscription.update({
+                where: { id: subscription.id },
+                data: {
+                    dailyAmount: newAmount,
+                    lastAutoIncreaseAt: new Date(),
+                },
+            });
+
+            const increaseType = subscription.autoIncreaseType === 'FIXED'
+                ? `+$${increaseAmount}`
+                : `+${increaseAmount}%`;
+
+            console.log(`📈 Auto-increased: ${subscription.walletAddress} ($${currentAmount} → $${newAmount}) [${increaseType}]`);
+
+            // Send notification if enabled
+            if (subscription.user.notificationsEnabled) {
+                await notificationService.sendAutoIncreaseNotification(
+                    subscription.user,
+                    currentAmount.toFixed(2),
+                    newAmount.toFixed(2)
+                );
+            }
+
+            return { success: true, oldAmount: currentAmount, newAmount };
+        } catch (error) {
+            console.error(`❌ Failed to apply auto-increase for ${subscription.walletAddress}:`, error);
             return { success: false, error: error.message };
         }
     }

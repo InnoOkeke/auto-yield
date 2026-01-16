@@ -402,4 +402,125 @@ router.get('/subscription/pause-status/:address', async (req, res) => {
     }
 });
 
+/**
+ * GET /api/subscription/auto-increase/:address
+ * Get auto-increase settings for a subscription
+ */
+router.get('/subscription/auto-increase/:address', async (req, res) => {
+    try {
+        const { address } = req.params;
+
+        const subscription = await prisma.subscription.findUnique({
+            where: { walletAddress: address.toLowerCase() },
+            select: {
+                autoIncreaseEnabled: true,
+                autoIncreaseType: true,
+                autoIncreaseAmount: true,
+                autoIncreaseIntervalDays: true,
+                autoIncreaseMaxAmount: true,
+                lastAutoIncreaseAt: true,
+                dailyAmount: true,
+            },
+        });
+
+        if (!subscription) {
+            return res.status(404).json({ error: 'Subscription not found' });
+        }
+
+        // Calculate next increase date
+        let nextIncreaseDate = null;
+        if (subscription.autoIncreaseEnabled) {
+            const lastIncrease = subscription.lastAutoIncreaseAt;
+            const intervalDays = subscription.autoIncreaseIntervalDays || 30;
+
+            if (lastIncrease) {
+                nextIncreaseDate = new Date(lastIncrease);
+                nextIncreaseDate.setDate(nextIncreaseDate.getDate() + intervalDays);
+            }
+        }
+
+        res.json({
+            enabled: subscription.autoIncreaseEnabled,
+            type: subscription.autoIncreaseType,
+            amount: subscription.autoIncreaseAmount?.toString() || null,
+            intervalDays: subscription.autoIncreaseIntervalDays,
+            maxAmount: subscription.autoIncreaseMaxAmount?.toString() || null,
+            lastIncreaseAt: subscription.lastAutoIncreaseAt,
+            nextIncreaseDate,
+            currentDailyAmount: subscription.dailyAmount.toString(),
+        });
+    } catch (error) {
+        console.error('Failed to get auto-increase settings:', error);
+        res.status(500).json({ error: 'Failed to get auto-increase settings' });
+    }
+});
+
+/**
+ * PUT /api/subscription/auto-increase/:address
+ * Update auto-increase settings for a subscription
+ */
+router.put('/subscription/auto-increase/:address', async (req, res) => {
+    try {
+        const { address } = req.params;
+        const { enabled, type, amount, intervalDays, maxAmount } = req.body;
+
+        // Validate input
+        if (enabled && !type) {
+            return res.status(400).json({ error: 'Type is required when enabling auto-increase' });
+        }
+
+        if (enabled && !amount) {
+            return res.status(400).json({ error: 'Amount is required when enabling auto-increase' });
+        }
+
+        if (type && !['FIXED', 'PERCENTAGE'].includes(type)) {
+            return res.status(400).json({ error: 'Type must be FIXED or PERCENTAGE' });
+        }
+
+        // Validate amounts
+        const parsedAmount = amount ? parseFloat(amount) : null;
+        const parsedMaxAmount = maxAmount ? parseFloat(maxAmount) : null;
+
+        if (parsedAmount !== null && parsedAmount <= 0) {
+            return res.status(400).json({ error: 'Amount must be greater than 0' });
+        }
+
+        if (type === 'PERCENTAGE' && parsedAmount > 100) {
+            return res.status(400).json({ error: 'Percentage cannot exceed 100%' });
+        }
+
+        const subscription = await prisma.subscription.findUnique({
+            where: { walletAddress: address.toLowerCase() },
+        });
+
+        if (!subscription) {
+            return res.status(404).json({ error: 'Subscription not found' });
+        }
+
+        // Update settings
+        await prisma.subscription.update({
+            where: { walletAddress: address.toLowerCase() },
+            data: {
+                autoIncreaseEnabled: enabled,
+                autoIncreaseType: enabled ? type : null,
+                autoIncreaseAmount: enabled ? parsedAmount : null,
+                autoIncreaseIntervalDays: intervalDays || 30,
+                autoIncreaseMaxAmount: parsedMaxAmount,
+            },
+        });
+
+        console.log(`📈 Auto-increase settings updated for ${address}: ${enabled ? `${type} +${amount}` : 'disabled'}`);
+
+        res.json({
+            success: true,
+            message: enabled
+                ? `Auto-increase enabled: ${type === 'FIXED' ? `+$${amount}` : `+${amount}%`} every ${intervalDays || 30} days`
+                : 'Auto-increase disabled',
+        });
+    } catch (error) {
+        console.error('Failed to update auto-increase settings:', error);
+        res.status(500).json({ error: 'Failed to update auto-increase settings' });
+    }
+});
+
 export default router;
