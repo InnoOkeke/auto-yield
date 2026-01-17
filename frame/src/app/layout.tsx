@@ -59,7 +59,8 @@ export const metadata: Metadata = {
                     splashBackgroundColor: "#0f172a"
                 }
             }
-        })
+        }),
+        "base:app_id": "696b5a1ec0ab25addaaaf232"
     },
 };
 
