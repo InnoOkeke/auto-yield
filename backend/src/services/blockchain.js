@@ -1,5 +1,11 @@
 import { ethers } from 'ethers';
 import dotenv from 'dotenv';
+import { createPublicClient, http, createClient } from 'viem';
+import { base } from 'viem/chains';
+import { paymasterActions } from 'viem/account-abstraction';
+import { privateKeyToAccount } from 'viem/accounts';
+import { createSmartAccountClient } from 'permissionless';
+import { toSimpleSmartAccount } from 'permissionless/accounts';
 
 dotenv.config();
 
@@ -62,6 +68,62 @@ export class BlockchainService {
             AVANTIS_VAULT_ABI,
             this.provider
         );
+
+        // Initialize Smart Account
+        this.setupSmartAccount().catch(err => {
+            console.error('Failed to setup Smart Account:', err);
+        });
+    }
+
+    async setupSmartAccount() {
+        try {
+            const paymasterUrl = process.env.PAYMASTER_URL;
+            if (!paymasterUrl) {
+                console.log('ℹ️ PAYMASTER_URL not found, using standard EOA wallet for transactions');
+                return;
+            }
+
+            const privateKey = process.env.OPERATOR_PRIVATE_KEY;
+            const owner = privateKeyToAccount(privateKey);
+
+            const publicClient = createPublicClient({
+                chain: base,
+                transport: http(process.env.BASE_RPC_URL || 'https://mainnet.base.org'),
+            });
+
+            // Create Simple Smart Account (compatible with Coinbase Paymaster)
+            // Uses standard SimpleAccount implementation
+            const account = await toSimpleSmartAccount({
+                client: publicClient,
+                owner: owner,
+                factoryAddress: process.env.FACTORY_ADDRESS, // Use env factory if available
+            });
+
+            // Create Smart Account Client with Paymaster
+            // Assuming the PAYMASTER_URL supports both bundler and paymaster methods (common for Coinbase/Pimlico)
+            this.smartAccountClient = createSmartAccountClient({
+                account,
+                chain: base,
+                bundlerTransport: http(paymasterUrl),
+                middleware: {
+                    sponsorUserOperation: async ({ userOperation }) => {
+                        const paymasterClient = createClient({
+                            chain: base,
+                            transport: http(paymasterUrl),
+                        }).extend(paymasterActions);
+
+                        return paymasterClient.sponsorUserOperation({
+                            userOperation,
+                        });
+                    },
+                },
+            });
+
+            console.log(`✅ Smart Account initialized: ${account.address}`);
+            this.smartAccountAddress = account.address;
+        } catch (error) {
+            console.error('❌ Error setting up Smart Account:', error);
+        }
     }
 
     /**
@@ -69,6 +131,25 @@ export class BlockchainService {
      */
     async executeDailyDeduction(userAddress) {
         try {
+            // Use Smart Account if available for gasless transaction
+            if (this.smartAccountClient) {
+                console.log(`Executing gasless deduction for ${userAddress}`);
+                const hash = await this.smartAccountClient.writeContract({
+                    address: this.vaultContract.target,
+                    abi: VAULT_ABI,
+                    functionName: 'executeDailyDeduction',
+                    args: [userAddress],
+                });
+
+                return {
+                    success: true,
+                    txHash: hash,
+                    blockNumber: 0, // Block number not immediately available in AA response
+                    gasUsed: '0', // Gas sponsored
+                };
+            }
+
+            // Fallback to standard EOA
             const tx = await this.vaultContract.executeDailyDeduction(userAddress, {
                 gasLimit: 500000,
             });
@@ -95,6 +176,26 @@ export class BlockchainService {
      */
     async batchExecuteDeductions(userAddresses) {
         try {
+            // Use Smart Account if available for gasless transaction
+            if (this.smartAccountClient) {
+                console.log(`Executing gasless batch deduction for ${userAddresses.length} users`);
+                const hash = await this.smartAccountClient.writeContract({
+                    address: this.vaultContract.target,
+                    abi: VAULT_ABI,
+                    functionName: 'batchExecuteDeductions',
+                    args: [userAddresses],
+                });
+
+                return {
+                    success: true,
+                    txHash: hash,
+                    blockNumber: 0,
+                    gasUsed: '0',
+                    processedUsers: userAddresses.length,
+                };
+            }
+
+            // Fallback to standard EOA
             const tx = await this.vaultContract.batchExecuteDeductions(userAddresses, {
                 gasLimit: 200000 * userAddresses.length,
             });
