@@ -4,7 +4,6 @@ import { useCallback } from 'react';
 import { useAccount, usePublicClient } from 'wagmi';
 import { useSendCalls, useCallsStatus } from 'wagmi/experimental';
 import { encodeFunctionData } from 'viem';
-import { base } from 'viem/chains';
 
 /**
  * Hook for sending sponsored transactions using Base Paymaster
@@ -14,7 +13,12 @@ export function useSponsoredTransaction() {
     const { address } = useAccount();
     const publicClient = usePublicClient();
 
-    const { sendCalls, data: callsId, isPending, error } = useSendCalls();
+    const { sendCalls, data: callsResult, isPending, error } = useSendCalls();
+
+    // Extract the ID string from the result object
+    const callsId = typeof callsResult === 'string'
+        ? callsResult
+        : callsResult?.id;
 
     const sendSponsoredTransaction = useCallback(async ({
         contractAddress,
@@ -54,9 +58,9 @@ export function useSponsoredTransaction() {
         return result;
     }, [address, sendCalls]);
 
-    // Get call status
+    // Get call status - only enable when we have a valid ID
     const { data: callStatus } = useCallsStatus({
-        id: callsId as string,
+        id: callsId ?? '',
         query: {
             enabled: !!callsId,
             refetchInterval: (data) =>
@@ -76,3 +80,4 @@ export function useSponsoredTransaction() {
 }
 
 export default useSponsoredTransaction;
+
