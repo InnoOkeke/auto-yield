@@ -83,9 +83,9 @@ export default function ConnectWallet({ onConnect }: { onConnect: () => void }) 
             disabled={signInState === 'loading'}
             className="w-full py-4 px-6 rounded-2xl font-semibold text-lg transition-all flex items-center justify-center gap-3 shadow-lg bg-[#855DCD] hover:bg-[#855DCD]/90 text-white disabled:opacity-50"
         >
-            <span className="text-2xl">{signInState === 'loading' ? '⏳' : '🟣'}</span>
+            <span className="text-2xl">{signInState === 'loading' ? '⏳' : '🔗'}</span>
             <span>
-                {signInState === 'loading' ? 'Signing In...' : 'Sign in with Farcaster'}
+                {signInState === 'loading' ? 'Connecting...' : 'Connect Wallet'}
             </span>
         </button>
     );

@@ -6,7 +6,7 @@ import axios from 'axios';
 // Initialize SDK and export for use across the app
 export const farcasterSDK = sdk;
 
-// Helper to check if running in Farcaster context
+// Helper to check if running in mini-app context
 export function isFarcasterContext(): boolean {
     if (typeof window === 'undefined') return false;
 
@@ -14,7 +14,7 @@ export function isFarcasterContext(): boolean {
     return Boolean(sdk.context);
 }
 
-// Helper to get Farcaster user context
+// Helper to get user context from mini-app
 export async function getFarcasterUser() {
     try {
         if (!isFarcasterContext()) return null;
@@ -162,27 +162,31 @@ export async function sendTestNotification(
 }
 
 /**
- * Share streak on Farcaster
+ * Share streak to feed (client-agnostic)
  */
 export async function shareStreak(streak: number) {
     const text = `I'm on a ${streak}-day savings streak with AutoYield! 🔥\n\nAutomating my DeFi savings on Base.`;
     const appUrl = process.env.NEXT_PUBLIC_FRAME_URL || 'https://autoyield.app';
-    const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(appUrl)}`;
 
     if (isFarcasterContext()) {
         try {
-            await sdk.actions.openUrl(url);
+            // Use SDK composeCast for client-agnostic sharing
+            await sdk.actions.composeCast({
+                text,
+                embeds: [appUrl],
+            });
         } catch (e) {
-            console.error('Failed to open URL via SDK:', e);
-            window.open(url, '_blank');
+            console.error('Failed to compose cast via SDK:', e);
         }
     } else {
-        window.open(url, '_blank');
+        // Fallback for non-mini-app context
+        const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(appUrl)}`;
+        window.open(shareUrl, '_blank');
     }
 }
 
 /**
- * Share daily/weekly summary on Farcaster
+ * Share daily/weekly summary to feed (client-agnostic)
  */
 export interface SummaryData {
     totalSaved: string;
@@ -204,17 +208,21 @@ export async function shareSummary(data: SummaryData) {
 Automating my savings on Base with AutoYield! 🚀`;
 
     const appUrl = process.env.NEXT_PUBLIC_FRAME_URL || 'https://autoyield.app';
-    const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(appUrl)}`;
 
     if (isFarcasterContext()) {
         try {
-            await sdk.actions.openUrl(url);
+            // Use SDK composeCast for client-agnostic sharing
+            await sdk.actions.composeCast({
+                text,
+                embeds: [appUrl],
+            });
         } catch (e) {
-            console.error('Failed to open URL via SDK:', e);
-            window.open(url, '_blank');
+            console.error('Failed to compose cast via SDK:', e);
         }
     } else {
-        window.open(url, '_blank');
+        // Fallback for non-mini-app context
+        const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(appUrl)}`;
+        window.open(shareUrl, '_blank');
     }
 }
 

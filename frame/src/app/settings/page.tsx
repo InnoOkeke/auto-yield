@@ -131,7 +131,7 @@ export default function SettingsPage() {
                                 console.log('Test result:', result);
 
                                 if (result.success) {
-                                    alert('Test notification sent! Check your Warpcast.');
+                                    alert('Test notification sent! Check your notifications.');
                                 } else {
                                     alert('Failed to send test notification: ' + result.error);
                                 }
