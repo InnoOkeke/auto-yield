@@ -8,6 +8,7 @@ import { encodeFunctionData } from 'viem';
 /**
  * Hook for sending sponsored transactions using Base Paymaster
  * This enables gasless transactions for users - required for Base App Featured status
+ * @version 1.1.0 - Fixed status type
  */
 export function useSponsoredTransaction() {
     const { address } = useAccount();
