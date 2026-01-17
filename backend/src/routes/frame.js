@@ -1,5 +1,10 @@
+/**
+ * Frame Routes - Migrated to Convex
+ * Farcaster Frame endpoints for the AutoYield app
+ */
+
 import express from 'express';
-import prisma from '../utils/database.js';
+import convex, { api } from '../utils/database.js';
 import avantisService from '../services/avantis.js';
 import { getSSLHubRpcClient, Message } from '@farcaster/hub-nodejs';
 
@@ -9,7 +14,6 @@ const client = getSSLHubRpcClient(HUB_URL);
 async function verifyFrameRequest(req) {
   if (process.env.SKIP_FRAME_VERIFY === 'true') return true;
 
-  // Allow unverified requests in dev if no Hub is configured (fallback warning)
   if (process.env.NODE_ENV !== 'production' && !process.env.FARCASTER_HUB_URL) {
     console.warn('⚠️ Skipping verification in dev: No FARCASTER_HUB_URL');
     return true;
@@ -78,12 +82,10 @@ router.post('/onboard', async (req, res) => {
   try {
     const { untrustedData, trustedData } = req.body;
 
-    // Security: Verify signature
     if (!(await verifyFrameRequest(req))) {
       return res.status(401).send('Invalid Frame Signature');
     }
 
-    // In production, verify trustedData signature
     const fid = untrustedData?.fid;
     const buttonIndex = untrustedData?.buttonIndex;
 
@@ -131,26 +133,11 @@ router.post('/subscribe', async (req, res) => {
 
     let dailyAmount = amount || inputAmount || '10';
 
-    // Security: Validate dailyAmount is numeric to prevent XSS
+    // Validate dailyAmount is numeric
     if (!/^\d+(\.\d+)?$/.test(dailyAmount)) {
       console.warn('Invalid dailyAmount received:', dailyAmount);
       dailyAmount = '10';
     }
-
-    // Generate transaction for user to sign
-    const txData = {
-      chainId: `eip155:${process.env.CHAIN_ID}`,
-      method: 'eth_sendTransaction',
-      params: {
-        abi: [{
-          "inputs": [{ "type": "uint256", "name": "dailyAmount" }],
-          "name": "subscribe",
-          "type": "function"
-        }],
-        to: process.env.VAULT_ADDRESS,
-        data: `subscribe(${ethers.parseUnits(dailyAmount, 6)})`,
-      },
-    };
 
     const frameHtml = `
 <!DOCTYPE html>
@@ -188,11 +175,8 @@ router.post('/dashboard', async (req, res) => {
     const { untrustedData } = req.body;
     const fid = untrustedData?.fid;
 
-    // Fetch user data
-    const user = await prisma.user.findUnique({
-      where: { farcasterFid: fid },
-      include: { subscription: true },
-    });
+    // Fetch user data from Convex
+    const user = await convex.query(api.users.getByFid, { farcasterFid: fid });
 
     let yieldData = null;
     if (user?.walletAddress) {

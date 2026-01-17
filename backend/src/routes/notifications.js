@@ -1,5 +1,10 @@
+/**
+ * Notification Routes - Migrated to Convex
+ * Farcaster notification webhook handling
+ */
+
 import express from 'express';
-import prisma from '../utils/database.js';
+import convex, { api } from '../utils/database.js';
 import notificationService from '../services/notification.js';
 
 const router = express.Router();
@@ -7,11 +12,11 @@ const router = express.Router();
 /**
  * POST /api/farcaster/webhook
  * Receives webhook events from Farcaster
- * This is called automatically when users enable/disable notifications in Warpcast
+ * Called automatically when users enable/disable notifications in their client
  */
 router.post('/webhook', async (req, res) => {
     try {
-        console.log('📱 Received Farcaster webhook:', JSON.stringify(req.body, null, 2));
+        console.log('📱 Received webhook:', JSON.stringify(req.body, null, 2));
 
         const { event, fid, notificationDetails } = req.body;
 
@@ -22,28 +27,24 @@ router.post('/webhook', async (req, res) => {
             console.log(`🔔 User FID ${fid} enabled notifications`);
 
             // Find or create user by FID
-            let user = await prisma.user.findUnique({
-                where: { farcasterFid: parseInt(fid) },
-            });
+            let user = await convex.query(api.users.getByFid, { farcasterFid: parseInt(fid) });
 
             if (!user) {
                 // Create user if doesn't exist
-                user = await prisma.user.create({
-                    data: {
-                        farcasterFid: parseInt(fid),
-                        walletAddress: `0x_fid_${fid}`, // Placeholder until linked
-                        notificationsEnabled: true,
-                    },
+                const userId = await convex.mutation(api.users.upsert, {
+                    farcasterFid: parseInt(fid),
+                    walletAddress: `0x_fid_${fid}`, // Placeholder until linked
                 });
+                user = await convex.query(api.users.getById, { userId });
                 console.log(`✨ Created new user for FID ${fid}`);
             }
 
             // Save notification credentials
-            await notificationService.saveNotificationCredentials(
-                user.id,
-                url,
-                token
-            );
+            await convex.mutation(api.users.enableNotifications, {
+                walletAddress: user.walletAddress,
+                notificationUrl: url,
+                notificationToken: token,
+            });
 
             console.log(`✅ Saved notification credentials for FID ${fid}`);
         }
@@ -52,12 +53,12 @@ router.post('/webhook', async (req, res) => {
         if (event === 'frame_removed' || event === 'frame.removed') {
             console.log(`🔕 User FID ${fid} disabled notifications`);
 
-            const user = await prisma.user.findUnique({
-                where: { farcasterFid: parseInt(fid) },
-            });
+            const user = await convex.query(api.users.getByFid, { farcasterFid: parseInt(fid) });
 
             if (user) {
-                await notificationService.disableNotifications(user.id);
+                await convex.mutation(api.users.disableNotifications, {
+                    walletAddress: user.walletAddress,
+                });
                 console.log(`✅ Disabled notifications for FID ${fid}`);
             }
         }
@@ -65,8 +66,8 @@ router.post('/webhook', async (req, res) => {
         // Always return 200 to acknowledge receipt
         res.status(200).json({ success: true });
     } catch (error) {
-        console.error('❌ Error processing Farcaster webhook:', error);
-        // Still return 200 to prevent Farcaster from retrying
+        console.error('❌ Error processing webhook:', error);
+        // Still return 200 to prevent retries
         res.status(200).json({ success: false, error: error.message });
     }
 });
@@ -81,16 +82,16 @@ router.get('/status', async (req, res) => {
 
         let user;
         if (fid) {
-            user = await prisma.user.findUnique({ where: { farcasterFid: parseInt(fid) } });
+            user = await convex.query(api.users.getByFid, { farcasterFid: parseInt(fid) });
         } else if (walletAddress) {
-            user = await prisma.user.findUnique({ where: { walletAddress: walletAddress.toLowerCase() } });
+            user = await convex.query(api.users.getByWallet, { walletAddress: walletAddress.toLowerCase() });
         }
 
         if (!user) {
             return res.json({ enabled: false, configured: false });
         }
 
-        const status = await notificationService.getNotificationStatus(user.id);
+        const status = await notificationService.getNotificationStatus(user.walletAddress);
         res.json(status);
     } catch (error) {
         console.error('Failed to get notification status:', error);
@@ -108,9 +109,9 @@ router.post('/test', async (req, res) => {
 
         let user;
         if (fid) {
-            user = await prisma.user.findUnique({ where: { farcasterFid: parseInt(fid) } });
+            user = await convex.query(api.users.getByFid, { farcasterFid: parseInt(fid) });
         } else if (walletAddress) {
-            user = await prisma.user.findUnique({ where: { walletAddress: walletAddress.toLowerCase() } });
+            user = await convex.query(api.users.getByWallet, { walletAddress: walletAddress.toLowerCase() });
         }
 
         if (!user) {
@@ -138,20 +139,18 @@ router.post('/test', async (req, res) => {
 router.post('/enable', async (req, res) => {
     try {
         const { walletAddress, fid } = req.body;
-        // This is mainly a placeholder as Farcaster handles this via webhooks.
-        // But we can use it to ensure the user exists in our DB.
 
-        let user = await prisma.user.findUnique({
-            where: fid ? { farcasterFid: parseInt(fid) } : { walletAddress: walletAddress.toLowerCase() }
-        });
+        let user;
+        if (fid) {
+            user = await convex.query(api.users.getByFid, { farcasterFid: parseInt(fid) });
+        } else if (walletAddress) {
+            user = await convex.query(api.users.getByWallet, { walletAddress: walletAddress.toLowerCase() });
+        }
 
         if (!user && walletAddress) {
-            user = await prisma.user.create({
-                data: {
-                    farcasterFid: fid ? parseInt(fid) : 0,
-                    walletAddress: walletAddress.toLowerCase(),
-                    notificationsEnabled: true,
-                },
+            await convex.mutation(api.users.upsert, {
+                farcasterFid: fid ? parseInt(fid) : 0,
+                walletAddress: walletAddress.toLowerCase(),
             });
         }
 
