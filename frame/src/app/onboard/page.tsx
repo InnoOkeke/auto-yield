@@ -77,7 +77,7 @@ export default function OnboardPage() {
                     <div className="text-center mb-8">
                         <h1 className="text-4xl font-bold text-foreground mb-3 font-display">
                             {step === 'connect' && (username ? `🚀 Welcome, @${username}!` : '🚀 Welcome to AutoYield')}
-                            {step === 'notifications' && '🔔 Stay Updated'}
+                            {step === 'notifications' && 'Enable Notifications'}
                             {step === 'amount' && '💵 Set Your Daily Savings'}
                             {step === 'confirm' && '✅ Almost There!'}
                         </h1>
@@ -147,9 +147,7 @@ export default function OnboardPage() {
                     {step === 'notifications' && (
                         <div className="space-y-6 text-center">
                             <div className="glass rounded-2xl p-8 border border-primary-500/20 bg-primary-500/5">
-                                <div className="text-5xl mb-4">🔔</div>
-                                <h3 className="text-xl font-bold mb-2">Enable Notifications</h3>
-                                <p className="text-muted mb-6">
+                                <p className="text-sm text-muted mb-6">
                                     Get alerts when you save money, earn yield, or when there&apos;s an issue with your account.
                                 </p>
                                 <div className="flex flex-col gap-3">
