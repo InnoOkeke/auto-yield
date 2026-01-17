@@ -2,7 +2,17 @@
 const nextConfig = {
     reactStrictMode: true,
     images: {
-        domains: ['avatars.githubusercontent.com', 'i.imgur.com'],
+        remotePatterns: [
+            { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
+            { protocol: 'https', hostname: 'i.imgur.com' },
+            { protocol: 'https', hostname: 'imagedelivery.net' },
+            { protocol: 'https', hostname: 'i.seadn.io' },
+            { protocol: 'https', hostname: 'warpcast.com' },
+            { protocol: 'https', hostname: '*.warpcast.com' },
+            { protocol: 'https', hostname: 'res.cloudinary.com' },
+            { protocol: 'https', hostname: '*.farcaster.xyz' },
+            { protocol: 'https', hostname: 'openseauserdata.com' },
+        ],
     },
     async headers() {
         return [

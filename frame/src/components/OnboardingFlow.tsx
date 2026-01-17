@@ -64,7 +64,10 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{
+                background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
+            }}
         >
             <div className="w-full max-w-md">
                 <AnimatePresence mode="wait">
@@ -105,8 +108,8 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                             key={index}
                             onClick={() => setCurrentSlide(index)}
                             className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentSlide
-                                    ? 'w-8 bg-gradient-to-r from-purple-500 to-blue-500'
-                                    : 'bg-foreground/20'
+                                ? 'w-8 bg-gradient-to-r from-purple-500 to-blue-500'
+                                : 'bg-foreground/20'
                                 }`}
                         />
                     ))}

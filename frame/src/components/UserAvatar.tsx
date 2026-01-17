@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
@@ -26,6 +27,7 @@ export default function UserAvatar({
 }: UserAvatarProps) {
     const { displayName, pfpUrl, loading } = useUserProfile();
     const { avatar: avatarSize, text: textSize } = sizes[size];
+    const [imageError, setImageError] = useState(false);
 
     if (loading) {
         return (
@@ -41,16 +43,20 @@ export default function UserAvatar({
         );
     }
 
+    const showFallback = !pfpUrl || imageError;
+
     return (
         <div className={`flex items-center gap-2 ${className}`}>
             {/* Avatar */}
-            {pfpUrl ? (
+            {!showFallback ? (
                 <Image
                     src={pfpUrl}
                     alt={displayName}
                     width={avatarSize}
                     height={avatarSize}
                     className="rounded-full object-cover border-2 border-foreground/10"
+                    unoptimized
+                    onError={() => setImageError(true)}
                 />
             ) : (
                 <div
