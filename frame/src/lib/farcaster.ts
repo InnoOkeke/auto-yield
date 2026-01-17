@@ -56,20 +56,21 @@ export async function enableNotifications(
     try {
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-        // 1. Call backend to initialize (optional but ensures user exists)
-        await axios.post(`${backendUrl}/api/notifications/enable`, {
-            walletAddress,
-            fid,
-        });
-
-        // 2. Prompt user to add frame with notifications if SDK is available
+        // 1. Prompt user to add frame with notifications if SDK is available
         if (typeof window !== 'undefined' && farcasterSDK.actions.addFrame) {
             try {
-                await farcasterSDK.actions.addFrame();
+                const result = await farcasterSDK.actions.addFrame();
+                console.log('addFrame result:', result);
             } catch (sdkError) {
                 console.warn('Farcaster SDK addFrame failed or cancelled:', sdkError);
             }
         }
+
+        // 2. Call backend to initialize (optional but ensures user exists)
+        await axios.post(`${backendUrl}/api/farcaster/enable`, {
+            walletAddress,
+            fid,
+        });
 
         return {
             success: true,
@@ -94,7 +95,7 @@ export async function disableNotifications(
     try {
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-        const response = await axios.delete(`${backendUrl}/api/notifications/disable`, {
+        const response = await axios.delete(`${backendUrl}/api/farcaster/disable`, {
             data: { walletAddress, fid },
         });
 
@@ -118,7 +119,7 @@ export async function getNotificationStatus(
     try {
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-        const response = await axios.get(`${backendUrl}/api/notifications/status`, {
+        const response = await axios.get(`${backendUrl}/api/farcaster/status`, {
             params: { walletAddress, fid },
         });
 
@@ -146,7 +147,7 @@ export async function sendTestNotification(
     try {
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-        const response = await axios.post(`${backendUrl}/api/notifications/test`, {
+        const response = await axios.post(`${backendUrl}/api/farcaster/test`, {
             walletAddress,
             fid,
         });
