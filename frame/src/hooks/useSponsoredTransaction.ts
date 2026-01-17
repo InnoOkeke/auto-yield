@@ -64,7 +64,7 @@ export function useSponsoredTransaction() {
         query: {
             enabled: !!callsId,
             refetchInterval: (data) =>
-                data.state.data?.status === 'CONFIRMED' ? false : 1000,
+                data.state.data?.status === 'success' ? false : 1000,
         },
     });
 
@@ -74,7 +74,7 @@ export function useSponsoredTransaction() {
         isPending,
         error,
         callStatus,
-        isConfirmed: callStatus?.status === 'CONFIRMED',
+        isConfirmed: callStatus?.status === 'success',
         txHash: callStatus?.receipts?.[0]?.transactionHash,
     };
 }
