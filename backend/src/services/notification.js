@@ -1,5 +1,10 @@
+/**
+ * Notification Service - Migrated to Convex
+ * Handles push notifications via Farcaster webhook
+ */
+
 import axios from 'axios';
-import prisma from '../utils/database.js';
+import convex, { api } from '../utils/database.js';
 
 export class NotificationService {
     /**
@@ -13,9 +18,8 @@ export class NotificationService {
         try {
             // Check if user has notifications enabled
             if (!user.notificationsEnabled || !user.notificationUrl || !user.notificationToken) {
-                console.log(`Notifications not enabled for user ${user.id}`);
+                console.log(`Notifications not enabled for user ${user._id}`);
 
-                // Return more specific error message
                 if (!user.notificationsEnabled) {
                     return { success: false, reason: 'notifications_disabled', error: 'Notifications are not enabled for this user' };
                 }
@@ -23,14 +27,14 @@ export class NotificationService {
                     return {
                         success: false,
                         reason: 'credentials_missing',
-                        error: 'Notification credentials not yet received from Farcaster. Please enable notifications in your Warpcast settings for this Mini App.'
+                        error: 'Notification credentials not yet received. Please enable notifications in your client settings for this Mini App.'
                     };
                 }
             }
 
             console.log(`📱 Sending notification to user ${user.username || user.walletAddress}`);
 
-            // Send POST request to Farcaster notification webhook
+            // Send POST request to notification webhook
             const response = await axios.post(
                 user.notificationUrl,
                 {
@@ -43,7 +47,7 @@ export class NotificationService {
                         Authorization: `Bearer ${user.notificationToken}`,
                         'Content-Type': 'application/json',
                     },
-                    timeout: 5000, // 5 second timeout
+                    timeout: 5000,
                 }
             );
 
@@ -54,13 +58,13 @@ export class NotificationService {
                 response: response.data,
             };
         } catch (error) {
-            console.error(`❌ Failed to send notification to user ${user.id}:`, error.message);
+            console.error(`❌ Failed to send notification to user ${user._id}:`, error.message);
 
             // Handle specific error cases
             if (error.response?.status === 401) {
                 // Token expired or invalid - disable notifications for this user
-                await this.disableNotifications(user.id);
-                console.warn(`Disabled notifications for user ${user.id} due to auth error`);
+                await this.disableNotificationsByWallet(user.walletAddress);
+                console.warn(`Disabled notifications for user ${user._id} due to auth error`);
             }
 
             return {
@@ -72,81 +76,63 @@ export class NotificationService {
     }
 
     /**
-     * Save notification credentials for a user
-     * @param {string} userId - User ID
+     * Save notification credentials for a user by wallet address
+     * @param {string} walletAddress - User wallet address
      * @param {string} notificationUrl - Farcaster webhook URL
      * @param {string} notificationToken - Auth token
      */
-    async saveNotificationCredentials(userId, notificationUrl, notificationToken) {
+    async saveNotificationCredentials(walletAddress, notificationUrl, notificationToken) {
         try {
-            await prisma.user.update({
-                where: { id: userId },
-                data: {
-                    notificationUrl,
-                    notificationToken,
-                    notificationsEnabled: true,
-                },
+            await convex.mutation(api.users.enableNotifications, {
+                walletAddress,
+                notificationUrl,
+                notificationToken,
             });
 
-            console.log(`✅ Saved notification credentials for user ${userId}`);
+            console.log(`✅ Saved notification credentials for wallet ${walletAddress}`);
             return { success: true };
         } catch (error) {
-            console.error(`Failed to save notification credentials for user ${userId}:`, error);
+            console.error(`Failed to save notification credentials for wallet ${walletAddress}:`, error);
             return { success: false, error: error.message };
         }
     }
 
     /**
-     * Disable notifications for a user
-     * @param {string} userId - User ID
+     * Disable notifications for a user by wallet address
+     * @param {string} walletAddress - User wallet address
      */
-    async disableNotifications(userId) {
+    async disableNotificationsByWallet(walletAddress) {
         try {
-            await prisma.user.update({
-                where: { id: userId },
-                data: {
-                    notificationUrl: null,
-                    notificationToken: null,
-                    notificationsEnabled: false,
-                },
-            });
+            await convex.mutation(api.users.disableNotifications, { walletAddress });
 
-            console.log(`✅ Disabled notifications for user ${userId}`);
+            console.log(`✅ Disabled notifications for wallet ${walletAddress}`);
             return { success: true };
         } catch (error) {
-            console.error(`Failed to disable notifications for user ${userId}:`, error);
+            console.error(`Failed to disable notifications for wallet ${walletAddress}:`, error);
             return { success: false, error: error.message };
         }
     }
 
     /**
      * Check if notifications are enabled for a user
-     * @param {string} userId - User ID
+     * @param {string} walletAddress - User wallet address
      */
-    async getNotificationStatus(userId) {
+    async getNotificationStatus(walletAddress) {
         try {
-            const user = await prisma.user.findUnique({
-                where: { id: userId },
-                select: {
-                    notificationsEnabled: true,
-                    notificationUrl: true,
-                },
-            });
+            const user = await convex.query(api.users.getByWallet, { walletAddress });
 
             return {
                 enabled: user?.notificationsEnabled || false,
                 configured: Boolean(user?.notificationUrl),
             };
         } catch (error) {
-            console.error(`Failed to get notification status for user ${userId}:`, error);
+            console.error(`Failed to get notification status for wallet ${walletAddress}:`, error);
             return { enabled: false, configured: false };
         }
     }
 
     /**
      * Send deduction success notification
-     * @param {Object} user - User object
-     * @param {string|number} amount - Amount deducted
      */
     async sendDeductionNotification(user, amount, streak = 0) {
         let message = `Successfully saved ${amount} USDC today! Keep building your yield.`;
@@ -163,8 +149,6 @@ export class NotificationService {
 
     /**
      * Send deposit notification
-     * @param {Object} user - User object
-     * @param {string|number} amount - Amount deposited
      */
     async sendDepositNotification(user, amount) {
         return this.sendNotification(
@@ -177,8 +161,6 @@ export class NotificationService {
 
     /**
      * Send withdrawal notification
-     * @param {Object} user - User object
-     * @param {string|number} amount - Amount withdrawn
      */
     async sendWithdrawalNotification(user, amount) {
         return this.sendNotification(
@@ -191,8 +173,6 @@ export class NotificationService {
 
     /**
      * Send subscription activated notification
-     * @param {Object} user - User object
-     * @param {string|number} dailyAmount - Daily deduction amount
      */
     async sendSubscriptionActivatedNotification(user, dailyAmount) {
         return this.sendNotification(
@@ -205,9 +185,6 @@ export class NotificationService {
 
     /**
      * Send yield earnings summary notification
-     * @param {Object} user - User object
-     * @param {string|number} totalYield - Total yield earned
-     * @param {string} period - Time period (e.g., 'this week', 'this month')
      */
     async sendYieldSummaryNotification(user, totalYield, period) {
         return this.sendNotification(
@@ -220,9 +197,6 @@ export class NotificationService {
 
     /**
      * Smart Pause notification - friendly and non-alarming
-     * @param {Object} user - User object
-     * @param {string} currentBalance - User's current USDC balance
-     * @param {string} requiredAmount - Required amount for daily save
      */
     async sendSmartPauseNotification(user, currentBalance, requiredAmount) {
         return this.sendNotification(
@@ -235,7 +209,6 @@ export class NotificationService {
 
     /**
      * Auto-resume notification - celebratory
-     * @param {Object} user - User object
      */
     async sendAutoResumeNotification(user) {
         return this.sendNotification(
@@ -248,7 +221,6 @@ export class NotificationService {
 
     /**
      * Manual resume notification - confirmation
-     * @param {Object} user - User object
      */
     async sendManualResumeNotification(user) {
         return this.sendNotification(
@@ -261,9 +233,6 @@ export class NotificationService {
 
     /**
      * Auto-increase notification - premium feature celebration
-     * @param {Object} user - User object
-     * @param {string} oldAmount - Previous daily amount
-     * @param {string} newAmount - New daily amount
      */
     async sendAutoIncreaseNotification(user, oldAmount, newAmount) {
         return this.sendNotification(

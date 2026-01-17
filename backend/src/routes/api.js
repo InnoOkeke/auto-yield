@@ -1,5 +1,10 @@
+/**
+ * API Routes - Migrated to Convex
+ * Main API endpoints for the AutoYield backend
+ */
+
 import express from 'express';
-import prisma from '../utils/database.js';
+import convex, { api } from '../utils/database.js';
 import blockchainService from '../services/blockchain.js';
 import avantisService from '../services/avantis.js';
 import deductionService from '../services/deduction.js';
@@ -12,7 +17,6 @@ export const requireAuth = (req, res, next) => {
     const apiKey = req.headers['x-api-key'];
     const validKey = process.env.API_SECRET;
 
-    // Allow usage without key in development if specifically allowed, or strictly enforce
     if (!validKey) {
         console.warn('⚠️ API_SECRET not set, allowing request (unsafe)');
         return next();
@@ -31,19 +35,18 @@ export const requireAuth = (req, res, next) => {
  */
 router.get('/stats', async (req, res) => {
     try {
-        const [activeSubscriptions, totalUsers, vaultStats, deductionStats] = await Promise.all([
-            prisma.subscription.count({ where: { isActive: true } }),
-            prisma.user.count(),
+        const [stats, vaultStats, deductionStats] = await Promise.all([
+            convex.query(api.stats.getStats),
             avantisService.getVaultStats(),
             deductionService.getDeductionStats('24h'),
         ]);
 
         res.json({
             users: {
-                total: totalUsers,
-                activeSubscriptions,
+                total: stats.totalUsers,
+                activeSubscriptions: stats.activeSubscriptions,
             },
-            vault: vaultStats,
+            vault: vaultStats || stats.vault,
             deductions: deductionStats,
             timestamp: new Date().toISOString(),
         });
@@ -61,25 +64,27 @@ router.get('/user/:address', async (req, res) => {
     try {
         const { address } = req.params;
 
-        const user = await prisma.user.findUnique({
-            where: { walletAddress: address.toLowerCase() },
-            include: {
-                subscription: true,
-                transactions: {
-                    orderBy: { timestamp: 'desc' },
-                    take: 10,
-                },
-            },
+        const user = await convex.query(api.users.getByWallet, {
+            walletAddress: address.toLowerCase()
         });
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
+        const subscription = await convex.query(api.subscriptions.getByUserId, {
+            userId: user._id
+        });
+
+        const transactions = await convex.query(api.transactions.getByUser, {
+            userId: user._id,
+            limit: 10
+        });
+
         const yieldData = await avantisService.getUserYieldData(address);
 
         res.json({
-            user,
+            user: { ...user, subscription, transactions },
             yield: yieldData,
         });
     } catch (error) {
@@ -114,8 +119,8 @@ router.get('/subscription/:address', async (req, res) => {
 
         const [onChainSub, dbSub] = await Promise.all([
             blockchainService.getSubscription(address),
-            prisma.subscription.findUnique({
-                where: { walletAddress: address.toLowerCase() },
+            convex.query(api.subscriptions.getByWallet, {
+                walletAddress: address.toLowerCase()
             }),
         ]);
 
@@ -136,33 +141,26 @@ router.get('/subscription/:address', async (req, res) => {
 router.get('/transactions/:address', async (req, res) => {
     try {
         const { address } = req.params;
-        const { limit = 50, offset = 0 } = req.query;
+        const { limit = 50 } = req.query;
 
-        const user = await prisma.user.findUnique({
-            where: { walletAddress: address.toLowerCase() },
+        const user = await convex.query(api.users.getByWallet, {
+            walletAddress: address.toLowerCase()
         });
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        const transactions = await prisma.transaction.findMany({
-            where: { userId: user.id },
-            orderBy: { timestamp: 'desc' },
-            take: parseInt(limit),
-            skip: parseInt(offset),
-        });
-
-        const total = await prisma.transaction.count({
-            where: { userId: user.id },
+        const transactions = await convex.query(api.transactions.getByUser, {
+            userId: user._id,
+            limit: parseInt(limit)
         });
 
         res.json({
             transactions,
             pagination: {
-                total,
+                total: transactions.length,
                 limit: parseInt(limit),
-                offset: parseInt(offset),
             },
         });
     } catch (error) {
@@ -184,47 +182,37 @@ router.post('/sync-user', requireAuth, async (req, res) => {
         }
 
         // Upsert user
-        const user = await prisma.user.upsert({
-            where: { walletAddress: walletAddress.toLowerCase() },
-            update: { username },
-            create: {
-                farcasterFid,
-                walletAddress: walletAddress.toLowerCase(),
-                username,
-            },
+        const userId = await convex.mutation(api.users.upsert, {
+            farcasterFid,
+            walletAddress: walletAddress.toLowerCase(),
+            username,
         });
+
+        const user = await convex.query(api.users.getById, { userId });
 
         // Fetch on-chain subscription
         const onChainSub = await blockchainService.getSubscription(walletAddress);
 
         if (onChainSub && onChainSub.isActive) {
-            // Sync subscription to database
-            const isNew = !await prisma.subscription.findUnique({ where: { walletAddress: walletAddress.toLowerCase() } });
-
-            await prisma.subscription.upsert({
-                where: { walletAddress: walletAddress.toLowerCase() },
-                update: {
-                    dailyAmount: onChainSub.dailyAmount.toString(),
-                    isActive: onChainSub.isActive,
-                    lastDeduction: onChainSub.lastDeduction > 0
-                        ? new Date(onChainSub.lastDeduction * 1000)
-                        : null,
-                },
-                create: {
-                    userId: user.id,
-                    walletAddress: walletAddress.toLowerCase(),
-                    dailyAmount: onChainSub.dailyAmount.toString(),
-                    isActive: onChainSub.isActive,
-                    startDate: new Date(onChainSub.startDate * 1000),
-                    lastDeduction: onChainSub.lastDeduction > 0
-                        ? new Date(onChainSub.lastDeduction * 1000)
-                        : null,
-                },
+            // Check if subscription exists
+            const existingSub = await convex.query(api.subscriptions.getByWallet, {
+                walletAddress: walletAddress.toLowerCase()
             });
 
-            // Send notification if new subscription
-            if (isNew && user.notificationsEnabled) {
-                await notificationService.sendSubscriptionActivatedNotification(user, onChainSub.dailyAmount.toString());
+            if (!existingSub) {
+                // Create new subscription
+                await convex.mutation(api.subscriptions.create, {
+                    userId: user._id,
+                    walletAddress: walletAddress.toLowerCase(),
+                    dailyAmount: parseFloat(onChainSub.dailyAmount.toString()),
+                });
+
+                if (user.notificationsEnabled) {
+                    await notificationService.sendSubscriptionActivatedNotification(
+                        user,
+                        onChainSub.dailyAmount.toString()
+                    );
+                }
             }
         }
 
@@ -247,77 +235,47 @@ router.post('/subscription/sync', requireAuth, async (req, res) => {
             return res.status(400).json({ error: 'Address is required' });
         }
 
+        const user = await convex.query(api.users.getByWallet, {
+            walletAddress: address.toLowerCase()
+        });
+
+        if (!user) {
+            return res.json({ success: false, message: 'User not found' });
+        }
+
         const onChainSub = await blockchainService.getSubscription(address);
 
         if (onChainSub) {
-            await prisma.subscription.upsert({
-                where: { walletAddress: address.toLowerCase() },
-                update: {
-                    dailyAmount: onChainSub.dailyAmount.toString(),
-                    isActive: onChainSub.isActive,
-                    lastDeduction: onChainSub.lastDeduction > 0
-                        ? new Date(onChainSub.lastDeduction * 1000)
-                        : null,
-                },
-                // We don't create if user doesn't exist, this is just for sync
-                create: {
-                    walletAddress: address.toLowerCase(), // This might fail if user doesn't exist foreign key
-                    userId: 'temp', // This will definitely fail. We should only update if exists or handle user creation.
-                    // Actually, better to just update if it exists, or find user first.
-                    dailyAmount: onChainSub.dailyAmount.toString(),
-                    isActive: onChainSub.isActive,
-                    startDate: new Date(),
-                    lastDeduction: null
-                }
+            const existingSub = await convex.query(api.subscriptions.getByWallet, {
+                walletAddress: address.toLowerCase()
             });
-            // Re-think logic: we just want to update the existing sub.
-            // If sub doesn't exist but user does, create it.
 
-            const user = await prisma.user.findUnique({ where: { walletAddress: address.toLowerCase() } });
-
-            if (user) {
-                const existingSub = await prisma.subscription.findUnique({ where: { walletAddress: address.toLowerCase() } });
-                const wasActive = existingSub?.isActive || false;
-
-                await prisma.subscription.upsert({
-                    where: { walletAddress: address.toLowerCase() },
-                    update: {
-                        dailyAmount: onChainSub.dailyAmount.toString(),
-                        isActive: onChainSub.isActive,
-                        lastDeduction: onChainSub.lastDeduction > 0
-                            ? new Date(onChainSub.lastDeduction * 1000)
-                            : null,
-                    },
-                    create: {
-                        userId: user.id,
-                        walletAddress: address.toLowerCase(),
-                        dailyAmount: onChainSub.dailyAmount.toString(),
-                        isActive: onChainSub.isActive,
-                        startDate: new Date(onChainSub.startDate * 1000),
-                        lastDeduction: onChainSub.lastDeduction > 0
-                            ? new Date(onChainSub.lastDeduction * 1000)
-                            : null,
-                    }
+            if (existingSub) {
+                // Update existing
+                await convex.mutation(api.subscriptions.updateDailyAmount, {
+                    walletAddress: address.toLowerCase(),
+                    dailyAmount: parseFloat(onChainSub.dailyAmount.toString()),
+                });
+            } else {
+                // Create new
+                await convex.mutation(api.subscriptions.create, {
+                    userId: user._id,
+                    walletAddress: address.toLowerCase(),
+                    dailyAmount: parseFloat(onChainSub.dailyAmount.toString()),
                 });
 
-                // Trigger notifications based on status change
                 if (user.notificationsEnabled) {
-                    if (!wasActive && onChainSub.isActive) {
-                        await notificationService.sendSubscriptionActivatedNotification(user, onChainSub.dailyAmount.toString());
-                    } else if (wasActive && !onChainSub.isActive) {
-                        await notificationService.sendNotification(
-                            user,
-                            '⏸️ Subscription Paused',
-                            'Your daily deductions have been paused. You can resume anytime from the dashboard.',
-                            process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
-                        );
-                    }
+                    await notificationService.sendSubscriptionActivatedNotification(
+                        user,
+                        onChainSub.dailyAmount.toString()
+                    );
                 }
-
-                return res.json({ success: true });
             }
+
+            return res.json({ success: true });
         }
-        res.json({ success: false, message: 'User or subscription not found' });
+
+        res.json({ success: false, message: 'Subscription not found on-chain' });
     } catch (error) {
         console.error('Failed to sync subscription:', error);
         res.status(500).json({ error: 'Failed to sync subscription' });
@@ -357,24 +315,14 @@ router.get('/subscription/pause-status/:address', async (req, res) => {
     try {
         const { address } = req.params;
 
-        const subscription = await prisma.subscription.findUnique({
-            where: { walletAddress: address.toLowerCase() },
-            select: {
-                isPaused: true,
-                pauseReason: true,
-                pausedAt: true,
-                autoResumeEnabled: true,
-                dailyAmount: true,
-                currentStreak: true,
-                bestStreak: true,
-            },
+        const subscription = await convex.query(api.subscriptions.getByWallet, {
+            walletAddress: address.toLowerCase()
         });
 
         if (!subscription) {
             return res.status(404).json({ error: 'Subscription not found' });
         }
 
-        // Get current balance if paused
         let currentBalance = null;
         let requiredAmount = null;
 
@@ -410,33 +358,18 @@ router.get('/subscription/auto-increase/:address', async (req, res) => {
     try {
         const { address } = req.params;
 
-        const subscription = await prisma.subscription.findUnique({
-            where: { walletAddress: address.toLowerCase() },
-            select: {
-                autoIncreaseEnabled: true,
-                autoIncreaseType: true,
-                autoIncreaseAmount: true,
-                autoIncreaseIntervalDays: true,
-                autoIncreaseMaxAmount: true,
-                lastAutoIncreaseAt: true,
-                dailyAmount: true,
-            },
+        const subscription = await convex.query(api.subscriptions.getByWallet, {
+            walletAddress: address.toLowerCase()
         });
 
         if (!subscription) {
             return res.status(404).json({ error: 'Subscription not found' });
         }
 
-        // Calculate next increase date
         let nextIncreaseDate = null;
-        if (subscription.autoIncreaseEnabled) {
-            const lastIncrease = subscription.lastAutoIncreaseAt;
+        if (subscription.autoIncreaseEnabled && subscription.lastAutoIncreaseAt) {
             const intervalDays = subscription.autoIncreaseIntervalDays || 30;
-
-            if (lastIncrease) {
-                nextIncreaseDate = new Date(lastIncrease);
-                nextIncreaseDate.setDate(nextIncreaseDate.getDate() + intervalDays);
-            }
+            nextIncreaseDate = new Date(subscription.lastAutoIncreaseAt + intervalDays * 24 * 60 * 60 * 1000);
         }
 
         res.json({
@@ -477,7 +410,6 @@ router.put('/subscription/auto-increase/:address', async (req, res) => {
             return res.status(400).json({ error: 'Type must be FIXED or PERCENTAGE' });
         }
 
-        // Validate amounts
         const parsedAmount = amount ? parseFloat(amount) : null;
         const parsedMaxAmount = maxAmount ? parseFloat(maxAmount) : null;
 
@@ -489,24 +421,21 @@ router.put('/subscription/auto-increase/:address', async (req, res) => {
             return res.status(400).json({ error: 'Percentage cannot exceed 100%' });
         }
 
-        const subscription = await prisma.subscription.findUnique({
-            where: { walletAddress: address.toLowerCase() },
+        const subscription = await convex.query(api.subscriptions.getByWallet, {
+            walletAddress: address.toLowerCase()
         });
 
         if (!subscription) {
             return res.status(404).json({ error: 'Subscription not found' });
         }
 
-        // Update settings
-        await prisma.subscription.update({
-            where: { walletAddress: address.toLowerCase() },
-            data: {
-                autoIncreaseEnabled: enabled,
-                autoIncreaseType: enabled ? type : null,
-                autoIncreaseAmount: enabled ? parsedAmount : null,
-                autoIncreaseIntervalDays: intervalDays || 30,
-                autoIncreaseMaxAmount: parsedMaxAmount,
-            },
+        await convex.mutation(api.subscriptions.updateAutoIncrease, {
+            walletAddress: address.toLowerCase(),
+            autoIncreaseEnabled: enabled,
+            autoIncreaseType: enabled ? type : undefined,
+            autoIncreaseAmount: enabled ? parsedAmount : undefined,
+            autoIncreaseIntervalDays: intervalDays || 30,
+            autoIncreaseMaxAmount: parsedMaxAmount,
         });
 
         console.log(`📈 Auto-increase settings updated for ${address}: ${enabled ? `${type} +${amount}` : 'disabled'}`);

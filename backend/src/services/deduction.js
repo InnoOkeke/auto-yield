@@ -1,4 +1,9 @@
-import prisma from '../utils/database.js';
+/**
+ * Deduction Service - Migrated to Convex
+ * Handles daily deductions, smart pause, auto-resume, and auto-increase
+ */
+
+import convex, { api } from '../utils/database.js';
 import blockchainService from './blockchain.js';
 import notificationService from './notification.js';
 import { ethers } from 'ethers';
@@ -15,22 +20,22 @@ export class DeductionService {
             await this.applyAutoIncreases();
 
             // Step 2: Get all active subscriptions that are NOT paused
-            const activeSubscriptions = await prisma.subscription.findMany({
-                where: {
-                    isActive: true,
-                    isPaused: false, // Skip Smart Paused subscriptions
-                },
-                include: {
-                    user: true,
-                },
-            });
+            const activeSubscriptions = await convex.query(api.subscriptions.getActiveSubscriptions);
 
             console.log(`Found ${activeSubscriptions.length} active subscriptions`);
+
+            // Get user info for each subscription
+            const subsWithUsers = await Promise.all(
+                activeSubscriptions.map(async (sub) => {
+                    const user = await convex.query(api.users.getById, { userId: sub.userId });
+                    return { ...sub, user };
+                })
+            );
 
             // Filter users who can be deducted today
             const eligibleUsers = [];
 
-            for (const sub of activeSubscriptions) {
+            for (const sub of subsWithUsers) {
                 const canDeduct = await blockchainService.canDeductToday(sub.walletAddress);
                 if (canDeduct) {
                     eligibleUsers.push(sub);
@@ -129,41 +134,30 @@ export class DeductionService {
     async recordDeduction(subscription, txResult) {
         try {
             // Create transaction record
-            await prisma.transaction.create({
-                data: {
-                    userId: subscription.userId,
-                    type: 'DEDUCTION',
-                    amount: subscription.dailyAmount,
-                    txHash: txResult.txHash,
-                    blockNumber: txResult.blockNumber,
-                    status: 'CONFIRMED',
-                    timestamp: new Date(),
-                },
+            await convex.mutation(api.transactions.create, {
+                userId: subscription.userId,
+                type: 'DEDUCTION',
+                amount: parseFloat(subscription.dailyAmount.toString()),
+                txHash: txResult.txHash,
+                blockNumber: txResult.blockNumber,
+                status: 'CONFIRMED',
             });
 
-            // Calculate new streaks
-            const newCurrentStreak = (subscription.currentStreak || 0) + 1;
-            const newBestStreak = Math.max(subscription.bestStreak || 0, newCurrentStreak);
-
-            // Update subscription last deduction time and streaks
-            await prisma.subscription.update({
-                where: { id: subscription.id },
-                data: {
-                    lastDeduction: new Date(),
-                    nextDeduction: new Date(Date.now() + 24 * 60 * 60 * 1000), // +24 hours
-                    currentStreak: newCurrentStreak,
-                    bestStreak: newBestStreak,
-                },
+            // Update subscription streaks
+            await convex.mutation(api.subscriptions.recordDeduction, {
+                subscriptionId: subscription._id,
+                nextDeduction: Date.now() + 24 * 60 * 60 * 1000, // +24 hours
             });
 
-            console.log(`✅ Recorded deduction for ${subscription.walletAddress} (Streak: ${newCurrentStreak})`);
+            const newStreak = (subscription.currentStreak || 0) + 1;
+            console.log(`✅ Recorded deduction for ${subscription.walletAddress} (Streak: ${newStreak})`);
 
             // Send notification to user
-            if (subscription.user.notificationsEnabled) {
+            if (subscription.user?.notificationsEnabled) {
                 await notificationService.sendDeductionNotification(
                     subscription.user,
                     subscription.dailyAmount.toString(),
-                    newCurrentStreak // Pass streak to notification
+                    newStreak
                 );
             }
         } catch (error) {
@@ -176,25 +170,25 @@ export class DeductionService {
      */
     async recordFailedDeduction(subscription, errorMessage) {
         try {
-            await prisma.transaction.create({
-                data: {
-                    userId: subscription.userId,
-                    type: 'DEDUCTION',
-                    amount: subscription.dailyAmount,
-                    txHash: '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    blockNumber: 0,
-                    status: 'FAILED',
-                    errorMessage,
-                    timestamp: new Date(),
-                },
+            await convex.mutation(api.transactions.create, {
+                userId: subscription.userId,
+                type: 'DEDUCTION',
+                amount: parseFloat(subscription.dailyAmount.toString()),
+                txHash: '0x0000000000000000000000000000000000000000000000000000000000000000',
+                blockNumber: 0,
+                status: 'FAILED',
+            });
+
+            // Update transaction with error
+            await convex.mutation(api.transactions.updateStatus, {
+                txHash: '0x0000000000000000000000000000000000000000000000000000000000000000',
+                status: 'FAILED',
+                errorMessage,
             });
 
             // Reset streak on failure
-            await prisma.subscription.update({
-                where: { id: subscription.id },
-                data: {
-                    currentStreak: 0,
-                },
+            await convex.mutation(api.subscriptions.resetStreak, {
+                subscriptionId: subscription._id,
             });
 
             console.log(`⚠️ Recorded failed deduction for ${subscription.walletAddress} (Streak reset)`);
@@ -212,25 +206,15 @@ export class DeductionService {
             const balanceFloat = parseFloat(balance);
             const minBalance = parseFloat(process.env.MIN_RELAYER_BALANCE_ETH || '0.1');
 
-            await prisma.relayerStatus.upsert({
-                where: { address: blockchainService.wallet.address },
-                update: {
-                    ethBalance: balance,
-                    lastCheck: new Date(),
-                    isHealthy: balanceFloat >= minBalance,
-                    alertSent: balanceFloat < minBalance,
-                },
-                create: {
-                    address: blockchainService.wallet.address,
-                    ethBalance: balance,
-                    isHealthy: balanceFloat >= minBalance,
-                    alertSent: balanceFloat < minBalance,
-                },
+            await convex.mutation(api.stats.updateRelayerStatus, {
+                address: blockchainService.wallet.address,
+                ethBalance: balanceFloat,
+                isHealthy: balanceFloat >= minBalance,
+                alertSent: balanceFloat < minBalance,
             });
 
             if (balanceFloat < minBalance) {
                 console.warn(`⚠️ LOW RELAYER BALANCE: ${balance} ETH (minimum: ${minBalance} ETH)`);
-                // TODO: Send email/SMS alert
             }
 
             return balanceFloat;
@@ -245,37 +229,38 @@ export class DeductionService {
      */
     async getDeductionStats(timeframe = '24h') {
         try {
-            const since = new Date();
-            if (timeframe === '24h') {
-                since.setHours(since.getHours() - 24);
-            } else if (timeframe === '7d') {
-                since.setDate(since.getDate() - 7);
-            } else if (timeframe === '30d') {
-                since.setDate(since.getDate() - 30);
-            }
-
-            const transactions = await prisma.transaction.findMany({
-                where: {
-                    type: 'DEDUCTION',
-                    timestamp: {
-                        gte: since,
-                    },
-                },
+            // Get recent transactions
+            const transactions = await convex.query(api.transactions.getByType, {
+                type: 'DEDUCTION',
+                limit: 1000,
             });
 
-            const successful = transactions.filter(t => t.status === 'CONFIRMED').length;
-            const failed = transactions.filter(t => t.status === 'FAILED').length;
-            const totalAmount = transactions
+            // Filter by timeframe
+            const since = Date.now();
+            let cutoff;
+            if (timeframe === '24h') {
+                cutoff = since - 24 * 60 * 60 * 1000;
+            } else if (timeframe === '7d') {
+                cutoff = since - 7 * 24 * 60 * 60 * 1000;
+            } else if (timeframe === '30d') {
+                cutoff = since - 30 * 24 * 60 * 60 * 1000;
+            }
+
+            const filtered = transactions.filter(t => t._creationTime >= cutoff);
+
+            const successful = filtered.filter(t => t.status === 'CONFIRMED').length;
+            const failed = filtered.filter(t => t.status === 'FAILED').length;
+            const totalAmount = filtered
                 .filter(t => t.status === 'CONFIRMED')
-                .reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0);
+                .reduce((sum, t) => sum + t.amount, 0);
 
             return {
                 timeframe,
                 successful,
                 failed,
-                total: transactions.length,
+                total: filtered.length,
                 totalAmount,
-                successRate: transactions.length > 0 ? (successful / transactions.length) * 100 : 0,
+                successRate: filtered.length > 0 ? (successful / filtered.length) * 100 : 0,
             };
         } catch (error) {
             console.error('Failed to get deduction stats:', error);
@@ -285,7 +270,6 @@ export class DeductionService {
 
     /**
      * Smart Pause: Check user balance and pause if too low
-     * Returns true if user was paused, false if they should proceed
      */
     async checkAndSmartPause(subscription) {
         try {
@@ -296,7 +280,6 @@ export class DeductionService {
             const requiredWithBuffer = requiredAmount + (requiredAmount / 10n);
 
             if (userBalance < requiredWithBuffer) {
-                // Trigger Smart Pause
                 await this.triggerSmartPause(subscription, userBalance, requiredAmount);
                 return true;
             }
@@ -304,27 +287,18 @@ export class DeductionService {
             return false;
         } catch (error) {
             console.error(`Failed to check balance for ${subscription.walletAddress}:`, error);
-            // If we can't check balance, proceed with deduction attempt
             return false;
         }
     }
 
     /**
      * Trigger Smart Pause for a subscription
-     * Preserves streak and sends friendly notification
      */
     async triggerSmartPause(subscription, currentBalance, requiredAmount) {
         try {
-            // Update subscription to paused state
-            await prisma.subscription.update({
-                where: { id: subscription.id },
-                data: {
-                    isPaused: true,
-                    pauseReason: 'LOW_BALANCE',
-                    pausedAt: new Date(),
-                    pauseNotifiedAt: new Date(),
-                    // Keep streak intact! Don't reset it
-                },
+            await convex.mutation(api.subscriptions.pause, {
+                walletAddress: subscription.walletAddress,
+                reason: 'LOW_BALANCE',
             });
 
             const formattedBalance = ethers.formatUnits(currentBalance, 6);
@@ -332,8 +306,7 @@ export class DeductionService {
 
             console.log(`⏸️ Smart Paused: ${subscription.walletAddress} (Balance: $${formattedBalance}, Required: $${formattedRequired})`);
 
-            // Send friendly notification
-            if (subscription.user.notificationsEnabled) {
+            if (subscription.user?.notificationsEnabled) {
                 await notificationService.sendSmartPauseNotification(
                     subscription.user,
                     formattedBalance,
@@ -352,20 +325,23 @@ export class DeductionService {
         console.log('🔄 Checking paused subscriptions for auto-resume...');
 
         try {
-            const pausedSubs = await prisma.subscription.findMany({
-                where: {
-                    isPaused: true,
-                    pauseReason: 'LOW_BALANCE',
-                    autoResumeEnabled: true,
-                },
-                include: { user: true },
-            });
+            // Get all subscriptions and filter paused ones
+            const allSubs = await convex.query(api.subscriptions.getActiveSubscriptions);
+
+            // We need to query differently - get by active status first
+            // For now, let's get all and filter
+            const pausedSubs = allSubs.filter(s =>
+                s.isPaused &&
+                s.pauseReason === 'LOW_BALANCE' &&
+                s.autoResumeEnabled
+            );
 
             console.log(`Found ${pausedSubs.length} paused subscriptions to check`);
 
             let resumed = 0;
 
             for (const sub of pausedSubs) {
+                const user = await convex.query(api.users.getById, { userId: sub.userId });
                 const balance = await blockchainService.getUserUsdcBalance(sub.walletAddress);
                 const required = ethers.parseUnits(sub.dailyAmount.toString(), 6);
 
@@ -373,23 +349,15 @@ export class DeductionService {
                 const resumeThreshold = required * 3n;
 
                 if (balance >= resumeThreshold) {
-                    // Resume subscription
-                    await prisma.subscription.update({
-                        where: { id: sub.id },
-                        data: {
-                            isPaused: false,
-                            pauseReason: null,
-                            pausedAt: null,
-                            pauseNotifiedAt: null,
-                        },
+                    await convex.mutation(api.subscriptions.resume, {
+                        walletAddress: sub.walletAddress,
                     });
 
                     const formattedBalance = ethers.formatUnits(balance, 6);
                     console.log(`▶️ Auto-resumed: ${sub.walletAddress} (Balance: $${formattedBalance})`);
 
-                    // Send celebratory notification
-                    if (sub.user.notificationsEnabled) {
-                        await notificationService.sendAutoResumeNotification(sub.user);
+                    if (user?.notificationsEnabled) {
+                        await notificationService.sendAutoResumeNotification(user);
                     }
 
                     resumed++;
@@ -410,10 +378,7 @@ export class DeductionService {
      */
     async manualResume(walletAddress) {
         try {
-            const sub = await prisma.subscription.findUnique({
-                where: { walletAddress },
-                include: { user: true },
-            });
+            const sub = await convex.query(api.subscriptions.getByWallet, { walletAddress });
 
             if (!sub) {
                 return { success: false, error: 'Subscription not found' };
@@ -436,22 +401,13 @@ export class DeductionService {
                 };
             }
 
-            // Resume subscription
-            await prisma.subscription.update({
-                where: { walletAddress },
-                data: {
-                    isPaused: false,
-                    pauseReason: null,
-                    pausedAt: null,
-                    pauseNotifiedAt: null,
-                },
-            });
+            await convex.mutation(api.subscriptions.resume, { walletAddress });
 
+            const user = await convex.query(api.users.getById, { userId: sub.userId });
             console.log(`▶️ Manually resumed: ${walletAddress}`);
 
-            // Send confirmation notification
-            if (sub.user.notificationsEnabled) {
-                await notificationService.sendManualResumeNotification(sub.user);
+            if (user?.notificationsEnabled) {
+                await notificationService.sendManualResumeNotification(user);
             }
 
             return { success: true };
@@ -463,23 +419,12 @@ export class DeductionService {
 
     /**
      * Apply auto-increases for eligible subscriptions
-     * Runs before daily deductions to update amounts
      */
     async applyAutoIncreases() {
         console.log('📈 Checking for auto-increase eligibility...');
 
         try {
-            // Find subscriptions with auto-increase enabled
-            const eligibleSubs = await prisma.subscription.findMany({
-                where: {
-                    isActive: true,
-                    isPaused: false,
-                    autoIncreaseEnabled: true,
-                    autoIncreaseType: { not: null },
-                    autoIncreaseAmount: { not: null },
-                },
-                include: { user: true },
-            });
+            const eligibleSubs = await convex.query(api.subscriptions.getAutoIncreaseEnabled);
 
             if (eligibleSubs.length === 0) {
                 console.log('📈 No subscriptions with auto-increase enabled');
@@ -489,13 +434,14 @@ export class DeductionService {
             console.log(`📈 Found ${eligibleSubs.length} subscriptions with auto-increase enabled`);
 
             let increasedCount = 0;
-            const now = new Date();
+            const now = Date.now();
 
             for (const sub of eligibleSubs) {
+                const user = await convex.query(api.users.getById, { userId: sub.userId });
                 const shouldIncrease = this.shouldApplyAutoIncrease(sub, now);
 
                 if (shouldIncrease) {
-                    const result = await this.applyAutoIncrease(sub);
+                    const result = await this.applyAutoIncrease({ ...sub, user });
                     if (result.success) {
                         increasedCount++;
                     }
@@ -518,8 +464,7 @@ export class DeductionService {
         const lastIncrease = subscription.lastAutoIncreaseAt;
 
         if (!lastIncrease) {
-            // First increase: check if subscription is old enough
-            const startDate = subscription.startDate || subscription.createdAt;
+            const startDate = subscription.startDate;
             const daysSinceStart = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
             return daysSinceStart >= intervalDays;
         }
@@ -533,19 +478,15 @@ export class DeductionService {
      */
     async applyAutoIncrease(subscription) {
         try {
-            const currentAmount = parseFloat(subscription.dailyAmount.toString());
-            const increaseAmount = parseFloat(subscription.autoIncreaseAmount.toString());
-            const maxAmount = subscription.autoIncreaseMaxAmount
-                ? parseFloat(subscription.autoIncreaseMaxAmount.toString())
-                : null;
+            const currentAmount = subscription.dailyAmount;
+            const increaseAmount = subscription.autoIncreaseAmount;
+            const maxAmount = subscription.autoIncreaseMaxAmount;
 
             let newAmount;
 
             if (subscription.autoIncreaseType === 'FIXED') {
-                // Fixed increase: add flat amount (e.g., +$0.50)
                 newAmount = currentAmount + increaseAmount;
             } else if (subscription.autoIncreaseType === 'PERCENTAGE') {
-                // Percentage increase: add percentage of current amount
                 newAmount = currentAmount * (1 + increaseAmount / 100);
             } else {
                 return { success: false, error: 'Invalid auto-increase type' };
@@ -566,12 +507,9 @@ export class DeductionService {
             }
 
             // Update subscription with new amount
-            await prisma.subscription.update({
-                where: { id: subscription.id },
-                data: {
-                    dailyAmount: newAmount,
-                    lastAutoIncreaseAt: new Date(),
-                },
+            await convex.mutation(api.subscriptions.applyAutoIncrease, {
+                subscriptionId: subscription._id,
+                newDailyAmount: newAmount,
             });
 
             const increaseType = subscription.autoIncreaseType === 'FIXED'
@@ -580,8 +518,7 @@ export class DeductionService {
 
             console.log(`📈 Auto-increased: ${subscription.walletAddress} ($${currentAmount} → $${newAmount}) [${increaseType}]`);
 
-            // Send notification if enabled
-            if (subscription.user.notificationsEnabled) {
+            if (subscription.user?.notificationsEnabled) {
                 await notificationService.sendAutoIncreaseNotification(
                     subscription.user,
                     currentAmount.toFixed(2),
