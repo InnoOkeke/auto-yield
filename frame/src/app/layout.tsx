@@ -7,6 +7,7 @@ import FarcasterInitializer from "@/components/FarcasterInitializer";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ChatWidget from "@/components/ChatWidget";
+import OnboardingWrapper from "@/components/OnboardingWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -74,16 +75,19 @@ export default function RootLayout({
             <body className={inter.className}>
                 <FarcasterInitializer />
                 <Providers>
-                    <div className="flex flex-col min-h-screen">
-                        <Header />
-                        <main className="flex-grow pt-20">
-                            {children}
-                        </main>
-                        <Footer />
-                    </div>
-                    <ChatWidget />
+                    <OnboardingWrapper>
+                        <div className="flex flex-col min-h-screen">
+                            <Header />
+                            <main className="flex-grow pt-20">
+                                {children}
+                            </main>
+                            <Footer />
+                        </div>
+                        <ChatWidget />
+                    </OnboardingWrapper>
                 </Providers>
             </body>
         </html>
     );
 }
+
