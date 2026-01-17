@@ -52,7 +52,8 @@ export const metadata: Metadata = {
             button: {
                 title: "Start Earning",
                 action: {
-                    type: "launch_frame",
+                    type: "launch_miniapp",
+                    name: "AutoYield",
                     url: appUrl,
                     splashImageUrl: `${appUrl}/splash.png`,
                     splashBackgroundColor: "#0f172a"
