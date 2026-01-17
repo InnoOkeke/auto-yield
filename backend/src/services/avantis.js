@@ -1,11 +1,13 @@
-import prisma from '../utils/database.js';
+/**
+ * Avantis Service - Migrated to Convex
+ * AvantisFi vault integration and yield tracking
+ */
+
+import convex, { api } from '../utils/database.js';
 import blockchainService from './blockchain.js';
 import { ethers } from 'ethers';
 
 export class AvantisService {
-    /**
-     * Get AvantisFi vault statistics
-     */
     constructor() {
         this.cachedAPY = null;
         this.lastAPYFetch = 0;
@@ -17,8 +19,6 @@ export class AvantisService {
     async getVaultStats() {
         try {
             const stats = await blockchainService.getAvantisVaultStats();
-
-            if (!stats) return null;
 
             if (!stats) return null;
 
@@ -52,7 +52,7 @@ export class AvantisService {
             if (!apy) apy = 9.45;
 
             return {
-                totalAssets: ethers.formatUnits(stats.totalAssets, 6), // USDC has 6 decimals
+                totalAssets: ethers.formatUnits(stats.totalAssets, 6),
                 totalSupply: stats.totalSupply,
                 sharePrice: stats.sharePrice,
                 apy: apy,
@@ -73,29 +73,28 @@ export class AvantisService {
                 blockchainService.getUserTotalValue(walletAddress),
             ]);
 
-            const subscription = await prisma.subscription.findUnique({
-                where: { walletAddress },
-                include: {
-                    user: {
-                        include: {
-                            transactions: {
-                                where: {
-                                    type: 'DEDUCTION',
-                                    status: 'CONFIRMED',
-                                },
-                            },
-                        },
-                    },
-                },
+            const subscription = await convex.query(api.subscriptions.getByWallet, {
+                walletAddress
             });
 
             if (!subscription) {
                 return null;
             }
 
+            // Get user and transactions
+            const user = await convex.query(api.users.getById, { userId: subscription.userId });
+            const transactions = await convex.query(api.transactions.getByUser, {
+                userId: subscription.userId
+            });
+
+            // Filter confirmed deductions
+            const confirmedDeductions = transactions.filter(
+                t => t.type === 'DEDUCTION' && t.status === 'CONFIRMED'
+            );
+
             // Calculate total deposited
-            const totalDeposited = subscription.user.transactions.reduce(
-                (sum, tx) => sum + parseFloat(tx.amount.toString()),
+            const totalDeposited = confirmedDeductions.reduce(
+                (sum, tx) => sum + tx.amount,
                 0
             );
 
@@ -105,7 +104,7 @@ export class AvantisService {
 
             // Calculate days active
             const daysActive = Math.floor(
-                (Date.now() - subscription.startDate.getTime()) / (1000 * 60 * 60 * 24)
+                (Date.now() - subscription.startDate) / (1000 * 60 * 60 * 24)
             );
 
             return {
@@ -118,7 +117,7 @@ export class AvantisService {
                     ? ((yieldEarned / totalDeposited) * 100).toFixed(2)
                     : '0.00',
                 daysActive,
-                transactionCount: subscription.user.transactions.length,
+                transactionCount: confirmedDeductions.length,
             };
         } catch (error) {
             console.error(`Failed to get yield data for ${walletAddress}:`, error);
@@ -139,43 +138,33 @@ export class AvantisService {
             }
 
             // Get total pooled from all active subscriptions
-            const subscriptions = await prisma.subscription.findMany({
-                where: { isActive: true },
-                include: {
-                    user: {
-                        include: {
-                            transactions: {
-                                where: {
-                                    type: 'DEDUCTION',
-                                    status: 'CONFIRMED',
-                                },
-                            },
-                        },
-                    },
-                },
-            });
+            const subscriptions = await convex.query(api.subscriptions.getActiveSubscriptions);
 
-            const totalPooled = subscriptions.reduce((sum, sub) => {
-                const userDeposits = sub.user.transactions.reduce(
-                    (txSum, tx) => txSum + parseFloat(tx.amount.toString()),
+            let totalPooled = 0;
+            for (const sub of subscriptions) {
+                const transactions = await convex.query(api.transactions.getByUser, {
+                    userId: sub.userId
+                });
+                const confirmedDeductions = transactions.filter(
+                    t => t.type === 'DEDUCTION' && t.status === 'CONFIRMED'
+                );
+                const userDeposits = confirmedDeductions.reduce(
+                    (sum, tx) => sum + tx.amount,
                     0
                 );
-                return sum + userDeposits;
-            }, 0);
+                totalPooled += userDeposits;
+            }
 
-            const snapshot = await prisma.yieldSnapshot.create({
-                data: {
-                    totalPooled: totalPooled.toString(),
-                    avantisShares: vaultStats.totalSupply,
-                    totalValue: vaultStats.totalAssets,
-                    apy: vaultStats.apy.toString(),
-                    timestamp: new Date(),
-                },
+            await convex.mutation(api.stats.createSnapshot, {
+                totalPooled,
+                avantisShares: parseFloat(vaultStats.totalSupply) || 0,
+                totalValue: parseFloat(vaultStats.totalAssets),
+                apy: vaultStats.apy,
             });
 
-            console.log(`✅ Created yield snapshot: ${snapshot.id}`);
+            console.log(`✅ Created yield snapshot`);
 
-            return snapshot;
+            return { success: true };
         } catch (error) {
             console.error('Failed to create yield snapshot:', error);
             return null;
@@ -187,30 +176,23 @@ export class AvantisService {
      */
     async getHistoricalYield(timeframe = '30d') {
         try {
-            const since = new Date();
+            let limit;
             if (timeframe === '7d') {
-                since.setDate(since.getDate() - 7);
+                limit = 7;
             } else if (timeframe === '30d') {
-                since.setDate(since.getDate() - 30);
+                limit = 30;
             } else if (timeframe === '90d') {
-                since.setDate(since.getDate() - 90);
+                limit = 90;
+            } else {
+                limit = 30;
             }
 
-            const snapshots = await prisma.yieldSnapshot.findMany({
-                where: {
-                    timestamp: {
-                        gte: since,
-                    },
-                },
-                orderBy: {
-                    timestamp: 'asc',
-                },
-            });
+            const snapshots = await convex.query(api.stats.getSnapshots, { limit });
 
             return snapshots.map(s => ({
-                timestamp: s.timestamp.toISOString(),
-                totalValue: parseFloat(s.totalValue.toString()),
-                apy: parseFloat(s.apy.toString()),
+                timestamp: new Date(s._creationTime).toISOString(),
+                totalValue: s.totalValue,
+                apy: s.apy,
             }));
         } catch (error) {
             console.error('Failed to get historical yield:', error);
@@ -233,18 +215,15 @@ export class AvantisService {
             const totalAssets = parseFloat(stats.totalAssets);
 
             // Check for anomalies
-            const previousSnapshot = await prisma.yieldSnapshot.findFirst({
-                orderBy: { timestamp: 'desc' },
-            });
+            const previousSnapshot = await convex.query(api.stats.getLatestSnapshot);
 
             if (previousSnapshot) {
-                const previousValue = parseFloat(previousSnapshot.totalValue.toString());
+                const previousValue = previousSnapshot.totalValue;
                 const change = ((totalAssets - previousValue) / previousValue) * 100;
 
                 // Alert if >20% drop (potential exploit or issue)
                 if (change < -20) {
                     console.error(`🚨 ALERT: AvantisFi vault value dropped by ${change.toFixed(2)}%`);
-                    // TODO: Send emergency alert, pause deductions
                     return {
                         healthy: false,
                         reason: `Vault value dropped ${change.toFixed(2)}%`,
