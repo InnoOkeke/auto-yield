@@ -37,12 +37,33 @@ async function getStats() {
 
 export default async function Home() {
     const stats = await getStats();
-    const apy = stats?.vault?.apy ? Number(stats.vault.apy).toFixed(2) : 9.45;
+
+    // Extract real stats or use defaults
+    const apy = stats?.vault?.apy ? Number(stats.vault.apy).toFixed(2) : '9.45';
+    const totalSaved = stats?.vault?.totalAssets
+        ? `$${formatNumber(Number(stats.vault.totalAssets))}`
+        : '$0';
+    const activeUsers = stats?.users?.total ?? 0;
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <Hero apy={Number(apy)} />
+            <Hero
+                apy={Number(apy)}
+                totalSaved={totalSaved}
+                activeUsers={activeUsers}
+            />
             <FeatureSection />
         </div>
     );
 }
+
+// Helper to format large numbers
+function formatNumber(num: number): string {
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toFixed(2);
+}
+

@@ -4,7 +4,17 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { TrendingUp, DollarSign, Users } from 'lucide-react';
 
-export default function Hero({ apy = 9.45 }: { apy?: number }) {
+interface HeroProps {
+    apy?: number;
+    totalSaved?: string;
+    activeUsers?: number;
+}
+
+export default function Hero({
+    apy = 9.45,
+    totalSaved = '$0',
+    activeUsers = 0
+}: HeroProps) {
     return (
         <div className="text-center py-12 md:py-20">
             <motion.div
@@ -56,8 +66,8 @@ export default function Hero({ apy = 9.45 }: { apy?: number }) {
             >
                 {[
                     { label: 'Current APY', value: `~${apy}%`, icon: TrendingUp },
-                    { label: 'Total Saved', value: '$250K+', icon: DollarSign },
-                    { label: 'Active Users', value: '500+', icon: Users },
+                    { label: 'Total Saved', value: totalSaved, icon: DollarSign },
+                    { label: 'Active Users', value: activeUsers > 0 ? activeUsers.toLocaleString() : '0', icon: Users },
                 ].map((stat, i) => (
                     <div key={i} className="glass-dark rounded-2xl p-6 backdrop-blur-xl border border-foreground/5 shadow-sm">
                         <div className="flex justify-center mb-3">
