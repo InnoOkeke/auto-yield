@@ -272,6 +272,18 @@ export class BlockchainService {
             return 0n;
         }
     }
+
+    async estimateDeductionGas(userAddresses: string[]) {
+        try {
+            const gasEstimate = await this.vaultContract.batchExecuteDeductions.estimateGas(
+                userAddresses
+            );
+            return gasEstimate.toString();
+        } catch (error) {
+            console.error('Failed to estimate gas:', error);
+            return null;
+        }
+    }
 }
 
 export const blockchainService = new BlockchainService();
