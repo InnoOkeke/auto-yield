@@ -137,30 +137,6 @@ export async function getNotificationStatus(
     }
 }
 
-/**
- * Send test notification
- */
-export async function sendTestNotification(
-    walletAddress: string,
-    fid: number
-): Promise<{ success: boolean; error?: string }> {
-    try {
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-
-        const response = await axios.post(`${backendUrl}/api/farcaster/test`, {
-            walletAddress,
-            fid,
-        });
-
-        return { success: response.data.success };
-    } catch (error: any) {
-        console.error('Failed to send test notification:', error);
-        return {
-            success: false,
-            error: error.response?.data?.error || error.message,
-        };
-    }
-}
 
 /**
  * Share streak to feed (client-agnostic)

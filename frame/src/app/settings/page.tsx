@@ -12,7 +12,6 @@ export default function SettingsPage() {
     const router = useRouter();
     const { address } = useAccount();
     const [amount, setAmount] = useState('');
-    const [sendingTest, setSendingTest] = useState(false);
 
     // Read current subscription
     const { data: subscription } = useReadContract({
@@ -109,45 +108,8 @@ export default function SettingsPage() {
                 {/* Auto-Increase Rule Section */}
                 {address && <AutoIncreaseCard address={address} />}
 
-                {/* Notifications Section */}
-                <div className="glass-dark rounded-3xl p-6 border border-foreground/10 shadow-lg">
-                    <h2 className="text-xl font-semibold text-foreground mb-4 font-display">Notifications</h2>
-                    <p className="text-muted text-sm mb-4">
-                        Test if your Farcaster notifications are configured correctly.
-                    </p>
-                    <button
-                        onClick={async () => {
-                            console.log('🔔 Test Notification clicked');
-                            if (!address) {
-                                alert('Please connect your wallet first!');
-                                return;
-                            }
-
-                            try {
-                                setSendingTest(true);
-                                const { sendTestNotification } = await import('@/lib/farcaster');
-                                console.log('Sending test notification to:', address);
-                                const result = await sendTestNotification(address, 0);
-                                console.log('Test result:', result);
-
-                                if (result.success) {
-                                    alert('Test notification sent! Check your notifications.');
-                                } else {
-                                    alert('Failed to send test notification: ' + result.error);
-                                }
-                            } catch (e) {
-                                console.error('Test notification error:', e);
-                                alert('Error sending notification');
-                            } finally {
-                                setSendingTest(false);
-                            }
-                        }}
-                        disabled={sendingTest}
-                        className="w-full py-3 rounded-xl glass hover:bg-black/5 dark:hover:bg-white/20 text-foreground font-semibold border border-foreground/5 flex items-center justify-center gap-2"
-                    >
-                        <span>🔔</span> Send Test Notification
-                    </button>
-                </div>
+                {/* Auto-Increase Rule Section */}
+                {address && <AutoIncreaseCard address={address} />}
             </div>
         </div>
     );
