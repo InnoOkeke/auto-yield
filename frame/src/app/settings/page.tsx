@@ -107,9 +107,6 @@ export default function SettingsPage() {
 
                 {/* Auto-Increase Rule Section */}
                 {address && <AutoIncreaseCard address={address} />}
-
-                {/* Auto-Increase Rule Section */}
-                {address && <AutoIncreaseCard address={address} />}
             </div>
         </div>
     );

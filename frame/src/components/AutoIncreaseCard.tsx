@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { TrendingUp, Banknote, BarChart3, Sparkles } from 'lucide-react';
 
 interface AutoIncreaseCardProps {
     address: string;
@@ -111,19 +112,22 @@ export default function AutoIncreaseCard({ address }: AutoIncreaseCardProps) {
             className="glass-dark rounded-3xl p-6 border border-foreground/10 shadow-lg"
         >
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                    <span className="text-2xl">📈</span>
+            <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-primary-600/10 flex items-center justify-center">
+                        <TrendingUp className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                    </div>
                     <div>
-                        <h3 className="text-lg font-semibold text-foreground">Auto-Increase Rule</h3>
-                        <p className="text-xs text-muted">Grow your savings automatically</p>
+                        <h3 className="text-xl font-black text-foreground uppercase tracking-widest leading-none mb-1">Scale Plan</h3>
+                        <p className="text-[10px] text-secondary-500 font-bold uppercase tracking-widest">Compounding Growth</p>
                     </div>
                 </div>
 
                 {/* Premium Badge */}
-                <span className="px-2 py-1 rounded-full bg-primary/10 text-xs font-bold text-primary border border-primary/20">
-                    ✨ Premium
-                </span>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary-600/10 text-primary-600 dark:text-primary-400 border border-primary-600/20">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Premium</span>
+                </div>
             </div>
 
             {/* Toggle Switch */}
@@ -157,33 +161,35 @@ export default function AutoIncreaseCard({ address }: AutoIncreaseCardProps) {
                 >
                     {/* Type Selection */}
                     <div>
-                        <label className="text-sm font-medium text-muted mb-2 block">Increase Type</label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <label className="text-[10px] font-black text-secondary-500 uppercase tracking-widest mb-3 block">Strategy Type</label>
+                        <div className="grid grid-cols-2 gap-4">
                             <button
                                 onClick={() => {
                                     setType('FIXED');
                                     setAmount('0.50');
                                 }}
-                                className={`p-4 rounded-xl border-2 transition-all ${type === 'FIXED'
-                                    ? 'border-primary bg-primary/10'
-                                    : 'border-foreground/10 bg-foreground/5 hover:border-foreground/20'
+                                className={`p-5 rounded-2xl border-2 transition-all text-left group ${type === 'FIXED'
+                                    ? 'border-primary-500 bg-primary-500/5'
+                                    : 'border-foreground/5 bg-foreground/5 hover:border-foreground/10'
                                     }`}
                             >
-                                <p className="font-bold text-foreground">💵 Fixed</p>
-                                <p className="text-xs text-muted">+$0.50 per period</p>
+                                <Banknote className={`w-5 h-5 mb-3 transition-colors ${type === 'FIXED' ? 'text-primary-500' : 'text-secondary-500'}`} />
+                                <p className="font-black text-foreground uppercase tracking-widest text-xs mb-1">Fixed</p>
+                                <p className="text-[10px] text-secondary-500 font-bold uppercase tracking-widest">+$0.50 / period</p>
                             </button>
                             <button
                                 onClick={() => {
                                     setType('PERCENTAGE');
                                     setAmount('5');
                                 }}
-                                className={`p-4 rounded-xl border-2 transition-all ${type === 'PERCENTAGE'
-                                    ? 'border-primary bg-primary/10'
-                                    : 'border-foreground/10 bg-foreground/5 hover:border-foreground/20'
+                                className={`p-5 rounded-2xl border-2 transition-all text-left group ${type === 'PERCENTAGE'
+                                    ? 'border-primary-500 bg-primary-500/5'
+                                    : 'border-foreground/5 bg-foreground/5 hover:border-foreground/10'
                                     }`}
                             >
-                                <p className="font-bold text-foreground">📊 Percentage</p>
-                                <p className="text-xs text-muted">+5% per period</p>
+                                <BarChart3 className={`w-5 h-5 mb-3 transition-colors ${type === 'PERCENTAGE' ? 'text-primary-500' : 'text-secondary-500'}`} />
+                                <p className="font-black text-foreground uppercase tracking-widest text-xs mb-1">Percentage</p>
+                                <p className="text-[10px] text-secondary-500 font-bold uppercase tracking-widest">+5% / period</p>
                             </button>
                         </div>
                     </div>
