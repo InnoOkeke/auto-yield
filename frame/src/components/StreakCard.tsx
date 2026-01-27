@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { shareStreak } from '@/lib/farcaster';
+import { Flame, Share2 } from 'lucide-react';
 
 interface StreakCardProps {
     currentStreak: number;
@@ -11,42 +12,41 @@ export default function StreakCard({ currentStreak = 0, bestStreak = 0 }: Streak
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="glass-dark rounded-3xl p-6 border border-orange-500/20 bg-orange-500/5 relative overflow-hidden"
+            className="glass-dark rounded-3xl p-6 border border-primary-500/20 bg-primary-500/5 relative overflow-hidden group"
         >
-            <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl" />
+            <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-primary-500/10 rounded-full blur-2xl group-hover:bg-primary-500/20 transition-all" />
 
             <div className="relative z-10">
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-6">
                     <div>
-                        <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                            <span className="text-2xl">🔥</span> Savings Streak
-                        </h3>
-                        <p className="text-muted text-sm font-medium mt-1">
-                            Keep your auto-save active!
+                        <div className="flex items-center gap-2 text-primary-600 dark:text-primary-400 mb-1">
+                            <Flame className="w-5 h-5 fill-current" />
+                            <h3 className="text-sm font-bold uppercase tracking-widest">Savings Streak</h3>
+                        </div>
+                        <p className="text-secondary-500 dark:text-secondary-400 text-xs font-medium">
+                            Auto-save is building your future
                         </p>
                     </div>
                 </div>
 
-                <div className="flex items-end gap-2 mb-6">
-                    <span className="text-5xl font-bold text-orange-500 font-display">
+                <div className="flex items-baseline gap-2 mb-6">
+                    <span className="text-6xl font-black text-primary-600 dark:text-primary-400 font-display transition-transform group-hover:scale-110 duration-500 origin-left">
                         {currentStreak}
                     </span>
-                    <span className="text-lg text-foreground/60 font-medium mb-1">days</span>
+                    <span className="text-sm text-secondary-500 dark:text-secondary-400 font-bold uppercase tracking-wider">Days</span>
                 </div>
 
-                <div className="flex items-center justify-between">
-                    <div className="text-xs font-semibold text-muted bg-black/10 dark:bg-white/5 py-1.5 px-3 rounded-lg border border-foreground/5">
-                        🏆 Best: <span className="text-orange-400">{bestStreak} days</span>
+                <div className="flex items-center justify-between pt-4 border-t border-foreground/5">
+                    <div className="text-[10px] font-bold text-secondary-500 dark:text-secondary-400 uppercase tracking-widest">
+                        Best <span className="text-primary-600 dark:text-primary-400 ml-1">{bestStreak} Days</span>
                     </div>
 
                     <button
                         onClick={() => shareStreak(currentStreak)}
-                        className="text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 py-2 px-4 rounded-xl transition-all shadow-md hover:shadow-orange-500/20 flex items-center gap-1.5"
+                        className="p-2.5 rounded-xl bg-primary-600 text-white hover:bg-primary-700 transition-all shadow-md flex items-center gap-2 text-xs font-bold"
                     >
+                        <Share2 className="w-3.5 h-3.5" />
                         <span>Share</span>
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                        </svg>
                     </button>
                 </div>
             </div>

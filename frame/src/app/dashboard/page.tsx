@@ -12,6 +12,7 @@ import QuickActions from '@/components/QuickActions';
 import YieldChart from '@/components/YieldChart';
 import axios from 'axios';
 import Link from 'next/link';
+import { Activity, CheckCircle, Smartphone } from 'lucide-react';
 
 export default function DashboardPage() {
     const { address, isConnected } = useAccount();
@@ -111,25 +112,29 @@ export default function DashboardPage() {
 
                     {/* Subscription Status Banner */}
                     {pauseData?.isPaused ? (
-                        <div className="glass-dark rounded-2xl p-4 border-l-4 border-amber-500 shadow-sm">
-                            <div className="flex items-center gap-3">
-                                <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse" />
+                        <div className="glass-dark rounded-3xl p-5 border-l-4 border-amber-500 shadow-sm flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                                    <Activity className="w-6 h-6 animate-pulse" />
+                                </div>
                                 <div>
-                                    <p className="text-foreground font-semibold">💤 Daily Saves Paused</p>
-                                    <p className="text-muted text-sm font-medium">
-                                        We paused to protect you • Your streak is safe!
+                                    <p className="text-foreground font-black uppercase tracking-widest text-xs mb-1">Status: Paused</p>
+                                    <p className="text-secondary-500 text-[10px] font-bold uppercase tracking-widest">
+                                        Overdraft Protection Active • Streak Secure
                                     </p>
                                 </div>
                             </div>
                         </div>
                     ) : userData?.user?.subscription?.isActive && (
-                        <div className="glass-dark rounded-2xl p-4 border-l-4 border-green-500 shadow-sm">
-                            <div className="flex items-center gap-3">
-                                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                        <div className="glass-dark rounded-3xl p-5 border-l-4 border-primary-500 shadow-sm flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-primary-500/10 flex items-center justify-center text-primary-500">
+                                    <CheckCircle className="w-6 h-6" />
+                                </div>
                                 <div>
-                                    <p className="text-foreground font-semibold">Active Subscription</p>
-                                    <p className="text-muted text-sm font-medium">
-                                        ${userData.user.subscription.dailyAmount} USDC deposited daily
+                                    <p className="text-foreground font-black uppercase tracking-widest text-xs mb-1">Status: Operational</p>
+                                    <p className="text-secondary-500 text-[10px] font-bold uppercase tracking-widest">
+                                        Auto-save frequency: Daily • ${userData.user.subscription.dailyAmount} USDC
                                     </p>
                                 </div>
                             </div>
@@ -182,14 +187,21 @@ export default function DashboardPage() {
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="glass-dark rounded-3xl p-6 border border-foreground/5 shadow-sm"
+                            className="glass-dark rounded-3xl p-8 border border-foreground/5 shadow-sm bg-primary-500/[0.02]"
                         >
-                            <h3 className="text-lg font-semibold text-foreground mb-4">💡 Did You Know?</h3>
-                            <div className="space-y-3 text-sm text-muted font-medium">
-                                <p>• Your funds are earning yield 24/7 in AvantisFi</p>
-                                <p>• You can withdraw anytime without penalties</p>
-                                <p>• All deductions are automated and gas-free</p>
-                                <p>• Your keys, your crypto - always non-custodial</p>
+                            <h3 className="text-xs font-black text-foreground mb-6 uppercase tracking-[0.2em]">Strategy Overview</h3>
+                            <div className="space-y-4">
+                                {[
+                                    '24/7 Yield via AvantisFi',
+                                    'Instant non-custodial withdrawals',
+                                    'Automated, gas-free deposits',
+                                    'Secure onchain vault logic'
+                                ].map((item, i) => (
+                                    <div key={i} className="flex items-center gap-3">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-primary-500" />
+                                        <p className="text-[10px] text-secondary-500 uppercase font-black tracking-widest">{item}</p>
+                                    </div>
+                                ))}
                             </div>
                         </motion.div>
                     </div>
