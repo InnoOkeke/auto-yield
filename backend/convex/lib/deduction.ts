@@ -1,12 +1,23 @@
 import { ethers } from "ethers";
 import { blockchainService } from "./blockchain";
-import { notificationService } from "./notification";
+
+export interface Subscription {
+    walletAddress: string;
+    dailyAmount: number;
+    startDate: number;
+    lastAutoIncreaseAt?: number;
+    autoIncreaseEnabled: boolean;
+    autoIncreaseType?: string;
+    autoIncreaseAmount?: number;
+    autoIncreaseIntervalDays?: number;
+    autoIncreaseMaxAmount?: number;
+}
 
 export class DeductionService {
     /**
      * Check if a subscription should receive an auto-increase
      */
-    shouldApplyAutoIncrease(subscription: any, now: number) {
+    shouldApplyAutoIncrease(subscription: Subscription, now: number) {
         const intervalDays = subscription.autoIncreaseIntervalDays || 30;
         const lastIncrease = subscription.lastAutoIncreaseAt;
 
@@ -23,7 +34,7 @@ export class DeductionService {
     /**
      * Calculate new amount for auto-increase
      */
-    calculateNewAmount(subscription: any): number {
+    calculateNewAmount(subscription: Subscription): number {
         const currentAmount = subscription.dailyAmount;
         const increaseAmount = subscription.autoIncreaseAmount;
         const maxAmount = subscription.autoIncreaseMaxAmount;
@@ -52,7 +63,7 @@ export class DeductionService {
     /**
      * Smart Pause Check
      */
-    async checkLowBalance(subscription: any): Promise<{ shouldPause: boolean; balance?: string; required?: string }> {
+    async checkLowBalance(subscription: { walletAddress: string; dailyAmount: number }): Promise<{ shouldPause: boolean; balance?: string; required?: string }> {
         try {
             const userBalance = await blockchainService.getUserUsdcBalance(subscription.walletAddress);
             const requiredAmount = ethers.parseUnits(subscription.dailyAmount.toString(), 6);

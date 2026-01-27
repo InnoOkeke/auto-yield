@@ -13,16 +13,9 @@ import { ethers } from "ethers";
 export const getPlatformStats = query({
     args: {},
     handler: async (ctx) => {
-        const stats = await ctx.db.query("yieldSnapshots").order("desc").first();
-        const usersCount = (await ctx.db.query("users").collect()).length;
-        const activeSubsCount = (await ctx.db.query("subscriptions").withIndex("by_active", q => q.eq("isActive", true)).collect()).length;
-
+        const stats = await ctx.runQuery(api.stats.getStats);
         return {
-            users: {
-                total: usersCount,
-                activeSubscriptions: activeSubsCount,
-            },
-            vault: stats || null,
+            ...stats,
             timestamp: new Date().toISOString(),
         };
     }

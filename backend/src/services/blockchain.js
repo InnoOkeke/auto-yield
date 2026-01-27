@@ -99,24 +99,18 @@ export class BlockchainService {
                 factoryAddress: process.env.FACTORY_ADDRESS, // Use env factory if available
             });
 
+            const paymasterClient = createClient({
+                chain: base,
+                transport: http(paymasterUrl),
+            }).extend(paymasterActions);
+
             // Create Smart Account Client with Paymaster
             // Assuming the PAYMASTER_URL supports both bundler and paymaster methods (common for Coinbase/Pimlico)
             this.smartAccountClient = createSmartAccountClient({
                 account,
                 chain: base,
                 bundlerTransport: http(paymasterUrl),
-                middleware: {
-                    sponsorUserOperation: async ({ userOperation }) => {
-                        const paymasterClient = createClient({
-                            chain: base,
-                            transport: http(paymasterUrl),
-                        }).extend(paymasterActions);
-
-                        return paymasterClient.sponsorUserOperation({
-                            userOperation,
-                        });
-                    },
-                },
+                paymaster: paymasterClient,
             });
 
             console.log(`✅ Smart Account initialized: ${account.address}`);

@@ -3,8 +3,15 @@
 // actions calls mutations. It is cleaner to keep this service purely for external IO (Axios)
 // and handle DB updates in the regular logic.
 
+export interface UserNotificationInfo {
+    _id: string;
+    notificationsEnabled: boolean;
+    notificationUrl?: string;
+    notificationToken?: string;
+}
+
 export class NotificationService {
-    async sendNotification(user: any, title: string, message: string, targetUrl: string) {
+    async sendNotification(user: UserNotificationInfo, title: string, message: string, targetUrl: string) {
         try {
             if (!user.notificationsEnabled || !user.notificationUrl || !user.notificationToken) {
                 return { success: false, reason: 'disabled_or_missing_creds' };
@@ -24,7 +31,6 @@ export class NotificationService {
             });
 
             if (!response.ok) {
-                // Return 401 status etc
                 return { success: false, statusCode: response.status };
             }
 
@@ -35,7 +41,7 @@ export class NotificationService {
         }
     }
 
-    async sendDeductionNotification(user: any, amount: string, streak = 0) {
+    async sendDeductionNotification(user: UserNotificationInfo, amount: string, streak = 0) {
         let message = `Successfully saved ${amount} USDC today! Keep building your yield.`;
         if (streak > 1) {
             message = `Successfully saved ${amount} USDC today! 🔥 ${streak}-day streak! Keep it up!`;
@@ -48,7 +54,7 @@ export class NotificationService {
         );
     }
 
-    async sendSmartPauseNotification(user: any, balance: string, required: string) {
+    async sendSmartPauseNotification(user: UserNotificationInfo, balance: string, required: string) {
         return this.sendNotification(
             user,
             '💤 We\'ve Got Your Back',
@@ -57,7 +63,7 @@ export class NotificationService {
         );
     }
 
-    async sendAutoResumeNotification(user: any) {
+    async sendAutoResumeNotification(user: UserNotificationInfo) {
         return this.sendNotification(
             user,
             '🎉 You\'re Back in Action!',
@@ -66,57 +72,59 @@ export class NotificationService {
         );
     }
 
-    async sendAutoIncreaseNotification(user: any, oldAmount: string, newAmount: string) {
+    async sendAutoIncreaseNotification(user: UserNotificationInfo, oldAmount: string, newAmount: string) {
         return this.sendNotification(
             user,
             '📈 Daily Savings Increased!',
             `Your auto-increase rule kicked in! Daily savings: $${oldAmount} → $${newAmount}.`,
             process.env.FRONTEND_URL || 'https://autoyield.vercel.app/settings'
         );
-    async sendDepositNotification(user: any, amount: string) {
-            return this.sendNotification(
-                user,
-                '✅ Deposit Successful',
-                `${amount} USDC deposited to your AutoYield vault!`,
-                process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
-            );
-        }
-
-    async sendWithdrawalNotification(user: any, amount: string) {
-            return this.sendNotification(
-                user,
-                '💸 Withdrawal Complete',
-                `${amount} USDC withdrawn from your vault.`,
-                process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
-            );
-        }
-
-    async sendSubscriptionActivatedNotification(user: any, dailyAmount: string) {
-            return this.sendNotification(
-                user,
-                '🎯 AutoYield Activated',
-                `Daily savings of ${dailyAmount} USDC enabled. Your future self will thank you!`,
-                process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
-            );
-        }
-
-    async sendYieldSummaryNotification(user: any, totalYield: string, period: string) {
-            return this.sendNotification(
-                user,
-                '📊 Yield Summary',
-                `You earned ${totalYield} USDC in yield ${period}! 🚀`,
-                process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
-            );
-        }
-
-    async sendManualResumeNotification(user: any) {
-            return this.sendNotification(
-                user,
-                '✅ Resumed Successfully',
-                `Your daily saves are back on. Let's keep building!`,
-                process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
-            );
-        }
     }
 
-    export const notificationService = new NotificationService();
+    async sendDepositNotification(user: UserNotificationInfo, amount: string) {
+        return this.sendNotification(
+            user,
+            '✅ Deposit Successful',
+            `${amount} USDC deposited to your AutoYield vault!`,
+            process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
+        );
+    }
+
+    async sendWithdrawalNotification(user: UserNotificationInfo, amount: string) {
+        return this.sendNotification(
+            user,
+            '💸 Withdrawal Complete',
+            `${amount} USDC withdrawn from your vault.`,
+            process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
+        );
+    }
+
+    async sendSubscriptionActivatedNotification(user: UserNotificationInfo, dailyAmount: string) {
+        return this.sendNotification(
+            user,
+            '🎯 AutoYield Activated',
+            `Daily savings of ${dailyAmount} USDC enabled. Your future self will thank you!`,
+            process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
+        );
+    }
+
+    async sendYieldSummaryNotification(user: UserNotificationInfo, totalYield: string, period: string) {
+        return this.sendNotification(
+            user,
+            '📊 Yield Summary',
+            `You earned ${totalYield} USDC in yield ${period}! 🚀`,
+            process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
+        );
+    }
+
+    async sendManualResumeNotification(user: UserNotificationInfo) {
+        return this.sendNotification(
+            user,
+            '✅ Resumed Successfully',
+            `Your daily saves are back on. Let's keep building!`,
+            process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
+        );
+    }
+}
+
+export const notificationService = new NotificationService();

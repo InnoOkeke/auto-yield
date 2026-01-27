@@ -1,12 +1,12 @@
 import { ethers } from 'ethers';
-import { createPublicClient, http, createClient } from 'viem';
+import { createPublicClient, http, createClient, parseAbi } from 'viem';
 import { base } from 'viem/chains';
 import { paymasterActions } from 'viem/account-abstraction';
 import { privateKeyToAccount } from 'viem/accounts';
 import { createSmartAccountClient } from 'permissionless';
 import { toSimpleSmartAccount } from 'permissionless/accounts';
 
-const VAULT_ABI = [
+const VAULT_ABI_STR = [
     'function subscriptions(address) view returns (uint256 dailyAmount, bool isActive, uint256 startDate, uint256 lastDeduction)',
     'function executeDailyDeduction(address user) external',
     'function batchExecuteDeductions(address[] users) external',
@@ -17,6 +17,8 @@ const VAULT_ABI = [
     'event Subscribed(address indexed user, uint256 dailyAmount, uint256 timestamp)',
     'event Unsubscribed(address indexed user, uint256 timestamp)',
 ];
+
+const VAULT_ABI = parseAbi(VAULT_ABI_STR);
 
 const AVANTIS_VAULT_ABI = [
     'function totalAssets() view returns (uint256)',
@@ -53,7 +55,7 @@ export class BlockchainService {
 
         this.vaultContract = new ethers.Contract(
             vaultAddress,
-            VAULT_ABI,
+            VAULT_ABI_STR,
             this.wallet
         );
 
@@ -72,10 +74,11 @@ export class BlockchainService {
                 return;
             }
 
-            const privateKey = process.env.OPERATOR_PRIVATE_KEY as `0x${string}`;
+            let privateKey = process.env.OPERATOR_PRIVATE_KEY;
             if (!privateKey) throw new Error("Missing Private Key");
+            if (!privateKey.startsWith('0x')) privateKey = `0x${privateKey}`;
 
-            const owner = privateKeyToAccount(privateKey);
+            const owner = privateKeyToAccount(privateKey as `0x${string}`);
 
             const publicClient = createPublicClient({
                 chain: base,
@@ -86,25 +89,19 @@ export class BlockchainService {
             const account = await toSimpleSmartAccount({
                 client: publicClient,
                 owner: owner,
-                factoryAddress: process.env.FACTORY_ADDRESS as `0x${string}`,
+                factoryAddress: (process.env.FACTORY_ADDRESS || '0x9406Cc6185a34690419c662e70f22adBda724c78') as `0x${string}`,
             });
+
+            const paymasterClient = createClient({
+                chain: base,
+                transport: http(paymasterUrl),
+            }).extend(paymasterActions);
 
             this.smartAccountClient = createSmartAccountClient({
                 account,
                 chain: base,
                 bundlerTransport: http(paymasterUrl),
-                middleware: {
-                    sponsorUserOperation: async ({ userOperation }) => {
-                        const paymasterClient = createClient({
-                            chain: base,
-                            transport: http(paymasterUrl),
-                        }).extend(paymasterActions);
-
-                        return paymasterClient.sponsorUserOperation({
-                            userOperation,
-                        });
-                    },
-                },
+                paymaster: paymasterClient,
             });
 
             console.log(`✅ Smart Account initialized: ${account.address}`);
@@ -283,6 +280,10 @@ export class BlockchainService {
             console.error('Failed to estimate gas:', error);
             return null;
         }
+    }
+
+    async subscribeToEvents(eventName: string, callback: any) {
+        this.vaultContract.on(eventName, callback);
     }
 }
 

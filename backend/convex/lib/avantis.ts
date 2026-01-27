@@ -1,6 +1,16 @@
 import { blockchainService } from './blockchain';
 import { ethers } from 'ethers';
 
+export interface SubscriptionInfo {
+    startDate: number;
+}
+
+export interface TransactionInfo {
+    type: string;
+    status: string;
+    amount: number;
+}
+
 export class AvantisService {
     cachedAPY: number | null = null;
     lastAPYFetch: number = 0;
@@ -49,7 +59,7 @@ export class AvantisService {
         }
     }
 
-    async getUserYieldData(walletAddress: string, subscription: any, user: any, transactions: any[]) {
+    async getUserYieldData(walletAddress: string, subscription: SubscriptionInfo, user: any, transactions: TransactionInfo[]) {
         try {
             const [shares, totalValue] = await Promise.all([
                 blockchainService.getUserLPShares(walletAddress),
@@ -60,12 +70,12 @@ export class AvantisService {
 
             // Filter confirmed deductions
             const confirmedDeductions = transactions.filter(
-                (t: any) => t.type === 'DEDUCTION' && t.status === 'CONFIRMED'
+                (t) => t.type === 'DEDUCTION' && t.status === 'CONFIRMED'
             );
 
             // Calculate total deposited
             const totalDeposited = confirmedDeductions.reduce(
-                (sum: number, tx: any) => sum + tx.amount,
+                (sum, tx) => sum + tx.amount,
                 0
             );
 
@@ -104,8 +114,6 @@ export class AvantisService {
             }
 
             const totalAssets = parseFloat(stats.totalAssets);
-            // In Convex, we should compare with previous snapshot in an action/mutation, 
-            // but for parity we keep the calculation logic if needed.
             return {
                 healthy: true,
                 totalAssets,
