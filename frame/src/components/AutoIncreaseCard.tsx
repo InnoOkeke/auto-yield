@@ -121,7 +121,7 @@ export default function AutoIncreaseCard({ address }: AutoIncreaseCardProps) {
                 </div>
 
                 {/* Premium Badge */}
-                <span className="px-2 py-1 rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-xs font-bold text-purple-500 dark:text-purple-400 border border-purple-500/20">
+                <span className="px-2 py-1 rounded-full bg-primary/10 text-xs font-bold text-primary border border-primary/20">
                     ✨ Premium
                 </span>
             </div>
@@ -135,8 +135,8 @@ export default function AutoIncreaseCard({ address }: AutoIncreaseCardProps) {
                 <button
                     onClick={() => setEnabled(!enabled)}
                     className={`relative w-14 h-8 rounded-full transition-all duration-300 ${enabled
-                            ? 'bg-gradient-to-r from-purple-500 to-blue-500'
-                            : 'bg-foreground/20'
+                        ? 'bg-primary'
+                        : 'bg-foreground/20'
                         }`}
                 >
                     <motion.div
@@ -165,8 +165,8 @@ export default function AutoIncreaseCard({ address }: AutoIncreaseCardProps) {
                                     setAmount('0.50');
                                 }}
                                 className={`p-4 rounded-xl border-2 transition-all ${type === 'FIXED'
-                                        ? 'border-purple-500 bg-purple-500/10'
-                                        : 'border-foreground/10 bg-foreground/5 hover:border-foreground/20'
+                                    ? 'border-primary bg-primary/10'
+                                    : 'border-foreground/10 bg-foreground/5 hover:border-foreground/20'
                                     }`}
                             >
                                 <p className="font-bold text-foreground">💵 Fixed</p>
@@ -178,8 +178,8 @@ export default function AutoIncreaseCard({ address }: AutoIncreaseCardProps) {
                                     setAmount('5');
                                 }}
                                 className={`p-4 rounded-xl border-2 transition-all ${type === 'PERCENTAGE'
-                                        ? 'border-purple-500 bg-purple-500/10'
-                                        : 'border-foreground/10 bg-foreground/5 hover:border-foreground/20'
+                                    ? 'border-primary bg-primary/10'
+                                    : 'border-foreground/10 bg-foreground/5 hover:border-foreground/20'
                                     }`}
                             >
                                 <p className="font-bold text-foreground">📊 Percentage</p>
@@ -204,7 +204,7 @@ export default function AutoIncreaseCard({ address }: AutoIncreaseCardProps) {
                                 min="0.01"
                                 max={type === 'PERCENTAGE' ? '100' : '1000'}
                                 step={type === 'FIXED' ? '0.10' : '1'}
-                                className={`w-full py-3 rounded-xl glass border border-foreground/10 text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 ${type === 'FIXED' ? 'pl-8 pr-4' : 'px-4'
+                                className={`w-full py-3 rounded-xl glass border border-foreground/10 text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary ${type === 'FIXED' ? 'pl-8 pr-4' : 'px-4'
                                     }`}
                             />
                             {type === 'PERCENTAGE' && (
@@ -229,21 +229,21 @@ export default function AutoIncreaseCard({ address }: AutoIncreaseCardProps) {
                                 placeholder="No limit"
                                 min="0"
                                 step="1"
-                                className="w-full pl-8 pr-4 py-3 rounded-xl glass border border-foreground/10 text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder:text-muted/50"
+                                className="w-full pl-8 pr-4 py-3 rounded-xl glass border border-foreground/10 text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-muted/50"
                             />
                         </div>
                         <p className="text-xs text-muted mt-1">Cap your daily amount so it never exceeds this</p>
                     </div>
 
                     {/* Preview */}
-                    <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20">
+                    <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">
                         <p className="text-xs text-muted mb-1">Preview: Next increase</p>
                         <div className="flex items-center gap-2">
                             <span className="text-lg font-bold text-foreground">
                                 ${settings?.currentDailyAmount}
                             </span>
-                            <span className="text-purple-500">→</span>
-                            <span className="text-lg font-bold text-purple-500">
+                            <span className="text-primary">→</span>
+                            <span className="text-lg font-bold text-primary">
                                 ${previewNextAmount()}
                             </span>
                             <span className="text-xs text-muted ml-auto">every 30 days</span>
@@ -258,8 +258,8 @@ export default function AutoIncreaseCard({ address }: AutoIncreaseCardProps) {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={`mt-4 p-3 rounded-xl text-sm font-medium ${message.type === 'success'
-                            ? 'bg-green-500/10 text-green-500 border border-green-500/20'
-                            : 'bg-red-500/10 text-red-500 border border-red-500/20'
+                        ? 'bg-green-500/10 text-green-500 border border-green-500/20'
+                        : 'bg-red-500/10 text-red-500 border border-red-500/20'
                         }`}
                 >
                     {message.text}
@@ -270,7 +270,7 @@ export default function AutoIncreaseCard({ address }: AutoIncreaseCardProps) {
             <button
                 onClick={handleSave}
                 disabled={saving}
-                className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full mt-4 py-3 rounded-xl bg-primary text-white font-semibold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
                 {saving ? (
                     <>

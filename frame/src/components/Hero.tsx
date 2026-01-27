@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { TrendingUp, DollarSign, Users } from 'lucide-react';
 
 interface HeroProps {
     apy?: number;
@@ -23,7 +22,7 @@ export default function Hero({
                 transition={{ duration: 0.5 }}
                 className="mb-8"
             >
-                <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-float">
+                <h1 className="text-5xl md:text-7xl font-bold mb-6">
                     <span className="text-primary-600 dark:text-primary-400">
                         Meluri AutoYield
                     </span>
@@ -45,13 +44,13 @@ export default function Hero({
             >
                 <Link
                     href="/onboard"
-                    className="px-8 py-4 bg-primary-50 dark:bg-primary-600 text-primary-600 dark:text-white border-2 border-primary-600 dark:border-transparent rounded-xl font-semibold text-lg hover:scale-105 transition-transform animate-pulse-glow shadow-md dark:shadow-2xl"
+                    className="px-8 py-4 bg-primary-600 text-white rounded-xl font-semibold text-lg hover:bg-primary-700 transition-colors"
                 >
                     Start Earning Now
                 </Link>
                 <Link
                     href="/dashboard"
-                    className="px-8 py-4 glass-dark rounded-xl text-foreground font-semibold text-lg hover:scale-105 transition-transform border border-foreground/10"
+                    className="px-8 py-4 bg-secondary-100 dark:bg-secondary-800 rounded-xl text-foreground font-semibold text-lg hover:bg-secondary-200 dark:hover:bg-secondary-700 transition-colors border border-foreground/5"
                 >
                     View Dashboard
                 </Link>
@@ -65,16 +64,13 @@ export default function Hero({
                 className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"
             >
                 {[
-                    { label: 'Current APY', value: `~${apy}%`, icon: TrendingUp },
-                    { label: 'Total Saved', value: totalSaved, icon: DollarSign },
-                    { label: 'Active Users', value: activeUsers > 0 ? activeUsers.toLocaleString() : '0', icon: Users },
+                    { label: 'Current APY', value: `~${apy}%` },
+                    { label: 'Total Saved', value: totalSaved },
+                    { label: 'Active Users', value: activeUsers > 0 ? activeUsers.toLocaleString() : '0' },
                 ].map((stat, i) => (
-                    <div key={i} className="glass-dark rounded-2xl p-6 backdrop-blur-xl border border-foreground/5 shadow-sm">
-                        <div className="flex justify-center mb-3">
-                            <stat.icon className="w-8 h-8 text-primary-500" />
-                        </div>
+                    <div key={i} className="bg-secondary-50 dark:bg-secondary-900/40 rounded-2xl p-6 border border-foreground/5">
                         <div className="text-3xl font-bold text-foreground mb-1">{stat.value}</div>
-                        <div className="text-muted">{stat.label}</div>
+                        <div className="text-muted text-sm uppercase tracking-wider font-semibold">{stat.label}</div>
                     </div>
                 ))}
             </motion.div>

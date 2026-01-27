@@ -11,20 +11,17 @@ const slides = [
     {
         title: 'Welcome to AutoYield',
         description: 'Automate your DeFi savings and earn yield on Base — all on autopilot.',
-        icon: '🚀',
-        gradient: 'from-purple-500 to-blue-500',
+        bg: 'bg-primary-600/10',
     },
     {
         title: 'Set Your Daily Amount',
         description: 'Choose how much USDC to save daily. Start with as little as $1.',
-        icon: '💰',
-        gradient: 'from-blue-500 to-cyan-500',
+        bg: 'bg-primary-600/10',
     },
     {
         title: 'Earn While You Sleep',
         description: 'Your savings automatically earn yield in DeFi vaults. No manual work needed.',
-        icon: '✨',
-        gradient: 'from-cyan-500 to-green-500',
+        bg: 'bg-primary-600/10',
     },
 ];
 
@@ -64,10 +61,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{
-                background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
-            }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background"
         >
             <div className="w-full max-w-md">
                 <AnimatePresence mode="wait">
@@ -79,14 +73,14 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                         transition={{ duration: 0.3 }}
                         className="text-center"
                     >
-                        {/* Icon */}
+                        {/* Branding / Visual */}
                         <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ delay: 0.1, type: 'spring' }}
-                            className={`mx-auto mb-8 w-24 h-24 rounded-3xl bg-gradient-to-br ${slide.gradient} flex items-center justify-center shadow-lg`}
+                            className={`mx-auto mb-8 w-24 h-24 rounded-3xl ${slide.bg} flex items-center justify-center border border-primary-600/20`}
                         >
-                            <span className="text-5xl">{slide.icon}</span>
+                            <div className="w-12 h-12 bg-primary-600 rounded-xl" />
                         </motion.div>
 
                         {/* Title */}
@@ -108,8 +102,8 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                             key={index}
                             onClick={() => setCurrentSlide(index)}
                             className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentSlide
-                                ? 'w-8 bg-gradient-to-r from-purple-500 to-blue-500'
-                                : 'bg-foreground/20'
+                                ? 'w-8 bg-primary-600'
+                                : 'bg-secondary-300 dark:bg-secondary-700'
                                 }`}
                         />
                     ))}
@@ -127,7 +121,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                             </button>
                             <button
                                 onClick={handleNext}
-                                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold hover:opacity-90 transition-all"
+                                className="flex-1 py-3 rounded-xl bg-primary text-white font-semibold hover:opacity-90 transition-all"
                             >
                                 Next
                             </button>
@@ -135,7 +129,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     ) : (
                         <button
                             onClick={handleComplete}
-                            className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold text-lg hover:opacity-90 transition-all shadow-lg"
+                            className="w-full py-4 rounded-xl bg-primary text-white font-semibold text-lg hover:opacity-90 transition-all shadow-lg"
                         >
                             Get Started
                         </button>

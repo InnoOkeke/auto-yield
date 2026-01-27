@@ -13,7 +13,6 @@
   /* #475569 (Light Mode Secondary) */
   --border: 15, 23, 42, 0.08;
   /* Dark navy at 8% opacity */
-  --gradient-signature: #4F46E5;
 }
 
 .dark {
@@ -27,7 +26,6 @@
   /* #9CA3AF (Dark Mode Secondary) */
   --border: 255, 255, 255, 0.06;
   /* White at 6% opacity */
-  --gradient-signature: #6366f1;
 }
 
 body {
@@ -42,39 +40,6 @@ body {
   }
 }
 
-/* Custom Animations */
-@keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-@keyframes pulse-glow {
-
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
-    /* Primary Indigo */
-  }
-
-  50% {
-    box-shadow: 0 0 30px rgba(79, 70, 229, 0.6);
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
 
 /* Glassmorphism */
 .glass {

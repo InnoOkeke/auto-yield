@@ -77,7 +77,7 @@ export default function SettingsPage() {
                                 type="number"
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
-                                className="w-full pl-8 pr-4 py-4 rounded-xl glass text-foreground text-xl font-bold focus:outline-none focus:ring-2 focus:ring-purple-500 border border-foreground/5"
+                                className="w-full pl-8 pr-4 py-4 rounded-xl glass text-foreground text-xl font-bold focus:outline-none focus:ring-2 focus:ring-primary border border-foreground/5"
                             />
                         </div>
                     </div>
@@ -93,7 +93,7 @@ export default function SettingsPage() {
                         <button
                             onClick={handleUpdate}
                             disabled={isWritePending || isConfirming || isSuccess}
-                            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 hover:opacity-90 transition-all text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="flex-1 py-3 rounded-xl bg-primary hover:opacity-90 transition-all text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {isWritePending ? 'Check Wallet...' : isConfirming ? 'Updating...' : isSuccess ? 'Updated!' : 'Update Amount'}
                         </button>

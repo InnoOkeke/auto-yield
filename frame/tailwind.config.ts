@@ -25,20 +25,20 @@ const config: Config = {
                     900: '#312e81',
                     950: '#1e1b4b',
                 },
-                // Secondary: Soft Cyan
+                // Secondary: Minimal Gray
                 secondary: {
-                    DEFAULT: '#22D3EE',
-                    50: '#ecfeff',
-                    100: '#cffafe',
-                    200: '#a5f3fc',
-                    300: '#67e8f9',
-                    400: '#22D3EE', // Accent / highlights
-                    500: '#06b6d4',
-                    600: '#0891b2',
-                    700: '#0e7490',
-                    800: '#155e75',
-                    900: '#164e63',
-                    950: '#083344',
+                    DEFAULT: '#64748B',
+                    50: '#f8fafc',
+                    100: '#f1f5f9',
+                    200: '#e2e8f0',
+                    300: '#cbd5e1',
+                    400: '#94a3b8',
+                    500: '#64748B',
+                    600: '#475569',
+                    700: '#334155',
+                    800: '#1e293b',
+                    900: '#0f172a',
+                    950: '#020617',
                 },
                 // Success: Emerald Green
                 success: {
@@ -75,10 +75,6 @@ const config: Config = {
             },
             fontFamily: {
                 sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-            },
-            backgroundImage: {
-                'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-                'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
             },
         },
     },

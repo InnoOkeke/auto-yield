@@ -82,10 +82,10 @@ export default function YieldChart({ yieldData, historyData }: YieldChartProps) 
 
     // Theme-aware colors
     const colors = {
-        deposited: isDark ? '#60A5FA' : '#3B82F6', // blue-400 / blue-500
-        value: isDark ? '#A78BFA' : '#8B5CF6', // purple-400 / purple-500
+        deposited: '#4F46E5', // primary-600
+        value: '#818cf8', // primary-400
         grid: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(15, 23, 42, 0.08)',
-        text: isDark ? '#9CA3AF' : '#475569', // muted colors from CSS vars
+        text: isDark ? '#9CA3AF' : '#475569',
         tooltipBg: isDark ? '#111827' : '#FFFFFF',
         tooltipBorder: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(15, 23, 42, 0.1)',
     };
@@ -128,7 +128,6 @@ export default function YieldChart({ yieldData, historyData }: YieldChartProps) 
             {/* Header with period toggle */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
-                    <span className="text-2xl">📈</span>
                     <h2 className="text-xl font-bold text-foreground">Yield Performance</h2>
                 </div>
 
@@ -137,8 +136,8 @@ export default function YieldChart({ yieldData, historyData }: YieldChartProps) 
                     <button
                         onClick={() => setPeriod('7d')}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${period === '7d'
-                                ? 'bg-purple-500 text-white shadow-md'
-                                : 'text-muted hover:text-foreground'
+                            ? 'bg-purple-500 text-white shadow-md'
+                            : 'text-muted hover:text-foreground'
                             }`}
                     >
                         7 Days
@@ -146,8 +145,8 @@ export default function YieldChart({ yieldData, historyData }: YieldChartProps) 
                     <button
                         onClick={() => setPeriod('30d')}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${period === '30d'
-                                ? 'bg-purple-500 text-white shadow-md'
-                                : 'text-muted hover:text-foreground'
+                            ? 'bg-purple-500 text-white shadow-md'
+                            : 'text-muted hover:text-foreground'
                             }`}
                     >
                         30 Days
@@ -175,14 +174,6 @@ export default function YieldChart({ yieldData, historyData }: YieldChartProps) 
                         margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
                     >
                         <defs>
-                            <linearGradient id="depositedGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor={colors.deposited} stopOpacity={0.3} />
-                                <stop offset="95%" stopColor={colors.deposited} stopOpacity={0} />
-                            </linearGradient>
-                            <linearGradient id="valueGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor={colors.value} stopOpacity={0.4} />
-                                <stop offset="95%" stopColor={colors.value} stopOpacity={0} />
-                            </linearGradient>
                         </defs>
                         <CartesianGrid
                             strokeDasharray="3 3"
@@ -209,14 +200,14 @@ export default function YieldChart({ yieldData, historyData }: YieldChartProps) 
                             dataKey="deposited"
                             stroke={colors.deposited}
                             strokeWidth={2}
-                            fill="url(#depositedGradient)"
+                            fill="transparent"
                         />
                         <Area
                             type="monotone"
                             dataKey="value"
                             stroke={colors.value}
                             strokeWidth={2}
-                            fill="url(#valueGradient)"
+                            fill="transparent"
                         />
                     </AreaChart>
                 </ResponsiveContainer>
@@ -226,13 +217,13 @@ export default function YieldChart({ yieldData, historyData }: YieldChartProps) 
             <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-foreground/5">
                 <div className="text-center">
                     <p className="text-xs text-muted font-medium">Total Deposited</p>
-                    <p className="text-lg font-bold text-blue-500 dark:text-blue-400">
+                    <p className="text-lg font-bold text-primary-600 dark:text-primary-400">
                         ${totalDeposited.toFixed(2)}
                     </p>
                 </div>
                 <div className="text-center">
                     <p className="text-xs text-muted font-medium">Current Value</p>
-                    <p className="text-lg font-bold text-purple-500 dark:text-purple-400">
+                    <p className="text-lg font-bold text-primary-500 dark:text-primary-300">
                         ${currentValue.toFixed(2)}
                     </p>
                 </div>

@@ -81,7 +81,7 @@ export default function HeaderConnect() {
         <button
             onClick={handleSignIn}
             disabled={loading}
-            className="px-4 py-1.5 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:opacity-90 text-white font-medium text-xs transition-all shadow-md disabled:opacity-50 flex items-center gap-2"
+            className="px-4 py-1.5 rounded-lg bg-primary hover:opacity-90 text-white font-medium text-xs transition-all shadow-md disabled:opacity-50 flex items-center gap-2"
         >
             {loading ? (
                 <>

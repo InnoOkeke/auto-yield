@@ -137,8 +137,10 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                             {/* Header */}
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-primary-600 flex items-center justify-center text-2xl text-white shadow-lg">
-                                        🔄
+                                    <div className="w-12 h-12 rounded-2xl bg-primary-600 flex items-center justify-center text-white shadow-md">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                        </svg>
                                     </div>
                                     <div>
                                         <h2 className="text-xl font-bold text-foreground">Smart Swap</h2>
@@ -204,7 +206,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                     <button
                                         onClick={generateSwapTransaction}
                                         disabled={!prompt.trim() || !isConnected}
-                                        className="w-full py-4 rounded-xl bg-primary-50 dark:bg-primary-600 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                                        className="w-full py-4 rounded-xl bg-primary-600 text-white font-semibold hover:bg-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                                     >
                                         Generate Swap
                                     </button>
@@ -232,8 +234,8 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                         <p className="text-foreground font-medium">{metadata.prompt}</p>
                                     </div>
 
-                                    <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20">
-                                        <p className="text-sm text-green-600 dark:text-green-400 mb-2 font-bold">✓ Transaction ready</p>
+                                    <div className="p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800">
+                                        <p className="text-sm text-primary-600 dark:text-primary-400 mb-2 font-bold uppercase tracking-wider">✓ Transaction ready</p>
                                         <p className="text-xs text-muted font-medium">
                                             Network: {metadata.chain?.toUpperCase() || 'BASE'}
                                         </p>
@@ -249,7 +251,7 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
                                         <button
                                             onClick={executeSwap}
                                             disabled={isSending}
-                                            className="flex-1 py-3 rounded-xl bg-primary-50 dark:bg-green-600 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-medium hover:opacity-90 transition-all disabled:opacity-50 shadow-md"
+                                            className="flex-1 py-3 rounded-xl bg-primary-600 text-white font-medium hover:bg-primary-700 transition-all shadow-md"
                                         >
                                             {isSending ? 'Signing...' : 'Confirm Swap'}
                                         </button>
@@ -299,14 +301,16 @@ export default function SwapModal({ isOpen, onClose }: SwapModalProps) {
 
                             {state === 'error' && (
                                 <div className="text-center py-8">
-                                    <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center text-4xl mx-auto mb-4">
-                                        ⚠️
+                                    <div className="w-16 h-16 rounded-full bg-secondary-100 dark:bg-secondary-800 flex items-center justify-center mx-auto mb-4">
+                                        <svg className="w-8 h-8 text-secondary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
                                     </div>
                                     <p className="text-foreground font-bold text-xl mb-2">Swap Failed</p>
                                     <p className="text-muted text-sm mb-4">{error}</p>
                                     <button
                                         onClick={resetModal}
-                                        className="w-full py-3 rounded-xl bg-black/5 dark:bg-white/10 text-foreground font-medium hover:bg-black/10 dark:hover:bg-white/20 transition-all border border-foreground/10"
+                                        className="w-full py-3 rounded-xl bg-secondary-100 dark:bg-secondary-800 text-foreground font-medium hover:bg-secondary-200 dark:hover:bg-secondary-700 transition-all border border-foreground/5"
                                     >
                                         Try Again
                                     </button>

@@ -32,3 +32,7 @@ yarn-error.log*
 
 # Scripts
 scripts/debug_hre.js
+# Avanasec scan reports (contains detected secrets)
+scan-reports/
+# Avanasec cache (scan results cache)
+.avana-cache/

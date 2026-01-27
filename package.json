@@ -9,7 +9,8 @@
     "compile": "hardhat compile",
     "deploy:sepolia": "hardhat run scripts/deploy.js --network base-sepolia",
     "deploy:base": "hardhat run scripts/deploy.js --network base",
-    "deploy:mocks": "hardhat run scripts/deployMocks.js --network localhost"
+    "deploy:mocks": "hardhat run scripts/deployMocks.js --network localhost",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",

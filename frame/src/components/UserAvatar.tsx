@@ -60,7 +60,7 @@ export default function UserAvatar({
                 />
             ) : (
                 <div
-                    className="rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold"
+                    className="rounded-full bg-primary flex items-center justify-center text-white font-bold"
                     style={{ width: avatarSize, height: avatarSize, fontSize: avatarSize * 0.4 }}
                 >
                     {displayName.slice(0, 1).toUpperCase()}

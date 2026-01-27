@@ -85,9 +85,9 @@ export default function SubscriptionForm({
                 key={amount}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="glass rounded-2xl p-6 bg-primary-100 dark:bg-primary-900/20 border border-primary-500/30"
+                className="bg-primary-50 dark:bg-primary-900/20 rounded-2xl p-6 border border-primary-100 dark:border-primary-800"
             >
-                <h3 className="text-foreground font-semibold mb-4">📊 Your Projected Returns</h3>
+                <h3 className="text-foreground font-semibold mb-4 text-center uppercase tracking-wider text-sm">Projected Returns</h3>
                 <div className="space-y-3">
                     <div className="flex justify-between text-muted">
                         <span>Daily Deposit</span>
@@ -115,14 +115,14 @@ export default function SubscriptionForm({
             <div className="flex gap-4">
                 <button
                     onClick={onBack}
-                    className="flex-1 py-4 rounded-xl glass hover:bg-black/5 dark:hover:bg-white/20 text-foreground font-semibold transition-all border border-foreground/5 shadow-sm"
+                    className="flex-1 py-4 rounded-xl bg-secondary-100 dark:bg-secondary-800 hover:bg-secondary-200 dark:hover:bg-secondary-700 text-foreground font-semibold transition-all border border-foreground/5 shadow-sm"
                 >
                     Back
                 </button>
                 <button
                     onClick={onNext}
                     disabled={!amount || parseFloat(amount) < 1}
-                    className="flex-1 py-4 rounded-xl bg-primary-50 dark:bg-primary-600 text-primary-600 dark:text-white border border-primary-600 dark:border-transparent font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                    className="flex-1 py-4 rounded-xl bg-primary-600 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                 >
                     Continue
                 </button>

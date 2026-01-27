@@ -21,7 +21,6 @@ export default function SummaryCard({
 }: SummaryCardProps) {
     const [period, setPeriod] = useState<'daily' | 'weekly'>('daily');
     const [isSharing, setIsSharing] = useState(false);
-    const [showConfetti, setShowConfetti] = useState(false);
 
     const handleShare = async () => {
         setIsSharing(true);
@@ -34,9 +33,6 @@ export default function SummaryCard({
         };
 
         await shareSummary(data);
-
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 2000);
         setIsSharing(false);
     };
 
@@ -48,50 +44,14 @@ export default function SummaryCard({
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-dark rounded-3xl p-6 border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-blue-500/5 relative overflow-hidden"
+            className="glass-dark rounded-3xl p-6 border border-foreground/10 relative overflow-hidden"
         >
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 -mt-8 -mr-8 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 -mb-6 -ml-6 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl" />
 
-            {/* Confetti animation */}
-            <AnimatePresence>
-                {showConfetti && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 pointer-events-none z-20"
-                    >
-                        {[...Array(12)].map((_, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{
-                                    x: '50%',
-                                    y: '50%',
-                                    scale: 0
-                                }}
-                                animate={{
-                                    x: `${Math.random() * 100}%`,
-                                    y: `${Math.random() * 100}%`,
-                                    scale: [0, 1, 0],
-                                    rotate: Math.random() * 360
-                                }}
-                                transition={{ duration: 1, ease: 'easeOut' }}
-                                className="absolute text-2xl"
-                            >
-                                {['✨', '🎉', '🚀', '💰', '🔥'][i % 5]}
-                            </motion.div>
-                        ))}
-                    </motion.div>
-                )}
-            </AnimatePresence>
 
             <div className="relative z-10">
                 {/* Header with period toggle */}
                 <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-2">
-                        <span className="text-3xl">📊</span>
                         <h3 className="text-xl font-bold text-foreground">Summary Card</h3>
                     </div>
 
@@ -100,7 +60,7 @@ export default function SummaryCard({
                         <button
                             onClick={() => setPeriod('daily')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${period === 'daily'
-                                ? 'bg-purple-500 text-white shadow-md'
+                                ? 'bg-primary text-white shadow-md'
                                 : 'text-muted hover:text-foreground'
                                 }`}
                         >
@@ -109,7 +69,7 @@ export default function SummaryCard({
                         <button
                             onClick={() => setPeriod('weekly')}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${period === 'weekly'
-                                ? 'bg-purple-500 text-white shadow-md'
+                                ? 'bg-primary text-white shadow-md'
                                 : 'text-muted hover:text-foreground'
                                 }`}
                         >
@@ -125,13 +85,12 @@ export default function SummaryCard({
                         key={`saved-${period}`}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="glass rounded-2xl p-4 text-center border border-blue-500/10 bg-blue-500/5"
+                        className="bg-secondary-50 dark:bg-secondary-900/40 rounded-2xl p-4 text-center border border-foreground/5"
                     >
-                        <div className="text-2xl mb-1">💵</div>
-                        <div className="text-xl font-bold text-blue-500 font-display">
+                        <div className="text-xl font-bold text-primary dark:text-primary-400 font-display">
                             ${savedAmount}
                         </div>
-                        <div className="text-xs text-muted font-medium">Saved</div>
+                        <div className="text-xs text-muted uppercase tracking-wider font-semibold">Saved</div>
                     </motion.div>
 
                     {/* Yield Earned */}
@@ -139,13 +98,12 @@ export default function SummaryCard({
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.1 }}
-                        className="glass rounded-2xl p-4 text-center border border-green-500/10 bg-green-500/5"
+                        className="bg-secondary-50 dark:bg-secondary-900/40 rounded-2xl p-4 text-center border border-foreground/5"
                     >
-                        <div className="text-2xl mb-1">✨</div>
-                        <div className="text-xl font-bold text-green-500 font-display">
+                        <div className="text-xl font-bold text-primary dark:text-primary-400 font-display">
                             ${yieldEarned}
                         </div>
-                        <div className="text-xs text-muted font-medium">Yield</div>
+                        <div className="text-xs text-muted uppercase tracking-wider font-semibold">Yield</div>
                     </motion.div>
 
                     {/* Current Streak */}
@@ -153,20 +111,19 @@ export default function SummaryCard({
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.2 }}
-                        className="glass rounded-2xl p-4 text-center border border-orange-500/10 bg-orange-500/5"
+                        className="bg-secondary-50 dark:bg-secondary-900/40 rounded-2xl p-4 text-center border border-foreground/5"
                     >
-                        <div className="text-2xl mb-1">🔥</div>
-                        <div className="text-xl font-bold text-orange-500 font-display">
+                        <div className="text-xl font-bold text-primary dark:text-primary-400 font-display">
                             {currentStreak}
                         </div>
-                        <div className="text-xs text-muted font-medium">Streak</div>
+                        <div className="text-xs text-muted uppercase tracking-wider font-semibold">Streak</div>
                     </motion.div>
                 </div>
 
                 {/* Current Value Banner */}
-                <div className="glass rounded-2xl p-4 mb-5 border border-purple-500/10 bg-purple-500/5 text-center">
-                    <p className="text-xs text-muted font-medium mb-1">Current Portfolio Value</p>
-                    <p className="text-2xl font-bold text-purple-500 font-display">${currentValue}</p>
+                <div className="bg-primary-50 dark:bg-primary-900/20 rounded-2xl p-4 mb-5 border border-primary-100 dark:border-primary-800 text-center">
+                    <p className="text-xs text-primary-700 dark:text-primary-300 font-semibold uppercase tracking-wider mb-1">Current Portfolio Value</p>
+                    <p className="text-2xl font-bold text-primary-600 dark:text-primary-400 font-display">${currentValue}</p>
                 </div>
 
                 {/* Footer with Share Button */}
@@ -177,7 +134,7 @@ export default function SummaryCard({
                     <button
                         onClick={handleShare}
                         disabled={isSharing}
-                        className="text-xs font-bold text-white bg-purple-500 hover:bg-purple-600 py-2 px-4 rounded-xl transition-all shadow-md hover:shadow-purple-500/20 flex items-center gap-1.5 disabled:opacity-50"
+                        className="text-xs font-bold text-white bg-primary hover:opacity-90 py-2 px-4 rounded-xl transition-all shadow-md flex items-center gap-1.5 disabled:opacity-50"
                     >
                         {isSharing ? (
                             <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />

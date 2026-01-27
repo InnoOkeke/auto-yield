@@ -5,32 +5,26 @@ import { motion } from 'framer-motion';
 export default function FeatureSection() {
     const features = [
         {
-            icon: '⚡',
             title: 'Automated Savings',
             description: 'Set your daily amount and let our backend handle the rest. Built for efficiency.',
         },
         {
-            icon: '🔄',
             title: 'Automated Daily Deductions',
             description: 'Set your daily amount and forget it. Our backend handles everything while you sleep.',
         },
         {
-            icon: '📊',
             title: 'Instant Yield Generation',
             description: 'Every deduction is immediately deposited into AvantisFi LP Vault for maximum yield.',
         },
         {
-            icon: '🔐',
             title: 'Non-Custodial',
             description: 'You always control your funds. Withdraw anytime with no penalties or lockups.',
         },
         {
-            icon: '⚙️',
             title: 'Flexible Management',
             description: 'Adjust your daily amount, pause, or cancel your subscription anytime you want.',
         },
         {
-            icon: '🌐',
             title: 'Built on Base',
             description: 'Lightning-fast transactions with minimal fees on Coinbase\'s Layer 2 network.',
         },
@@ -59,9 +53,8 @@ export default function FeatureSection() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 * index }}
-                        className="glass-dark rounded-2xl p-6 hover:scale-105 transition-transform cursor-pointer backdrop-blur-xl"
+                        className="bg-secondary-50 dark:bg-secondary-900/40 rounded-2xl p-6 border border-foreground/5"
                     >
-                        <div className="text-5xl mb-4">{feature.icon}</div>
                         <h3 className="text-xl font-semibold text-foreground mb-2">
                             {feature.title}
                         </h3>
