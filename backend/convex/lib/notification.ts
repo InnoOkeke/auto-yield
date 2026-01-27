@@ -73,7 +73,50 @@ export class NotificationService {
             `Your auto-increase rule kicked in! Daily savings: $${oldAmount} → $${newAmount}.`,
             process.env.FRONTEND_URL || 'https://autoyield.vercel.app/settings'
         );
-    }
-}
+    async sendDepositNotification(user: any, amount: string) {
+            return this.sendNotification(
+                user,
+                '✅ Deposit Successful',
+                `${amount} USDC deposited to your AutoYield vault!`,
+                process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
+            );
+        }
 
-export const notificationService = new NotificationService();
+    async sendWithdrawalNotification(user: any, amount: string) {
+            return this.sendNotification(
+                user,
+                '💸 Withdrawal Complete',
+                `${amount} USDC withdrawn from your vault.`,
+                process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
+            );
+        }
+
+    async sendSubscriptionActivatedNotification(user: any, dailyAmount: string) {
+            return this.sendNotification(
+                user,
+                '🎯 AutoYield Activated',
+                `Daily savings of ${dailyAmount} USDC enabled. Your future self will thank you!`,
+                process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
+            );
+        }
+
+    async sendYieldSummaryNotification(user: any, totalYield: string, period: string) {
+            return this.sendNotification(
+                user,
+                '📊 Yield Summary',
+                `You earned ${totalYield} USDC in yield ${period}! 🚀`,
+                process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
+            );
+        }
+
+    async sendManualResumeNotification(user: any) {
+            return this.sendNotification(
+                user,
+                '✅ Resumed Successfully',
+                `Your daily saves are back on. Let's keep building!`,
+                process.env.FRONTEND_URL || 'https://autoyield.vercel.app/dashboard'
+            );
+        }
+    }
+
+    export const notificationService = new NotificationService();

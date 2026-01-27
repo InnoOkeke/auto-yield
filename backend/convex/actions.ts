@@ -13,40 +13,55 @@ export const processDailyDeductions = action({
     handler: async (ctx) => {
         console.log('🔄 Starting daily deduction process...');
         try {
-            // Step 0: Apply auto-increases (port logic or call separate action?)
-            // We'll execute inline for simplicity or call internal helper
-            // Skipped auto-increase for now to keep it simple, or can implement later.
-            // Let's implement active subscription fetching
+            // Step 1: Handle Auto-Increases
+            const autoIncreaseSubs = await ctx.runQuery(api.subscriptions.getAutoIncreaseEnabled);
+            const now = Date.now();
+            let autoIncreasedCount = 0;
 
+            for (const sub of autoIncreaseSubs) {
+                if (deductionService.shouldApplyAutoIncrease(sub, now)) {
+                    const newAmount = deductionService.calculateNewAmount(sub);
+                    if (newAmount > sub.dailyAmount) {
+                        await ctx.runMutation(api.subscriptions.applyAutoIncrease, {
+                            subscriptionId: sub._id,
+                            newDailyAmount: newAmount,
+                        });
+
+                        const user = await ctx.runQuery(api.users.getById, { userId: sub.userId });
+                        if (user?.notificationsEnabled) {
+                            await notificationService.sendAutoIncreaseNotification(
+                                user,
+                                sub.dailyAmount.toFixed(2),
+                                newAmount.toFixed(2)
+                            );
+                        }
+                        autoIncreasedCount++;
+                    }
+                }
+            }
+            console.log(`📈 Auto-increased ${autoIncreasedCount} subscriptions`);
+
+            // Step 2: Process Deductions
             const activeSubscriptions = await ctx.runQuery(api.subscriptions.getActiveSubscriptions);
             console.log(`Found ${activeSubscriptions.length} active subscriptions`);
 
-            const eligibleUsers = [];
+            const eligibleSubs = [];
             for (const sub of activeSubscriptions) {
                 const canDeduct = await blockchainService.canDeductToday(sub.walletAddress);
                 if (canDeduct) {
                     const user = await ctx.runQuery(api.users.getById, { userId: sub.userId });
-                    if (user) {
-                        eligibleUsers.push({ ...sub, user });
-                    }
+                    eligibleSubs.push({ ...sub, user });
                 }
             }
 
-            console.log(`${eligibleUsers.length} users eligible for deduction today`);
+            console.log(`${eligibleSubs.length} users eligible for deduction today`);
 
-            if (eligibleUsers.length === 0) return { success: true, processed: 0 };
-
-            const usersToProcess = [];
+            const entriesToProcess = [];
             let pausedCount = 0;
 
-            for (const sub of eligibleUsers) {
-                // Check balance (Smart Pause)
-                const userBalance = await blockchainService.getUserUsdcBalance(sub.walletAddress);
-                const requiredAmount = ethers.parseUnits(sub.dailyAmount.toString(), 6);
-                const requiredWithBuffer = requiredAmount + (requiredAmount / 10n);
-
-                if (userBalance < requiredWithBuffer) {
-                    // Trigger pause
+            for (const sub of eligibleSubs) {
+                const balanceCheck = await deductionService.checkLowBalance(sub);
+                if (balanceCheck.shouldPause) {
                     await ctx.runMutation(api.subscriptions.pause, {
                         walletAddress: sub.walletAddress,
                         reason: 'LOW_BALANCE',
@@ -55,13 +70,13 @@ export const processDailyDeductions = action({
                     if (sub.user?.notificationsEnabled) {
                         await notificationService.sendSmartPauseNotification(
                             sub.user,
-                            ethers.formatUnits(userBalance, 6),
-                            ethers.formatUnits(requiredAmount, 6)
+                            balanceCheck.balance!,
+                            balanceCheck.required!
                         );
                     }
                     pausedCount++;
                 } else {
-                    usersToProcess.push(sub);
+                    entriesToProcess.push(sub);
                 }
             }
 
@@ -70,17 +85,14 @@ export const processDailyDeductions = action({
             let processed = 0;
             let failed = 0;
 
-            for (let i = 0; i < usersToProcess.length; i += BATCH_SIZE) {
-                const batch = usersToProcess.slice(i, i + BATCH_SIZE);
+            for (let i = 0; i < entriesToProcess.length; i += BATCH_SIZE) {
+                const batch = entriesToProcess.slice(i, i + BATCH_SIZE);
                 const addresses = batch.map(s => s.walletAddress);
-
-                console.log(`Processing batch ${Math.floor(i / BATCH_SIZE) + 1}`);
 
                 const result = await blockchainService.batchExecuteDeductions(addresses);
 
                 if (result.success) {
                     for (const sub of batch) {
-                        // Record success
                         await ctx.runMutation(api.transactions.create, {
                             userId: sub.userId,
                             type: 'DEDUCTION',
@@ -97,21 +109,21 @@ export const processDailyDeductions = action({
 
                         const newStreak = (sub.currentStreak || 0) + 1;
                         if (sub.user?.notificationsEnabled) {
-                            await notificationService.sendDeductionNotification(sub.user, sub.dailyAmount.toString(), newStreak);
+                            await notificationService.sendDeductionNotification(sub.user, sub.dailyAmount.toFixed(2), newStreak);
                         }
                     }
                     processed += batch.length;
                 } else {
-                    // Fallback to individual
+                    // Fallback individual
                     for (const sub of batch) {
-                        const singleRes = await blockchainService.executeDailyDeduction(sub.walletAddress);
-                        if (singleRes.success) {
+                        const single = await blockchainService.executeDailyDeduction(sub.walletAddress);
+                        if (single.success) {
                             await ctx.runMutation(api.transactions.create, {
                                 userId: sub.userId,
                                 type: 'DEDUCTION',
                                 amount: sub.dailyAmount,
-                                txHash: singleRes.txHash,
-                                blockNumber: singleRes.blockNumber || 0,
+                                txHash: single.txHash,
+                                blockNumber: single.blockNumber || 0,
                                 status: 'CONFIRMED'
                             });
                             await ctx.runMutation(api.subscriptions.recordDeduction, {
@@ -120,27 +132,24 @@ export const processDailyDeductions = action({
                             });
                             processed++;
                         } else {
-                            // Record failure
                             await ctx.runMutation(api.transactions.create, {
                                 userId: sub.userId,
                                 type: 'DEDUCTION',
                                 amount: sub.dailyAmount,
-                                txHash: '0x000', // Failed
+                                txHash: '0x000',
                                 blockNumber: 0,
-                                status: 'FAILED'
+                                status: 'FAILED',
+                                errorMessage: single.error
                             });
                             await ctx.runMutation(api.subscriptions.resetStreak, { subscriptionId: sub._id });
                             failed++;
                         }
                     }
                 }
-
-                if (i + BATCH_SIZE < usersToProcess.length) {
-                    await delay(2000);
-                }
+                if (i + BATCH_SIZE < entriesToProcess.length) await delay(2000);
             }
 
-            return { success: true, processed, failed, paused: pausedCount };
+            return { success: true, processed, failed, paused: pausedCount, autoIncreased: autoIncreasedCount };
         } catch (error: any) {
             console.error('Error in processDailyDeductions:', error);
             throw new Error(error.message);

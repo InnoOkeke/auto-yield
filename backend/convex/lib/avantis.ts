@@ -49,6 +49,53 @@ export class AvantisService {
         }
     }
 
+    async getUserYieldData(walletAddress: string, subscription: any, user: any, transactions: any[]) {
+        try {
+            const [shares, totalValue] = await Promise.all([
+                blockchainService.getUserLPShares(walletAddress),
+                blockchainService.getUserTotalValue(walletAddress),
+            ]);
+
+            if (!subscription) return null;
+
+            // Filter confirmed deductions
+            const confirmedDeductions = transactions.filter(
+                (t: any) => t.type === 'DEDUCTION' && t.status === 'CONFIRMED'
+            );
+
+            // Calculate total deposited
+            const totalDeposited = confirmedDeductions.reduce(
+                (sum: number, tx: any) => sum + tx.amount,
+                0
+            );
+
+            // Calculate yield earned
+            const currentValue = parseFloat(ethers.formatUnits(totalValue, 6));
+            const yieldEarned = currentValue - totalDeposited;
+
+            // Calculate days active
+            const daysActive = Math.floor(
+                (Date.now() - subscription.startDate) / (1000 * 60 * 60 * 24)
+            );
+
+            return {
+                walletAddress,
+                lpShares: ethers.formatUnits(shares, 6),
+                totalDeposited: totalDeposited.toFixed(2),
+                currentValue: currentValue.toFixed(2),
+                yieldEarned: yieldEarned.toFixed(2),
+                yieldPercentage: totalDeposited > 0
+                    ? ((yieldEarned / totalDeposited) * 100).toFixed(2)
+                    : '0.00',
+                daysActive,
+                transactionCount: confirmedDeductions.length,
+            };
+        } catch (error) {
+            console.error(`Failed to get yield data for ${walletAddress}:`, error);
+            return null;
+        }
+    }
+
     async monitorVaultHealth() {
         try {
             const stats = await this.getVaultStats();
@@ -57,6 +104,8 @@ export class AvantisService {
             }
 
             const totalAssets = parseFloat(stats.totalAssets);
+            // In Convex, we should compare with previous snapshot in an action/mutation, 
+            // but for parity we keep the calculation logic if needed.
             return {
                 healthy: true,
                 totalAssets,
