@@ -8,6 +8,8 @@ export const TransactionType = {
     WITHDRAWAL: "WITHDRAWAL",
     REWARDS_CLAIM: "REWARDS_CLAIM",
     EMERGENCY_WITHDRAWAL: "EMERGENCY_WITHDRAWAL",
+    MANUAL_DEPOSIT: "MANUAL_DEPOSIT",
+    CHALLENGE_DEPOSIT: "CHALLENGE_DEPOSIT",
 } as const;
 
 export const TransactionStatus = {

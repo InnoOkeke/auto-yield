@@ -99,38 +99,6 @@ router.get('/status', async (req, res) => {
     }
 });
 
-/**
- * POST /api/farcaster/test
- * Send a test notification
- */
-router.post('/test', async (req, res) => {
-    try {
-        const { walletAddress, fid } = req.body;
-
-        let user;
-        if (fid) {
-            user = await convex.query(api.users.getByFid, { farcasterFid: parseInt(fid) });
-        } else if (walletAddress) {
-            user = await convex.query(api.users.getByWallet, { walletAddress: walletAddress.toLowerCase() });
-        }
-
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        const result = await notificationService.sendNotification(
-            user,
-            '🔔 Test Notification',
-            'This is a test notification from AutoYield! It seems everything is working correctly. 🚀',
-            process.env.FRONTEND_URL || 'https://autoyield.vercel.app'
-        );
-
-        res.json(result);
-    } catch (error) {
-        console.error('Failed to send test notification:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
 
 /**
  * POST /api/farcaster/enable
