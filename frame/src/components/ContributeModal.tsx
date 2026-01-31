@@ -57,7 +57,7 @@ export default function ContributeModal({ isOpen, onClose, userId, challengeId, 
             {step === 'input' && (
                 <div className="space-y-6">
                     <p className="text-sm text-muted">
-                        Enter the amount of USDC you'd like to contribute to this goal.
+                        Enter the amount of USDC you&apos;d like to contribute to this goal.
                     </p>
 
                     <div className="space-y-2">
@@ -99,7 +99,7 @@ export default function ContributeModal({ isOpen, onClose, userId, challengeId, 
                     <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
                     <h3 className="text-xl font-bold text-foreground">Contribution Recorded!</h3>
                     <p className="text-sm text-muted mt-2 mb-8">
-                        You've successfully added ${parseFloat(amount).toFixed(2)} to {challengeName}.
+                        You&apos;ve successfully added ${parseFloat(amount).toFixed(2)} to {challengeName}.
                     </p>
                     <button
                         onClick={onClose}
