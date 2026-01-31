@@ -10,6 +10,8 @@ import SmartPauseCard from '@/components/SmartPauseCard';
 import ActivityFeed from '@/components/ActivityFeed';
 import QuickActions from '@/components/QuickActions';
 import YieldChart from '@/components/YieldChart';
+import ChallengesCard from '@/components/ChallengesCard';
+import ManualSavingsCard from '@/components/ManualSavingsCard';
 import axios from 'axios';
 import Link from 'next/link';
 import { Activity, CheckCircle, Smartphone } from 'lucide-react';
@@ -169,6 +171,17 @@ export default function DashboardPage() {
                                 currentStreak={pauseData?.currentStreak || userData?.user?.subscription?.currentStreak || 0}
                                 dailyAmount={userData?.user?.subscription?.dailyAmount?.toString() || '0.00'}
                                 currentValue={userData?.yield?.currentValue || '0.00'}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <ChallengesCard
+                                userId={userData?.user?._id}
+                                address={address!}
+                            />
+                            <ManualSavingsCard
+                                userId={userData?.user?._id}
+                                address={address!}
                             />
                         </div>
 
