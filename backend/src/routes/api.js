@@ -452,4 +452,50 @@ router.put('/subscription/auto-increase/:address', async (req, res) => {
     }
 });
 
+/**
+ * GET /api/challenges/user/:userId
+ * Get challenges for a user
+ */
+router.get('/challenges/user/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const challenges = await convex.query(api.challenges.getMyChallenges, {
+            userId
+        });
+
+        // Enrich with participants list for each challenge
+        const enrichedChallenges = await Promise.all(
+            challenges.map(async (challenge) => {
+                const fullChallenge = await convex.query(api.challenges.getById, {
+                    challengeId: challenge._id
+                });
+                return fullChallenge;
+            })
+        );
+
+        res.json(enrichedChallenges);
+    } catch (error) {
+        console.error('Failed to get user challenges:', error);
+        res.status(500).json({ error: 'Failed to fetch challenges' });
+    }
+});
+
+/**
+ * GET /api/savings/total/:userId
+ * Get total manual savings for a user
+ */
+router.get('/savings/total/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const total = await convex.query(api.manual_savings.getTotalManualSavings, {
+            userId
+        });
+
+        res.json({ total });
+    } catch (error) {
+        console.error('Failed to get manual savings:', error);
+        res.status(500).json({ error: 'Failed to fetch manual savings' });
+    }
+});
+
 export default router;
