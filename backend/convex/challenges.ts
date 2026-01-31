@@ -4,7 +4,7 @@ import { TransactionType } from "./transactions";
 
 // ============ QUERIES ============
 
-// Get challenge by ID
+// Get challenge by ID with basic participant info
 export const getById = query({
     args: { challengeId: v.id("challenges") },
     handler: async (ctx, args) => {
@@ -16,7 +16,19 @@ export const getById = query({
             .withIndex("by_challenge", (q) => q.eq("challengeId", args.challengeId))
             .collect();
 
-        return { ...challenge, participants };
+        // Enrich with usernames
+        const enrichedParticipants = await Promise.all(
+            participants.map(async (p) => {
+                const user = await ctx.db.get(p.userId);
+                return {
+                    ...p,
+                    username: user?.username || "Unknown",
+                    walletAddress: user?.walletAddress,
+                };
+            })
+        );
+
+        return { ...challenge, participants: enrichedParticipants };
     },
 });
 
@@ -173,5 +185,48 @@ export const contribute = mutation({
         });
 
         return challenge._id;
+    },
+});
+
+// Leave a challenge
+export const leave = mutation({
+    args: {
+        challengeId: v.id("challenges"),
+        userId: v.id("users"),
+    },
+    handler: async (ctx, args) => {
+        const participant = await ctx.db
+            .query("challengeParticipants")
+            .withIndex("by_challenge_user", (q) =>
+                q.eq("challengeId", args.challengeId).eq("userId", args.userId)
+            )
+            .unique();
+
+        if (!participant) throw new Error("User is not in this challenge");
+
+        await ctx.db.patch(participant._id, {
+            status: "LEFT",
+        });
+
+        return true;
+    },
+});
+
+// Cancel a challenge (only creator)
+export const cancel = mutation({
+    args: {
+        challengeId: v.id("challenges"),
+        userId: v.id("users"),
+    },
+    handler: async (ctx, args) => {
+        const challenge = await ctx.db.get(args.challengeId);
+        if (!challenge) throw new Error("Challenge not found");
+        if (challenge.creatorId !== args.userId) throw new Error("Only the creator can cancel");
+
+        await ctx.db.patch(challenge._id, {
+            status: "CANCELLED",
+        });
+
+        return true;
     },
 });

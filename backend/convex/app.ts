@@ -12,7 +12,18 @@ import { ethers } from "ethers";
  */
 export const getPlatformStats = query({
     args: {},
-    handler: async (ctx) => {
+    handler: async (ctx): Promise<{
+        totalUsers: number;
+        activeSubscriptions: number;
+        pausedSubscriptions: number;
+        totalDailySavings: number;
+        vault: {
+            totalPooled: number;
+            totalValue: number;
+            apy: number;
+        } | null;
+        timestamp: string;
+    }> => {
         const stats = await ctx.runQuery(api.stats.getStats);
         return {
             ...stats,
@@ -21,36 +32,26 @@ export const getPlatformStats = query({
     }
 });
 
-/**
- * GET /api/user/:address -> query(api.app.getUserProfile)
- */
-export const getUserProfile = query({
-    args: { walletAddress: v.string() },
-    handler: async (ctx, args) => {
-        const address = args.walletAddress.toLowerCase();
-        const user = await ctx.db.query("users").withIndex("by_wallet", q => q.eq("walletAddress", address)).first();
 
-        if (!user) return null;
-
-        const subscription = await ctx.db.query("subscriptions").withIndex("by_user", q => q.eq("userId", user._id)).first();
-        const transactions = await ctx.db.query("transactions").withIndex("by_user", q => q.eq("userId", user._id)).order("desc").take(10);
-
-        return {
-            ...user,
-            subscription,
-            transactions,
-        };
-    }
-});
 
 /**
  * GET /api/user/yield/:address -> action(api.app.getUserYield)
  */
 export const getUserYield = action({
     args: { walletAddress: v.string() },
-    handler: async (ctx, args) => {
+    handler: async (ctx, args): Promise<{
+        walletAddress: string;
+        lpShares: string;
+        totalDeposited: string;
+        currentValue: string;
+        yieldEarned: string;
+        yieldPercentage: string;
+        daysActive: number;
+        transactionCount: number;
+    } | null> => {
         const address = args.walletAddress.toLowerCase();
-        const userProfile = await ctx.runQuery(api.app.getUserProfile, { walletAddress: address });
+        // Call users.getUserProfile (moved to break circular dependency)
+        const userProfile = await ctx.runQuery(api.users.getUserProfile, { walletAddress: address });
 
         if (!userProfile || !userProfile.subscription) return null;
 
@@ -74,7 +75,7 @@ export const syncUser = action({
         walletAddress: v.string(),
         username: v.optional(v.string())
     },
-    handler: async (ctx, args) => {
+    handler: async (ctx, args): Promise<{ success: boolean; userId: string }> => {
         const walletAddress = args.walletAddress.toLowerCase();
 
         // Upsert user
@@ -118,7 +119,7 @@ export const syncUser = action({
  */
 export const resumeSubscription = action({
     args: { walletAddress: v.string() },
-    handler: async (ctx, args) => {
+    handler: async (ctx, args): Promise<{ success: boolean; error?: string }> => {
         const address = args.walletAddress.toLowerCase();
         const sub = await ctx.runQuery(api.subscriptions.getByWallet, { walletAddress: address });
 

@@ -3,6 +3,7 @@ import { api } from "./_generated/api";
 import { blockchainService } from "./lib/blockchain";
 import { avantisService } from "./lib/avantis";
 import { notificationService } from "./lib/notification";
+import { deductionService } from "./lib/deduction";
 import { ethers } from "ethers";
 
 // Helper to wait

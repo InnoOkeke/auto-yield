@@ -33,6 +33,28 @@ export const getById = query({
     },
 });
 
+/**
+ * Get full user profile including subscription and recent transactions
+ */
+export const getUserProfile = query({
+    args: { walletAddress: v.string() },
+    handler: async (ctx, args): Promise<any> => {
+        const address = args.walletAddress.toLowerCase();
+        const user = await ctx.db.query("users").withIndex("by_wallet", q => q.eq("walletAddress", address)).first();
+
+        if (!user) return null;
+
+        const subscription = await ctx.db.query("subscriptions").withIndex("by_user", q => q.eq("userId", user._id)).first();
+        const transactions = await ctx.db.query("transactions").withIndex("by_user", q => q.eq("userId", user._id)).order("desc").take(10);
+
+        return {
+            ...user,
+            subscription,
+            transactions,
+        };
+    }
+});
+
 // ============ MUTATIONS ============
 
 // Create or update user (upsert)

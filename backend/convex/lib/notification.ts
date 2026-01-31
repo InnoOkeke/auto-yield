@@ -127,4 +127,12 @@ export class NotificationService {
     }
 }
 
-export const notificationService = new NotificationService();
+let instance: NotificationService | null = null;
+export function getNotificationService(): NotificationService {
+    if (!instance) {
+        instance = new NotificationService();
+    }
+    return instance!;
+}
+
+export const notificationService = getNotificationService();

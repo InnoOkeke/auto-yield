@@ -10,6 +10,8 @@ export const TransactionType = {
     EMERGENCY_WITHDRAWAL: "EMERGENCY_WITHDRAWAL",
     MANUAL_DEPOSIT: "MANUAL_DEPOSIT",
     CHALLENGE_DEPOSIT: "CHALLENGE_DEPOSIT",
+    MANUAL_WITHDRAWAL: "MANUAL_WITHDRAWAL",
+    CHALLENGE_WITHDRAWAL: "CHALLENGE_WITHDRAWAL",
 } as const;
 
 export const TransactionStatus = {
@@ -93,6 +95,7 @@ export const create = mutation({
         blockNumber: v.number(),
         status: v.optional(v.string()),
         avantisShares: v.optional(v.number()),
+        errorMessage: v.optional(v.string()),
     },
     handler: async (ctx, args) => {
         // Check if transaction already exists
@@ -112,6 +115,8 @@ export const create = mutation({
             txHash: args.txHash,
             blockNumber: args.blockNumber,
             status: args.status || TransactionStatus.PENDING,
+            avantisShares: args.avantisShares,
+            errorMessage: args.errorMessage,
         });
     },
 });

@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { blockchainService } from "./blockchain";
+import { getBlockchainService } from "./blockchain";
 
 export interface Subscription {
     walletAddress: string;
@@ -65,7 +65,7 @@ export class DeductionService {
      */
     async checkLowBalance(subscription: { walletAddress: string; dailyAmount: number }): Promise<{ shouldPause: boolean; balance?: string; required?: string }> {
         try {
-            const userBalance = await blockchainService.getUserUsdcBalance(subscription.walletAddress);
+            const userBalance = await getBlockchainService().getUserUsdcBalance(subscription.walletAddress);
             const requiredAmount = ethers.parseUnits(subscription.dailyAmount.toString(), 6);
 
             // Add 10% buffer
@@ -86,4 +86,12 @@ export class DeductionService {
     }
 }
 
-export const deductionService = new DeductionService();
+let instance: DeductionService | null = null;
+export function getDeductionService(): DeductionService {
+    if (!instance) {
+        instance = new DeductionService();
+    }
+    return instance!;
+}
+
+export const deductionService = getDeductionService();

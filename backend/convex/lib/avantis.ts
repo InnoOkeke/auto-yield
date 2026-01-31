@@ -1,4 +1,4 @@
-import { blockchainService } from './blockchain';
+import { getBlockchainService } from './blockchain';
 import { ethers } from 'ethers';
 
 export interface SubscriptionInfo {
@@ -17,7 +17,7 @@ export class AvantisService {
 
     async getVaultStats() {
         try {
-            const stats = await blockchainService.getAvantisVaultStats();
+            const stats = await getBlockchainService().getAvantisVaultStats();
 
             if (!stats) return null;
 
@@ -62,8 +62,8 @@ export class AvantisService {
     async getUserYieldData(walletAddress: string, subscription: SubscriptionInfo, user: any, transactions: TransactionInfo[]) {
         try {
             const [shares, totalValue] = await Promise.all([
-                blockchainService.getUserLPShares(walletAddress),
-                blockchainService.getUserTotalValue(walletAddress),
+                getBlockchainService().getUserLPShares(walletAddress),
+                getBlockchainService().getUserTotalValue(walletAddress),
             ]);
 
             if (!subscription) return null;
@@ -125,4 +125,12 @@ export class AvantisService {
     }
 }
 
-export const avantisService = new AvantisService();
+let instance: AvantisService | null = null;
+export function getAvantisService(): AvantisService {
+    if (!instance) {
+        instance = new AvantisService();
+    }
+    return instance!;
+}
+
+export const avantisService = getAvantisService();

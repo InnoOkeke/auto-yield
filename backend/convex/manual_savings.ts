@@ -34,6 +34,26 @@ export const recordDeposit = mutation({
     },
 });
 
+// Record a manual withdrawal
+export const recordWithdrawal = mutation({
+    args: {
+        userId: v.id("users"),
+        amount: v.number(),
+        txHash: v.string(),
+    },
+    handler: async (ctx, args) => {
+        // Record withdrawal transaction
+        return await ctx.db.insert("transactions", {
+            userId: args.userId,
+            type: TransactionType.MANUAL_WITHDRAWAL,
+            amount: args.amount,
+            txHash: args.txHash,
+            blockNumber: 0,
+            status: TransactionStatus.CONFIRMED,
+        });
+    },
+});
+
 // ============ QUERIES ============
 
 // Get total manual savings for a user
@@ -46,7 +66,19 @@ export const getTotalManualSavings = query({
             .collect();
 
         return transactions
-            .filter(tx => tx.type === TransactionType.MANUAL_DEPOSIT || tx.type === TransactionType.CHALLENGE_DEPOSIT)
-            .reduce((sum, tx) => sum + tx.amount, 0);
+            .filter(tx =>
+                tx.type === TransactionType.MANUAL_DEPOSIT ||
+                tx.type === TransactionType.CHALLENGE_DEPOSIT ||
+                tx.type === TransactionType.MANUAL_WITHDRAWAL ||
+                tx.type === TransactionType.CHALLENGE_WITHDRAWAL
+            )
+            .reduce((sum, tx) => {
+                if (tx.type.includes("DEPOSIT")) {
+                    return sum + tx.amount;
+                } else if (tx.type.includes("WITHDRAWAL")) {
+                    return sum - tx.amount;
+                }
+                return sum;
+            }, 0);
     },
 });

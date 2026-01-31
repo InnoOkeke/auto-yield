@@ -27,13 +27,17 @@ const AVANTIS_VAULT_ABI = [
 ];
 
 export class BlockchainService {
-    provider: ethers.JsonRpcProvider;
-    wallet: ethers.Wallet;
-    vaultContract: ethers.Contract;
-    avantisContract: ethers.Contract;
+    provider!: ethers.JsonRpcProvider;
+    wallet!: ethers.Wallet;
+    vaultContract!: ethers.Contract;
+    avantisContract!: ethers.Contract;
     smartAccountClient: any; // Type as any for now to avoid extensive type definitions
 
-    constructor() {
+    private isInitialized = false;
+
+    private initialize() {
+        if (this.isInitialized) return;
+
         const vaultAddress = process.env.VAULT_ADDRESS || process.env.NEXT_PUBLIC_VAULT_ADDRESS;
 
         if (!vaultAddress) {
@@ -64,9 +68,12 @@ export class BlockchainService {
             AVANTIS_VAULT_ABI,
             this.provider
         );
+
+        this.isInitialized = true;
     }
 
     async setupSmartAccount() {
+        this.initialize();
         try {
             const paymasterUrl = process.env.PAYMASTER_URL;
             if (!paymasterUrl) {
@@ -111,6 +118,7 @@ export class BlockchainService {
     }
 
     async executeDailyDeduction(userAddress: string) {
+        this.initialize();
         if (!this.smartAccountClient) await this.setupSmartAccount();
 
         try {
@@ -148,6 +156,7 @@ export class BlockchainService {
     }
 
     async batchExecuteDeductions(userAddresses: string[]) {
+        this.initialize();
         if (!this.smartAccountClient) await this.setupSmartAccount();
 
         try {
@@ -188,6 +197,7 @@ export class BlockchainService {
     }
 
     async getSubscription(userAddress: string) {
+        this.initialize();
         try {
             const sub = await this.vaultContract.subscriptions(userAddress);
             return {
@@ -203,6 +213,7 @@ export class BlockchainService {
     }
 
     async canDeductToday(userAddress: string) {
+        this.initialize();
         try {
             return await this.vaultContract.canDeductToday(userAddress);
         } catch (error) {
@@ -211,6 +222,7 @@ export class BlockchainService {
     }
 
     async getUserTotalValue(userAddress: string) {
+        this.initialize();
         try {
             const value = await this.vaultContract.getUserTotalValue(userAddress);
             return value.toString();
@@ -220,6 +232,7 @@ export class BlockchainService {
     }
 
     async getUserLPShares(userAddress: string) {
+        this.initialize();
         try {
             const shares = await this.vaultContract.avantisLPShares(userAddress);
             return shares.toString();
@@ -229,6 +242,7 @@ export class BlockchainService {
     }
 
     async getAvantisVaultStats() {
+        this.initialize();
         try {
             const [totalAssets, totalSupply] = await Promise.all([
                 this.avantisContract.totalAssets(),
@@ -248,6 +262,7 @@ export class BlockchainService {
     }
 
     async getRelayerBalance() {
+        this.initialize();
         try {
             const balance = await this.provider.getBalance(this.wallet.address);
             return ethers.formatEther(balance);
@@ -258,6 +273,7 @@ export class BlockchainService {
     }
 
     async getUserUsdcBalance(userAddress: string) {
+        this.initialize();
         try {
             const USDC_ADDRESS = process.env.USDC_ADDRESS || '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
             const ERC20_ABI = ['function balanceOf(address) view returns (uint256)'];
@@ -271,6 +287,7 @@ export class BlockchainService {
     }
 
     async estimateDeductionGas(userAddresses: string[]) {
+        this.initialize();
         try {
             const gasEstimate = await this.vaultContract.batchExecuteDeductions.estimateGas(
                 userAddresses
@@ -283,8 +300,17 @@ export class BlockchainService {
     }
 
     async subscribeToEvents(eventName: string, callback: any) {
+        this.initialize();
         this.vaultContract.on(eventName, callback);
     }
 }
 
-export const blockchainService = new BlockchainService();
+let instance: BlockchainService | null = null;
+export function getBlockchainService(): BlockchainService {
+    if (!instance) {
+        instance = new BlockchainService();
+    }
+    return instance!;
+}
+
+export const blockchainService = getBlockchainService();
